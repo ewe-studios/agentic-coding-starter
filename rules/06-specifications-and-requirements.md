@@ -897,6 +897,73 @@ The `documentation/` directory provides living, detailed documentation of indivi
 - Faster onboarding and safer changes
 - Living documentation that stays up-to-date with code
 
+### Context Window Management for Large Documentation
+
+**CRITICAL OPTIMIZATION**: Documentation files can become large (10KB+), which wastes valuable context window space if loaded unnecessarily.
+
+**Main Agent Responsibility:**
+
+When documentation is **too large** to load without wasting context:
+
+1. **Main Agent DOES NOT load large documentation** into its own context
+2. **Main Agent delegates to sub-agents** who work with the module
+3. **Sub-agents ARE REQUIRED to**:
+   - Load the documentation relevant to their work
+   - Keep documentation up-to-date as they make changes
+   - Update documentation when code changes affect it
+   - Report documentation updates to Main Agent
+
+**When Documentation is "Too Large":**
+- **Threshold**: Documentation > 8-10KB or 1500+ lines
+- **Main Agent Action**: Reference the path, delegate reading to sub-agents
+- **Sub-Agent Action**: Load and maintain documentation
+
+**Main Agent Delegation Pattern:**
+```
+Main Agent identifies module needs work
+  ↓
+Main Agent sees documentation/[module]/doc.md exists and is large
+  ↓
+Main Agent DOES NOT load documentation (context optimization)
+  ↓
+Main Agent spawns Implementation Agent with instruction:
+  "Read documentation/[module]/doc.md first, keep it updated"
+  ↓
+Implementation Agent loads documentation
+  ↓
+Implementation Agent makes changes to code
+  ↓
+Implementation Agent updates documentation/[module]/doc.md
+  ↓
+Implementation Agent reports back with documentation status
+```
+
+**Why This Matters:**
+- **Context Efficiency**: Main Agent preserves context for orchestration
+- **Responsibility Distribution**: Sub-agents maintain docs for modules they work on
+- **Documentation Freshness**: Agents updating code also update docs
+- **No Documentation Drift**: Updates happen at implementation time
+
+**Main Agent Must Still:**
+- ✅ Know documentation exists (reference path in requirements.md)
+- ✅ Instruct sub-agents to read and update documentation
+- ✅ Verify sub-agents report documentation status
+- ❌ NOT load large documentation files into own context
+
+**Sub-Agents Must:**
+- ✅ Load relevant documentation before making changes
+- ✅ Use Grep, Glob, and Read tools to analyze code details
+- ✅ Rely on tools (Grep/ripgrep) for finding specific implementations
+- ✅ Update documentation when code changes
+- ✅ Report documentation updates to Main Agent
+- ✅ Keep documentation synchronized with code
+- ❌ NOT skip documentation updates "to save time"
+
+**Tool Usage Strategy for Sub-Agents:**
+- **Documentation provides**: High-level overview, architecture, module structure
+- **Tools provide**: Specific line numbers, exact implementations, current state
+- **Pattern**: Read documentation → Use Grep/Glob to find specifics → Make changes → Update documentation
+
 ### When Module Documentation Is Created
 
 **Initial Creation (After requirements.md Completed):**

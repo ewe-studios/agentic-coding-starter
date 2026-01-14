@@ -405,6 +405,68 @@ Your task: [specific task description]
 - Prevents sub-agent from guessing or assuming
 - Ensures consistent behavior across spawns
 
+### Context Management: Module Documentation (CRITICAL)
+
+**IMPORTANT**: In addition to agent documentation, sub-agents often need to work with module documentation (`documentation/[module]/doc.md`). Large module documentation files (>8-10KB) should NOT be loaded by Main Agent.
+
+**Main Agent Context Optimization:**
+
+When dealing with module documentation:
+
+1. **Main Agent DOES NOT load large module documentation** (>8-10KB)
+2. **Main Agent references the path** in requirements.md or spawn instructions
+3. **Main Agent delegates reading** to sub-agents who work with that module
+4. **Sub-agents MUST**:
+   - Load module documentation for their assigned modules
+   - Use Grep/Glob/Read tools to find specific implementations
+   - Keep module documentation up-to-date as they make changes
+   - Report documentation updates to Main Agent
+
+**Spawn Pattern with Module Documentation:**
+```
+You are an Implementation Agent.
+
+CRITICAL: Read your agent documentation FIRST:
+- File: .agents/agents/implementation.md
+
+Module Documentation (MUST READ):
+- File: documentation/foundation_core/doc.md
+- This provides overview of the module you'll be modifying
+- Use Grep/Glob to find specific implementations after reading overview
+
+After reading documentation:
+1. Read module doc for high-level understanding
+2. Use Grep/Glob/Read to find specific code locations
+3. Make your changes
+4. Update module documentation if structure changed
+5. Report back with documentation status
+
+Your task: [specific task]
+```
+
+**Why This Pattern:**
+- **Context Efficiency**: Main Agent doesn't waste context on large docs
+- **Targeted Loading**: Sub-agents only load docs they need
+- **Tool Usage**: Sub-agents use Grep/ripgrep for specifics
+- **Documentation Freshness**: Sub-agents update docs as they work
+- **Clear Responsibility**: Agent working on module maintains its documentation
+
+**Sub-Agent Responsibilities with Module Documentation:**
+- ✅ Load assigned module documentation
+- ✅ Use tools (Grep/Glob) to find specific implementations
+- ✅ Update documentation when making code changes
+- ✅ Report documentation changes to Main Agent
+- ✅ Keep documentation synchronized with code
+- ❌ NOT skip documentation because "it's too large"
+- ❌ NOT ignore documentation updates
+
+**Tool Strategy for Sub-Agents:**
+```
+Documentation provides → High-level architecture, module structure
+Tools (Grep/Glob) provide → Specific line numbers, exact implementations
+Combined approach → Fast orientation + precise work
+```
+
 ### Main Agent Workflow
 
 ```

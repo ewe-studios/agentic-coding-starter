@@ -111,6 +111,8 @@ When user requests new work related to a completed specification:
 
 #### New Specification Format:
 
+**requirements.md frontmatter MUST include `builds_on` field:**
+
 ```markdown
 ---
 description: [New enhancement/addition description]
@@ -118,6 +120,8 @@ status: in-progress
 builds_on:
   - specifications/NN-original-spec-name
   - specifications/MM-another-related-spec (if applicable)
+related_specs:
+  - specifications/PP-related-but-not-building-on
 ---
 
 # [New Specification Name] - Requirements
@@ -125,6 +129,7 @@ builds_on:
 ## Overview
 This specification builds upon and extends the work completed in:
 - [NN: Original Specification Name](../NN-original-spec-name/)
+- [MM: Another Related Specification](../MM-another-related-spec/) (if applicable)
 
 [Describe what this new specification adds, changes, or enhances]
 
@@ -139,11 +144,30 @@ This specification builds upon and extends the work completed in:
 - [Enhancements]
 - [Changes]
 
+### From Specification MM: [Another Related Name] (if applicable)
+**What was implemented:**
+- [Summary]
+
+**What this adds:**
+- [New work building on this]
+
 ## Requirements Conversation Summary
 [New requirements conversation for THIS specification]
 
 [... rest of requirements.md structure ...]
 ```
+
+**Frontmatter Fields Explained:**
+
+- **`description`**: Brief description of what THIS specification does
+- **`status`**: Current status (in-progress, completed, etc.)
+- **`builds_on`**: Array of specifications this one directly extends/enhances
+  - Use full path: `specifications/NN-spec-name`
+  - Include ALL specifications this work builds upon
+  - Creates the lineage chain
+- **`related_specs`**: (Optional) Related specs that aren't direct parents
+  - Specifications that are relevant but not dependencies
+  - Provides context without implying lineage
 
 #### Examples:
 

@@ -34,7 +34,7 @@ Agents **MUST NOT** create skills casually. Skills are created ONLY when:
 ### Location
 ```
 .agents/skills/
-├── 01-playwright-web-interaction/
+├── playwright-web-interaction/
 │   ├── skill.md (required - canonical documentation)
 │   ├── learnings.md (optional - practical learnings from usage)
 │   ├── browser-automation.js (executable script with arguments)
@@ -42,7 +42,7 @@ Agents **MUST NOT** create skills casually. Skills are created ONLY when:
 │   └── examples/
 │       ├── login-flow.js (pattern example)
 │       └── data-extraction.js (pattern example)
-├── 02-kubernetes-deployment/
+├── kubernetes-deployment/
 │   ├── skill.md (required)
 │   ├── learnings.md (optional)
 │   ├── deploy.sh
@@ -50,13 +50,13 @@ Agents **MUST NOT** create skills casually. Skills are created ONLY when:
 │   └── configs/
 │       ├── deployment.yaml
 │       └── service.yaml
-├── 03-jwt-authentication/
+├── jwt-authentication/
 │   ├── skill.md (required)
 │   ├── learnings.md (optional)
 │   ├── token-generator.py
 │   ├── validator.rs
 │   └── middleware.ts
-└── [NN-skill-name]/
+└── [skill-name]/
     ├── skill.md (required - canonical)
     ├── learnings.md (optional - practical usage insights)
     ├── script1.py (optional)
@@ -67,10 +67,11 @@ Agents **MUST NOT** create skills casually. Skills are created ONLY when:
 ```
 
 ### Naming Convention
-- Skills use numeric prefixes: `01-`, `02-`, `03-`, etc.
-- Descriptive kebab-case names: `playwright-web-interaction`
-- Format: `[NN-descriptive-skill-name]/skill.md` (required)
+- Skills use descriptive kebab-case names: `playwright-web-interaction`, `kubernetes-deployment`
+- **NO numeric prefixes** - skills are referenced by name, not number
+- Format: `[descriptive-skill-name]/skill.md` (required)
 - Supporting files: Any relevant code, scripts, configs in same directory
+- Name should clearly describe the skill's purpose
 
 ### Supporting Files
 Skills can include executable code and scripts to help agents:
@@ -100,7 +101,7 @@ Skills can include executable code and scripts to help agents:
    - skill.md provides scripts designed to be executed
    - Agents run scripts as external commands and consume output
    - Scripts act as tools/utilities that return results
-   - Example: `node .agents/skills/01-scraper/scraper.js --url https://example.com`
+   - Example: `node .agents/skills/web-scraper/scraper.js --url https://example.com`
    - ✅ Execute scripts, capture output, use results
    - ❌ Never modify script code
    - ❌ Scripts are not part of project code - they're external tools
@@ -301,8 +302,8 @@ Brief overview of what this skill is about (2-3 paragraphs).
 **How Agent Uses This TEMPLATE Skill**:
 ```bash
 # Step 1: Copy ALL files to project (template + helpers)
-cp .agents/skills/05-rest-api/api-client.ts ./src/clients/product-api-client.ts
-cp .agents/skills/05-rest-api/http-helpers.ts ./src/clients/http-helpers.ts
+cp .agents/skills/rest-api-client/api-client.ts ./src/clients/product-api-client.ts
+cp .agents/skills/rest-api-client/http-helpers.ts ./src/clients/http-helpers.ts
 
 # Step 2: Modify the COPIED files in your project
 # - Customize baseURL
@@ -350,7 +351,7 @@ node scraper.js --url <URL> --selector <CSS_SELECTOR> [--output <FILE>]
 **How Agent Uses This EXECUTABLE Skill**:
 ```bash
 # Agent executes the script from .agents/skills/ as external tool
-node .agents/skills/01-scraper/scraper.js \
+node .agents/skills/web-scraper/scraper.js \
   --url "https://example.com/products" \
   --selector ".product-item" \
   --output ./data/products.json
@@ -408,7 +409,7 @@ npm install jsonwebtoken
 npm install @types/jsonwebtoken --save-dev
 
 # Step 2: Study the example pattern in skill
-# Read: .agents/skills/03-jwt-auth/jwt-auth-example.ts
+# Read: .agents/skills/jwt-authentication-auth/jwt-auth-example.ts
 
 # Step 3: Implement FRESH code in project following the pattern
 # In src/auth/jwt-service.ts:
@@ -982,9 +983,9 @@ Once skill is approved AND verified as clear:
 **Type 1: TEMPLATE Skills** (Copy all files and customize)
 ```bash
 # Step 1: Copy ALL skill files to project (template + helpers + configs)
-cp .agents/skills/05-rest-api/api-client.ts ./src/clients/product-api-client.ts
-cp .agents/skills/05-rest-api/http-helpers.ts ./src/clients/http-helpers.ts
-cp .agents/skills/05-rest-api/config.yaml ./src/clients/api-config.yaml
+cp .agents/skills/rest-api-client/api-client.ts ./src/clients/product-api-client.ts
+cp .agents/skills/rest-api-client/http-helpers.ts ./src/clients/http-helpers.ts
+cp .agents/skills/rest-api-client/config.yaml ./src/clients/api-config.yaml
 
 # Step 2: Customize the COPIED files in your project
 # - Modify for your specific use case
@@ -1012,7 +1013,7 @@ const data = await client.getProducts();
 **Type 2: EXECUTABLE Skills** (Run as external tools)
 ```bash
 # Execute skill script from .agents/skills/ location
-node .agents/skills/01-scraper/scraper.js \
+node .agents/skills/web-scraper/scraper.js \
   --url "https://example.com/products" \
   --selector ".product-item" \
   --output ./data/products.json
@@ -1529,7 +1530,7 @@ Ready for review and approval."
 ```markdown
 # Sub-agent thinking process:
 1. Task: Implement user authentication
-2. Check .agents/skills/: Found "03-jwt-authentication"
+2. Check .agents/skills/: Found "jwt-authentication-authentication"
 3. Read frontmatter:
    - name: "JWT Authentication Implementation"
    - description: "Guide for implementing JWT-based auth..."
@@ -1551,7 +1552,7 @@ Ready for review and approval."
 ```markdown
 # Sub-agent task: Create REST API client for third-party service
 
-1. Check .agents/skills/: Found "05-rest-api-client-pattern"
+1. Check .agents/skills/: Found "rest-api-client-client-pattern"
 2. Read frontmatter: approved: Yes
 3. Read full skill.md content
 4. skill.md states: "TEMPLATE skill - Copy all files to your project and customize"
@@ -1585,10 +1586,10 @@ Customize all copied files for your specific API.
 
 # Agent execution:
 # Step 1: Copy ALL files to project
-cp .agents/skills/05-rest-api-client-pattern/api-client.ts ./src/clients/product-api-client.ts
-cp .agents/skills/05-rest-api-client-pattern/http-helpers.ts ./src/clients/http-helpers.ts
-cp .agents/skills/05-rest-api-client-pattern/retry-logic.ts ./src/clients/retry-logic.ts
-cp .agents/skills/05-rest-api-client-pattern/config.example.yaml ./config/api-config.yaml
+cp .agents/skills/rest-api-client-client-pattern/api-client.ts ./src/clients/product-api-client.ts
+cp .agents/skills/rest-api-client-client-pattern/http-helpers.ts ./src/clients/http-helpers.ts
+cp .agents/skills/rest-api-client-client-pattern/retry-logic.ts ./src/clients/retry-logic.ts
+cp .agents/skills/rest-api-client-client-pattern/config.example.yaml ./config/api-config.yaml
 
 # Step 2: Modify ALL COPIED files in project (NOT originals in .agents/skills/)
 # In src/clients/product-api-client.ts:

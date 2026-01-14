@@ -45,6 +45,34 @@ MAIN AGENT: Spawn verification agents, orchestrate all workflows
 Implementation → Report to Main → Verification → Update Spec → Commit
 ```
 
+### 4. Specification Versioning (CRITICAL)
+**MANDATORY REQUIREMENT**: Completed specifications are IMMUTABLE.
+
+**From Rule 06**: Once a specification is marked as completed (with FINAL_REPORT.md and VERIFICATION_SIGNOFF.md), it is **LOCKED** and represents historical fact.
+
+**Main Agent MUST**:
+- ✅ Check if specification status is "completed"
+- ✅ If completed: Create NEW specification that references the old one
+- ✅ If in-progress: Can update existing specification
+- ❌ NEVER modify completed specifications
+
+**New Work on Completed Specification:**
+```
+User: "Add retry logic to HTTP client"
+Main Agent checks: specifications/01-build-http-client/requirements.md
+Status: completed ✅
+Action: Create specifications/04-add-http-client-retry-logic/
+Reference: builds_on: specifications/01-build-http-client
+```
+
+**Why This Matters:**
+- Preserves historical record of what was done and when
+- Creates clear lineage chain of feature evolution
+- Enables audit trail for compliance
+- Prevents mixing old and new requirements
+
+See **Rule 06: Specification Versioning and Evolution** for complete details.
+
 ## Mandatory Workflow
 
 ### Phase 1: Implementation

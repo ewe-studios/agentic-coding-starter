@@ -51,6 +51,40 @@ SUB-AGENTS: NEVER spawn verification agents, report to Main Agent
 MAIN AGENT: Spawn verification agents, orchestrate verification
 ```
 
+### Specification Versioning Requirements
+
+**From Rule 06**: Completed specifications are **IMMUTABLE** and must not be modified.
+
+**Before updating any specification, Main Agent MUST check:**
+1. Read `specifications/NN-spec-name/requirements.md` frontmatter
+2. Check status field: is it "completed"?
+3. Check for FINAL_REPORT.md existence
+4. Check for VERIFICATION_SIGNOFF.md existence
+
+**If specification is COMPLETED:**
+- ❌ DO NOT update the completed specification
+- ❌ DO NOT modify its tasks.md
+- ✅ CREATE a new specification that references the old one
+- ✅ New spec uses `builds_on` field in frontmatter
+
+**If specification is IN-PROGRESS:**
+- ✅ Can update tasks.md as normal
+- ✅ Can mark tasks complete
+- ✅ Can add verification.md on failure
+
+**Example Check:**
+```
+Main Agent about to update specifications/01-http-client/tasks.md
+Checks: specifications/01-http-client/requirements.md
+Finds: status: completed
+Finds: FINAL_REPORT.md exists
+Finds: VERIFICATION_SIGNOFF.md exists
+Action: STOP - Do not update completed specification
+        Create new specification instead
+```
+
+See **Rule 06: Specification Versioning and Evolution** for complete details.
+
 ---
 
 ## The Four-Phase Workflow

@@ -12,14 +12,20 @@ This rule establishes a mandatory agent documentation system that ensures **ALL 
 ```
 Need Agent → Check Registry → Found? Use Documentation : Create Documentation First
                                                 ↓
-                                        Spawn Agent with Context
+                                    Spawn Agent WITH Documentation File Path
+                                                ↓
+                                    Sub-Agent Reads Own Documentation
 ```
 
 **NO EXCEPTIONS**:
 - ❌ **NEVER spawn an undocumented agent**
 - ❌ **NEVER create a new agent without documentation**
 - ❌ **NEVER skip the registry check**
+- ❌ **NEVER spawn sub-agent without providing documentation file path**
+- ❌ **NEVER allow duplicate agent documentation files**
 - ✅ **ALWAYS document before using**
+- ✅ **ALWAYS provide documentation path when spawning**
+- ✅ **ALWAYS check for duplicates before creating new documentation**
 
 ## Agent Registry Structure
 
@@ -51,7 +57,96 @@ Need Agent → Check Registry → Found? Use Documentation : Create Documentatio
 - ❌ `RustAgent.md` (wrong case)
 - ❌ `rust_agent.md` (wrong separator)
 
+### Duplicate Prevention
+
+**CRITICAL**: No duplicate agent documentation is allowed.
+
+**Before creating new agent documentation:**
+1. ✅ Scan all existing `.agents/agents/*.md` frontmatter
+2. ✅ Check if similar agent already exists
+3. ✅ If duplicate found: merge into single comprehensive file
+4. ✅ If similar but different: ensure clear differentiation in frontmatter
+
+**Duplicate Detection Process**:
+```
+Main Agent creating new agent documentation:
+1. Read all .agents/agents/*.md frontmatter
+2. Compare: name, type, purpose, language fields
+3. If match found:
+   ├─ SAME purpose + SAME type + SAME language → DUPLICATE (merge)
+   ├─ SIMILAR purpose but DIFFERENT specialization → OK (clarify difference)
+   └─ DIFFERENT purpose → OK (proceed with creation)
+4. If duplicate: merge both into single comprehensive file
+5. Delete redundant file after merge
+6. Commit changes
+```
+
+**Example - Duplicate Found**:
+```
+Existing: rust-verification.md
+  name: Rust Verification Agent
+  type: verification
+  purpose: Verify Rust code quality, tests, and standards
+
+New request: rust-code-checker.md
+  name: Rust Code Checker
+  type: verification
+  purpose: Verify Rust code quality and run tests
+
+→ DUPLICATE! Same purpose, same type, same language
+→ Action: Merge into rust-verification.md (keep existing)
+→ Delete: rust-code-checker.md concept
+```
+
+**Example - Not Duplicate**:
+```
+Existing: rust-verification.md
+  name: Rust Verification Agent
+  type: verification
+  purpose: Verify Rust code quality, tests, and standards
+
+New request: rust-security-audit.md
+  name: Rust Security Audit Agent
+  type: specialized
+  purpose: Perform security audit and vulnerability scanning
+
+→ NOT DUPLICATE: Different specialization (general vs security)
+→ Action: Create rust-security-audit.md
+→ Clarify: frontmatter must clearly distinguish from rust-verification.md
+```
+
 ## Agent Documentation Format
+
+### Frontmatter Importance (CRITICAL)
+
+**Main Agent Decision-Making**: The Main Agent makes spawning decisions based **ONLY** on:
+1. **Filename**: Descriptive name indicating agent purpose
+2. **Frontmatter**: Quick summary at top of file
+
+**Main Agent DOES NOT read full documentation** when scanning registry. Therefore:
+- ✅ Frontmatter MUST be crystal clear and self-explanatory
+- ✅ Purpose field MUST be immediately understandable
+- ✅ All critical information MUST be in frontmatter
+- ❌ Main Agent will NOT read detailed sections when selecting agent
+- ❌ Do NOT rely on detailed sections for agent selection
+
+**Frontmatter Writing Guidelines**:
+- **name**: Clear, descriptive name (e.g., "Rust Verification Agent")
+- **type**: Exact type from allowed list
+- **language**: Specific language or "language-agnostic"
+- **purpose**: ONE clear sentence (10-15 words max) stating exactly what agent does
+  - ✅ GOOD: "Verify Rust code quality, run tests, check clippy and formatting"
+  - ❌ BAD: "Handles Rust stuff" (too vague)
+  - ❌ BAD: "Comprehensive Rust code verification including but not limited to quality checks..." (too verbose)
+- **tools_required**: Complete list (Main Agent checks if available)
+- **skills_required**: Complete list (Main Agent checks if accessible)
+
+**Why This Matters**:
+- Main Agent scans 10-20 agent files quickly
+- Reading full documentation for each would be inefficient
+- Frontmatter enables fast filtering and selection
+- Clear frontmatter = correct agent selection
+- Vague frontmatter = wrong agent spawned = wasted work
 
 ### Required Structure
 
@@ -242,45 +337,128 @@ Result:
 
 ## Workflow for Agent Usage
 
+### Critical Requirement: Documentation File Path
+
+**MANDATORY**: When spawning any sub-agent, Main Agent **MUST** provide:
+1. ✅ Path to agent's documentation file (`.agents/agents/[name].md`)
+2. ✅ Task-specific context
+3. ✅ Related specification path (if applicable)
+4. ✅ Any other required resources
+
+**Sub-Agent MUST** receive documentation path in spawn prompt:
+```
+You are a [Agent Name].
+
+CRITICAL: Read your agent documentation FIRST:
+- File: .agents/agents/[name-of-agent].md
+
+After reading your documentation:
+1. Read AGENTS.md
+2. Read relevant rules
+3. Read specification (if provided)
+4. Execute your documented responsibilities
+
+Your task: [specific task description]
+[additional context...]
+```
+
+### Sub-Agent Startup Protocol
+
+**MANDATORY for all sub-agents** upon being spawned:
+
+1. **Check for Documentation Path**
+   - Look for `.agents/agents/[name].md` in spawn context
+   - If NOT provided: **STOP immediately**
+
+2. **If Documentation Path Missing**:
+   ```
+   STOP: No agent documentation provided!
+
+   Request to Main Agent:
+   "I am [Agent Type] spawned for [purpose].
+    I was not provided with my agent documentation file.
+
+    REQUIRED: Please provide path to my documentation at:
+    .agents/agents/[expected-name].md
+
+    I cannot proceed without understanding my:
+    - Exact responsibilities
+    - Tool requirements
+    - Workflow steps
+    - Boundaries and limitations
+
+    Waiting for documentation path..."
+   ```
+
+3. **If Documentation Path Provided**:
+   - Read documentation file FIRST
+   - Understand: capabilities, requirements, responsibilities, boundaries
+   - Then read AGENTS.md
+   - Then read relevant rules
+   - Then read specification (if applicable)
+   - Then execute documented workflow
+
+**Why This Matters**:
+- Sub-agent needs to know exact responsibilities
+- Sub-agent must understand boundaries
+- Sub-agent requires workflow steps
+- Prevents sub-agent from guessing or assuming
+- Ensures consistent behavior across spawns
+
 ### Main Agent Workflow
 
 ```
 1. Identify Need for Specialized Agent
    ↓
 2. Check Agent Registry (.agents/agents/)
-   ├─ Read all frontmatter files to find matching agent
-   ├─ Identify candidate agent(s) based on purpose/type
+   ├─ Scan all *.md frontmatter (filename + YAML header ONLY)
+   ├─ Compare: type, language, purpose fields
+   ├─ Filter by requirements (tools, skills needed)
+   ├─ Check for duplicates (same type+purpose+language)
    └─ Select best match for task
    ↓
-3. Read Full Agent Documentation
-   ├─ Understand capabilities
-   ├─ Check requirements (tools, skills)
-   ├─ Review responsibilities and boundaries
-   └─ Study workflow and examples
+3. If Agent Found in Registry:
+   ├─ Note the filename (e.g., rust-verification.md)
+   ├─ Frontmatter already read during scan
+   ├─ DO NOT read full documentation (not needed for Main Agent)
+   ├─ Verify requirements can be met
+   └─ Proceed to spawning
    ↓
-4. Verify Requirements Met
-   ├─ Tools available?
-   ├─ Skills accessible (if needed)?
-   ├─ Dependencies satisfied?
-   └─ Context can be provided?
+4. If Agent NOT Found in Registry:
+   ├─ Check for potential duplicates first
+   ├─ Create new agent documentation
+   ├─ Fill in complete frontmatter (clear and concise)
+   ├─ Fill in detailed sections
+   ├─ Commit new documentation
+   └─ Now proceed to spawning
    ↓
-5. Spawn Agent with Full Context
-   ├─ Provide agent documentation path
-   ├─ Provide task-specific context
-   ├─ Provide related specification (if applicable)
-   └─ Provide access to required tools/skills
+5. Spawn Agent with MANDATORY Documentation Path
+   ├─ Provide: .agents/agents/[name-of-agent].md path
+   ├─ Provide: task-specific context
+   ├─ Provide: related specification (if applicable)
+   ├─ Provide: access to required tools/skills
+   └─ NEVER spawn without documentation path
    ↓
-6. Agent Reads Documentation
-   ├─ Agent reads AGENTS.md first
-   ├─ Agent reads own documentation (.agents/agents/[name].md)
-   ├─ Agent reads relevant rules
-   ├─ Agent reads specification (if applicable)
-   └─ Agent understands boundaries and responsibilities
+6. Sub-Agent Startup
+   ├─ Sub-agent checks for documentation path
+   ├─ If missing: STOPS and requests from Main Agent
+   ├─ If provided: reads documentation FIRST
+   ├─ Then reads AGENTS.md, rules, specification
+   └─ Executes documented workflow
    ↓
 7. Agent Executes Task
    ↓
 8. Agent Reports Back to Main Agent
 ```
+
+**Key Points for Main Agent**:
+- ✅ Only scans frontmatter (fast, efficient)
+- ✅ Filename + frontmatter = enough for decision
+- ✅ Does NOT read full documentation when selecting
+- ✅ ALWAYS provides documentation path when spawning
+- ✅ Checks for duplicates before creating new documentation
+- ❌ NEVER spawns without documentation path
+- ❌ NEVER creates duplicate documentation
 
 ### Sub-Agent Requesting New Agent
 
@@ -484,9 +662,13 @@ The following are **CRITICAL VIOLATIONS** with **ZERO TOLERANCE**:
 1. ❌ **Spawning undocumented agent** (Main Agent violation)
 2. ❌ **Creating new agent without documentation** (Main Agent violation)
 3. ❌ **Skipping registry check** (Main Agent violation)
-4. ❌ **Sub-agent spawning agents directly** (Sub-agent violation)
-5. ❌ **Not reading own documentation** (Sub-agent violation)
-6. ❌ **Exceeding documented boundaries** (Sub-agent violation)
+4. ❌ **Spawning sub-agent WITHOUT documentation path** (Main Agent violation - CRITICAL)
+5. ❌ **Creating duplicate agent documentation** (Main Agent violation)
+6. ❌ **Vague or unclear frontmatter** (Main Agent violation when creating docs)
+7. ❌ **Sub-agent spawning agents directly** (Sub-agent violation)
+8. ❌ **Not reading own documentation** (Sub-agent violation)
+9. ❌ **Exceeding documented boundaries** (Sub-agent violation)
+10. ❌ **Sub-agent proceeding without documentation path** (Sub-agent violation - MUST STOP)
 
 ### Consequences
 
@@ -495,18 +677,31 @@ The following are **CRITICAL VIOLATIONS** with **ZERO TOLERANCE**:
 - ❌ You create a new agent without documenting it first
 - ❌ You ignore agent documentation boundaries
 - ❌ You skip reading agent documentation before spawning
+- ❌ **You spawn sub-agent without providing documentation file path**
+- ❌ **Sub-agent proceeds without documentation path**
+- ❌ You create duplicate agent documentation
+- ❌ You write vague frontmatter that doesn't help selection
 - ❌ Sub-agent spawns another agent without going through Main Agent
 
 ### Corrective Action
 
 When violation occurs:
 1. **STOP immediately**
-2. **Check registry** for appropriate agent
-3. **Read documentation** fully
-4. **Create documentation** if agent is new
-5. **Commit documentation** before spawning
-6. **Spawn agent properly** with documentation context
-7. **Report violation** to user (transparency)
+2. **If sub-agent spawned without documentation path**:
+   - Sub-agent STOPs and requests documentation
+   - Main Agent provides correct path
+   - Sub-agent reads documentation
+   - Sub-agent proceeds
+3. **If duplicate documentation detected**:
+   - Merge both into single comprehensive file
+   - Delete redundant file
+   - Commit changes
+4. **Check registry** for appropriate agent
+5. **Read frontmatter** of all agents
+6. **Create documentation** if agent is new (check for duplicates first)
+7. **Commit documentation** before spawning
+8. **Spawn agent properly** with documentation path in prompt
+9. **Report violation** to user (transparency)
 
 ## Examples
 
@@ -516,42 +711,55 @@ When violation occurs:
 1. Main Agent identifies need:
    "Implementation complete, need to verify Rust code"
 
-2. Main Agent scans registry:
-   - Reads .agents/agents/*.md frontmatter
+2. Main Agent scans registry frontmatter ONLY:
+   - Reads .agents/agents/*.md filenames and frontmatter
    - Finds rust-verification.md:
+     * name: Rust Verification Agent
      * type: verification
      * language: rust
-     * purpose: Verify Rust code quality
-   - Identifies as correct agent
+     * purpose: "Verify Rust code quality, run tests, check clippy and formatting"
+     * tools_required: [cargo, clippy, rustfmt]
+   - Identifies as correct agent (frontmatter is clear)
+   - Does NOT read full documentation (not needed)
 
-3. Main Agent reads full documentation:
-   - Capabilities: cargo fmt, clippy, test, build, audit
-   - Requirements: cargo toolchain
-   - Responsibilities: Run all checks, generate report
-   - Boundaries: Cannot commit, cannot update specs
+3. Main Agent verifies requirements:
+   - cargo available? Yes
+   - clippy available? Yes
+   - rustfmt available? Yes
+   - Can provide context? Yes
 
-4. Main Agent spawns agent:
+4. Main Agent spawns agent WITH documentation path:
    Task(
      subagent_type: "general-purpose",
      description: "Verify Rust code quality",
      prompt: "You are a Rust Verification Agent.
 
-     Read your documentation at .agents/agents/rust-verification.md
-     Read AGENTS.md first, then your specific documentation.
+     CRITICAL: Read your agent documentation FIRST:
+     - File: .agents/agents/rust-verification.md
+
+     After reading your documentation:
+     1. Read AGENTS.md
+     2. Read relevant rules
+     3. Execute your documented workflow
 
      Your task: Verify the following Rust files...
-     [context]
+     Files changed: [list]
+     Specification: specifications/03-user-authentication/
 
-     Follow all steps in your documentation."
+     [additional context]"
    )
 
-5. Rust Verification Agent:
+5. Rust Verification Agent starts:
+   - Checks for documentation path: ✅ Found (.agents/agents/rust-verification.md)
+   - Reads .agents/agents/rust-verification.md FIRST
+   - Understands workflow: cargo fmt, clippy, test, build, audit sequence
    - Reads AGENTS.md
-   - Reads .agents/agents/rust-verification.md
-   - Understands: cargo fmt, clippy, test, build, audit sequence
-   - Executes all checks
+   - Reads relevant rules
+   - Executes all checks in documented order
    - Generates report
    - Reports to Main Agent
+
+✅ Correct workflow: Documentation path provided, sub-agent reads it first
 ```
 
 ### Example 2: New Security Scan Agent Needed
@@ -622,38 +830,79 @@ When violation occurs:
 
 ## Summary
 
-**Core Principle**: **DOCUMENT BEFORE USE** - Every agent must be documented before it can be spawned.
+**Core Principle**: **DOCUMENT BEFORE USE** - Every agent must be documented before it can be spawned, and documentation path must ALWAYS be provided to sub-agents.
 
 **Key Rules**:
 - ✅ All agents documented in `.agents/agents/[name].md`
-- ✅ Main Agent checks registry before spawning
-- ✅ Main Agent reads full documentation before spawning
-- ✅ Main Agent creates documentation for new agents
-- ✅ Sub-agents read their own documentation
+- ✅ Main Agent scans frontmatter ONLY (filename + YAML header)
+- ✅ Main Agent does NOT read full documentation when selecting
+- ✅ Frontmatter MUST be crystal clear and self-explanatory
+- ✅ Main Agent checks for duplicates before creating new documentation
+- ✅ **Main Agent ALWAYS provides documentation path when spawning**
+- ✅ **Sub-agents MUST receive documentation path in spawn prompt**
+- ✅ **Sub-agents read documentation FIRST before executing**
+- ✅ **Sub-agents STOP if documentation path missing**
 - ✅ Sub-agents stay within documented boundaries
 - ✅ Sub-agents request new agents through Main Agent
+- ❌ **NEVER spawn without providing documentation path**
+- ❌ **NEVER allow sub-agent to proceed without documentation**
 - ❌ **NEVER spawn undocumented agents**
 - ❌ **NEVER skip registry check**
-- ❌ **NEVER create agents without documenting first**
+- ❌ **NEVER create duplicate agent documentation**
+- ❌ **NEVER write vague frontmatter**
+
+**Main Agent Responsibilities**:
+- Scan frontmatter (fast decision-making)
+- Select agent based on filename + frontmatter only
+- Check for duplicates before creating
+- Create clear, concise frontmatter
+- **Provide documentation path in spawn prompt**
+- Never spawn without documentation path
+
+**Sub-Agent Responsibilities**:
+- Check for documentation path immediately
+- STOP if documentation path missing
+- Request documentation from Main Agent if missing
+- Read documentation FIRST (before anything else)
+- Follow documented workflow exactly
+- Stay within documented boundaries
+- Never spawn other agents directly
+
+**Duplicate Prevention**:
+- Check all frontmatter before creating new agent
+- Merge duplicates into single comprehensive file
+- Delete redundant documentation
+- Ensure clear differentiation in frontmatter if similar
 
 **Registry Benefits**:
 - 📋 Centralized agent catalog
 - 🔍 Fast discovery via frontmatter scanning
-- 📖 Clear capabilities and boundaries
+- 📖 Clear capabilities and boundaries defined in detailed sections
 - 🔄 Reusable agent definitions
 - 🎯 Consistent agent behavior
 - 📚 Knowledge preservation
+- ⚡ Efficient selection (frontmatter only)
+- 🚫 No duplicates allowed
 
 **USER EXPECTATIONS**:
 - Agents are well-documented and discoverable
-- Main Agent makes informed spawning decisions
+- Main Agent makes informed spawning decisions efficiently
+- Sub-agents ALWAYS receive their documentation
 - Sub-agents know their exact responsibilities
+- No duplicate agent documentation exists
+- Frontmatter is clear enough for quick decisions
 - System remains organized and maintainable
 - New agents are properly introduced with documentation
 
-**Remember**: The user will be **VERY UPSET** if you spawn agents without checking the registry or create new agents without documenting them first!
+**Remember**: The user will be **VERY UPSET** if:
+- You spawn agents without checking the registry
+- You create new agents without documenting them first
+- **You spawn sub-agents without providing documentation path**
+- **Sub-agents proceed without reading their documentation**
+- You create duplicate agent documentation
+- You write vague frontmatter that doesn't help selection
 
 ---
 *Created: 2026-01-14*
 *Last Updated: 2026-01-14*
-*Version: 1.0*
+*Version: 1.1 - Added mandatory documentation path requirement and duplicate prevention*

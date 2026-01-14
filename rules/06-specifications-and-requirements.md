@@ -951,18 +951,43 @@ Implementation Agent reports back with documentation status
 - ❌ NOT load large documentation files into own context
 
 **Sub-Agents Must:**
-- ✅ Load relevant documentation before making changes
+- ✅ Load relevant documentation before making changes (if size permits)
 - ✅ Use Grep, Glob, and Read tools to analyze code details
 - ✅ Rely on tools (Grep/ripgrep) for finding specific implementations
-- ✅ Update documentation when code changes
-- ✅ Report documentation updates to Main Agent
+- ✅ If documentation too large for sub-agent context: Skip reading, use tools only
+- ✅ Report documentation status to Main Agent after changes
 - ✅ Keep documentation synchronized with code
 - ❌ NOT skip documentation updates "to save time"
 
+**When Documentation is Too Large for Sub-Agent:**
+
+If sub-agent finds documentation is also too large (>8-10KB), sub-agent **MUST**:
+
+1. **Skip Loading Documentation**: Don't waste context on large doc
+2. **Rely Entirely on Tools**: Use Grep, Glob, Read to understand code directly
+3. **Make Code Changes**: Complete implementation work
+4. **Report to Main Agent**:
+   ```
+   "Changes completed. Documentation at documentation/[module]/doc.md
+    is too large (XXkb) for my context. Requesting Documentation Agent
+    to update documentation based on my changes."
+   ```
+5. **Main Agent Response**:
+   - Spawns Documentation Agent
+   - Documentation Agent reviews code changes
+   - Documentation Agent updates documentation
+   - Documentation Agent reports completion
+
 **Tool Usage Strategy for Sub-Agents:**
+
+**If documentation is reasonable size (<8-10KB):**
 - **Documentation provides**: High-level overview, architecture, module structure
 - **Tools provide**: Specific line numbers, exact implementations, current state
 - **Pattern**: Read documentation → Use Grep/Glob to find specifics → Make changes → Update documentation
+
+**If documentation is too large (>8-10KB):**
+- **Tools provide everything**: Architecture discovery, implementation finding, current state
+- **Pattern**: Use Grep/Glob exclusively → Make changes → Report to Main Agent → Main Agent spawns Documentation Agent
 
 ### When Module Documentation Is Created
 

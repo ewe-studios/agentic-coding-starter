@@ -429,17 +429,20 @@ You are an Implementation Agent.
 CRITICAL: Read your agent documentation FIRST:
 - File: .agents/agents/implementation.md
 
-Module Documentation (MUST READ):
-- File: documentation/foundation_core/doc.md
-- This provides overview of the module you'll be modifying
-- Use Grep/Glob to find specific implementations after reading overview
+Module Documentation:
+- File: documentation/foundation_core/doc.md (16KB - LARGE)
+- Check size before loading
+- If <8-10KB: Load for overview, use Grep/Glob for details
+- If >8-10KB: Skip loading, use Grep/Glob exclusively
 
-After reading documentation:
-1. Read module doc for high-level understanding
-2. Use Grep/Glob/Read to find specific code locations
-3. Make your changes
-4. Update module documentation if structure changed
-5. Report back with documentation status
+After reading your agent documentation:
+1. Check module documentation size
+2. If reasonable: Read module doc for high-level understanding
+3. Use Grep/Glob/Read to find specific code locations
+4. Make your changes
+5. If doc was small: Update documentation directly
+6. If doc was large: Report "Documentation too large, need Documentation Agent"
+7. Report back with documentation status
 
 Your task: [specific task]
 ```
@@ -452,20 +455,51 @@ Your task: [specific task]
 - **Clear Responsibility**: Agent working on module maintains its documentation
 
 **Sub-Agent Responsibilities with Module Documentation:**
-- ✅ Load assigned module documentation
+- ✅ Check module documentation size first
+- ✅ If reasonable size (<8-10KB): Load documentation
+- ✅ If too large (>8-10KB): Skip loading, use tools exclusively
 - ✅ Use tools (Grep/Glob) to find specific implementations
-- ✅ Update documentation when making code changes
-- ✅ Report documentation changes to Main Agent
-- ✅ Keep documentation synchronized with code
+- ✅ Make code changes as assigned
+- ✅ Report documentation status to Main Agent
+- ✅ If doc too large: Request Main Agent spawn Documentation Agent
 - ❌ NOT skip documentation because "it's too large"
-- ❌ NOT ignore documentation updates
+- ❌ NOT try to update large docs directly (let Documentation Agent handle it)
+
+**Two-Tier Documentation Strategy:**
+
+**Tier 1: Reasonable Size Documentation (<8-10KB)**
+```
+Sub-Agent Process:
+1. Load module documentation
+2. Use Grep/Glob for specific details
+3. Make code changes
+4. Update documentation directly
+5. Report completion
+```
+
+**Tier 2: Large Documentation (>8-10KB)**
+```
+Sub-Agent Process:
+1. Skip loading documentation (too large)
+2. Use Grep/Glob/Read exclusively for code understanding
+3. Make code changes
+4. Report to Main Agent: "Documentation too large, need Documentation Agent"
+5. Main Agent spawns Documentation Agent
+6. Documentation Agent reviews changes and updates docs
+7. Documentation Agent reports completion
+```
 
 **Tool Strategy for Sub-Agents:**
 ```
-Documentation provides → High-level architecture, module structure
-Tools (Grep/Glob) provide → Specific line numbers, exact implementations
-Combined approach → Fast orientation + precise work
+Small docs (<8-10KB) → Load doc + Use tools → Update doc
+Large docs (>8-10KB) → Use tools only → Request Documentation Agent
 ```
+
+**Why This Tiered Approach:**
+- **Context Preservation**: Even sub-agents don't waste context on huge docs
+- **Tool Mastery**: Sub-agents become proficient with Grep/ripgrep
+- **Specialized Updates**: Documentation Agent handles complex doc updates
+- **Efficiency**: Right agent for the right task
 
 ### Main Agent Workflow
 

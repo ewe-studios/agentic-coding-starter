@@ -77,6 +77,120 @@ documentation/
 - ❌ `01_http_client/` (wrong separator)
 - ❌ `1-http-client/` (single digit instead of two)
 
+### Specification Versioning and Evolution (CRITICAL)
+
+**MANDATORY RULE**: Once a specification has been marked as **completed** (status: completed, with FINAL_REPORT.md and VERIFICATION_SIGNOFF.md), that specification is **immutable** and represents historical fact.
+
+**Any new additions, changes, or enhancements to a completed specification MUST become a new specification.**
+
+#### Why This Matters:
+- **Historical Record**: Preserves complete history of requirements and implementations
+- **Traceability**: Clear lineage showing how features evolved over time
+- **Audit Trail**: Know exactly what was done, when, and why
+- **No Confusion**: Prevents mixing old and new requirements in same document
+- **Clear Context**: New work has fresh requirements conversation, not amendments
+
+#### When Specification is Completed:
+
+If a specification has:
+- ✅ Status: `completed` in requirements.md
+- ✅ FINAL_REPORT.md created
+- ✅ VERIFICATION_SIGNOFF.md created
+- ✅ All tasks marked as complete
+
+Then that specification is **DONE** and **LOCKED**.
+
+#### Adding to Completed Specification:
+
+When user requests new work related to a completed specification:
+
+1. **Main Agent MUST create a NEW specification** (next available number)
+2. **New specification MUST reference the old specification** in requirements.md
+3. **New specification explains how it builds upon the old one**
+4. **Old specification remains untouched** (historical record)
+
+#### New Specification Format:
+
+```markdown
+---
+description: [New enhancement/addition description]
+status: in-progress
+builds_on:
+  - specifications/NN-original-spec-name
+  - specifications/MM-another-related-spec (if applicable)
+---
+
+# [New Specification Name] - Requirements
+
+## Overview
+This specification builds upon and extends the work completed in:
+- [NN: Original Specification Name](../NN-original-spec-name/)
+
+[Describe what this new specification adds, changes, or enhances]
+
+## Context from Previous Specifications
+
+### From Specification NN: [Original Name]
+**What was implemented:**
+- [Summary of original work]
+
+**What this adds:**
+- [New functionality]
+- [Enhancements]
+- [Changes]
+
+## Requirements Conversation Summary
+[New requirements conversation for THIS specification]
+
+[... rest of requirements.md structure ...]
+```
+
+#### Examples:
+
+**Bad (WRONG ❌):**
+```
+User: "Add retry logic to the HTTP client"
+Agent: "I'll update specification 01-build-http-client to add retry logic"
+Result: ❌ Corrupts historical record, mixes old and new requirements
+```
+
+**Good (CORRECT ✅):**
+```
+User: "Add retry logic to the HTTP client"
+Agent: "I'll create specification 04-add-http-client-retry-logic which builds upon 01-build-http-client"
+Result: ✅ Preserves history, clear lineage, fresh requirements
+```
+
+#### Specification Lineage Chain:
+
+```
+01-build-http-client (completed)
+  ↓ builds_on
+04-add-http-client-retry-logic (completed)
+  ↓ builds_on
+07-http-client-caching-support (in-progress)
+  ↓ builds_on
+11-http-client-metrics (pending)
+```
+
+#### Benefits of This Approach:
+
+1. **Clear History**: Know exactly what was done in each phase
+2. **Traceable Changes**: Follow the evolution of features over time
+3. **Proper Context**: Each spec has fresh requirements conversation
+4. **Audit Compliance**: Complete record of all work and decisions
+5. **Easier Review**: Review new work without mixing with old
+6. **Rollback Capability**: Can reference exact state at any point
+
+#### Exception: In-Progress Specifications
+
+Specifications that are **NOT completed** can be modified:
+- Status is NOT "completed"
+- No FINAL_REPORT.md exists
+- Work is still ongoing
+
+For in-progress specs, you can update requirements.md and tasks.md as needed.
+
 ## Spec.md File (Master Index)
 
 ### Purpose

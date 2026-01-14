@@ -203,6 +203,16 @@ name: "Playwright Web Interaction"
 description: "Guide for using Playwright to automate browser interactions, scraping, and testing web applications"
 approved: No
 created: 2026-01-13
+license: "MIT"
+metadata:
+  author: "Main Agent"
+  version: "1.0"
+  last_updated: "2026-01-13"
+  tags:
+    - web-automation
+    - browser-testing
+    - scraping
+    - playwright
 tools:
   - Playwright
   - TypeScript
@@ -216,12 +226,28 @@ files:
 ```
 
 **Frontmatter Fields**:
-- `name`: Clear, concise skill name (2-6 words)
-- `description`: 1-2 sentence summary of what skill achieves and when to use it
-- `approved`: `Yes` or `No` (defaults to `No` until user approves)
-- `created`: Date skill was created (YYYY-MM-DD)
-- `tools`: List of tools/technologies this skill covers
-- `files`: Dictionary of attached files with brief descriptions (optional)
+
+**REQUIRED Fields:**
+- **`name`**: Clear, concise skill name (2-6 words)
+- **`description`**: 1-2 sentence summary of what skill achieves and when to use it
+- **`approved`**: `Yes` or `No` (defaults to `No` until user approves)
+- **`created`**: Date skill was created (YYYY-MM-DD format)
+- **`license`**: License for the skill and its code
+  - Examples: "MIT", "Apache-2.0", "BSD-3-Clause", "GPL-3.0", "Proprietary"
+  - Choose license appropriate for the skill's content and attached code
+- **`metadata`**: Structured metadata object containing:
+  - **`author`**: Who created the skill (e.g., "Main Agent", "Team Name", "User Name")
+  - **`version`**: Semantic version of the skill (e.g., "1.0", "2.1.3")
+  - **`last_updated`**: Date of last update (YYYY-MM-DD format)
+  - **`tags`**: Array of searchable tags for categorization
+    - Use lowercase with hyphens for consistency
+    - Include: technology names, use cases, patterns, domains
+    - Examples: `web-automation`, `database`, `authentication`, `api-client`, `testing`
+    - Minimum 2 tags, recommended 3-5 tags
+- **`tools`**: List of tools/technologies this skill covers
+
+**OPTIONAL Fields:**
+- **`files`**: Dictionary of attached files with brief descriptions (required if files exist in skill directory)
 
 ### Skill Content Structure
 

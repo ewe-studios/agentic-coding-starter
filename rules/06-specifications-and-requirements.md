@@ -1,7 +1,7 @@
 # Specifications and Requirements Management
 
 ## Purpose
-This rule establishes a mandatory requirements-gathering and specification-tracking system that ensures all work begins with a documented conversation between the main agent and user, creating a clear record of requirements and tasks in the `.specifications/` directory.
+This rule establishes a mandatory requirements-gathering and specification-tracking system that ensures all work begins with a documented conversation between the main agent and user, creating a clear record of requirements and tasks in the `specifications/` directory.
 
 ## Rule
 
@@ -24,7 +24,7 @@ Before **ANY** work begins on new features, enhancements, or significant changes
 
 ### Overview
 ```
-.specifications/
+specifications/
 ├── Spec.md                          # Master index of all specifications
 ├── 01-specification-name/
 │   ├── requirements.md              # (MANDATORY) Requirements and conversation summary
@@ -773,7 +773,7 @@ This specification taught us the importance of systematic code quality improveme
 
 ### Challenge 2: Git Submodule Complexity
 **Problem**: Initially tried to put specifications in .agents submodule, caused git errors
-**Solution**: Moved specifications to .specifications/ in main repo
+**Solution**: Moved specifications to specifications/ in main repo
 **Learning**: Keep specifications close to the code they document, not in submodules
 
 ### Challenge 3: Numeric Literal Separators in WASM
@@ -1085,7 +1085,7 @@ Step 0: LAUNCH REVIEW AGENT (MANDATORY)
    ↓
 3. Create Specification Directory
    ├─ Determine next number (e.g., 04)
-   ├─ Create directory: .specifications/04-feature-name/
+   ├─ Create directory: specifications/04-feature-name/
    └─ Create both requirements.md and tasks.md files
    ↓
 4. Document Requirements
@@ -1106,7 +1106,7 @@ Step 0: LAUNCH REVIEW AGENT (MANDATORY)
    └─ Link to new specification directory
    ↓
 7. Commit Specification Files
-   ├─ git add .specifications/
+   ├─ git add specifications/
    ├─ git commit (following Rule 03)
    ├─ git push (following Rule 05)
    └─ Verify success
@@ -1255,7 +1255,7 @@ Main Agent:
 2. User provides answers
 
 3. Agent creates:
-   - .specifications/05-api-response-caching/
+   - specifications/05-api-response-caching/
    - requirements.md with full conversation summary
    - tasks.md with all identified tasks
    - Updates Spec.md with new specification

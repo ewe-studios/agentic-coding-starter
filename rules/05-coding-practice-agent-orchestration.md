@@ -51,7 +51,7 @@ Implementation → Report to Main → Verification → Update Spec → Commit
 
 #### Main Agent Responsibilities
 1. **Breaks down work** into specific tasks
-2. **Identifies specifications** (references `.agents/specifications/NN-spec-name/`)
+2. **Identifies specifications** (references `specifications/NN-spec-name/`)
 3. **Launches implementation agents** (up to 10 concurrent)
 4. **WAITS for completion reports** from all agents
 5. **DOES NOT COMMIT** anything yet
@@ -477,7 +477,7 @@ Ask yourself: Can I understand this learning in 5 seconds?
 
 ##### 1. Specification-Specific Learnings
 
-**Location**: `.agents/specifications/[NN-spec-name]/learnings.md`
+**Location**: `specifications/[NN-spec-name]/learnings.md`
 
 **Purpose**: Document critical knowledge specific to this specification that will help with:
 - Future work on this specification
@@ -570,7 +570,7 @@ Ask yourself: Can I understand this learning in 5 seconds?
 **Decision Tree for Where to Document**:
 ```
 Is this learning specific to this specification/feature?
-├─ YES → Document in .agents/specifications/[NN-spec-name]/learnings.md
+├─ YES → Document in specifications/[NN-spec-name]/learnings.md
 └─ NO  → Is it generic knowledge about the programming language/stack?
           ├─ YES → Document in .agents/stacks/[stack].md
           └─ NO  → Don't document (too trivial or obvious)
@@ -664,7 +664,7 @@ Main Agent provides each verification agent with:
 Context Package:
 - Changed files list (filtered by language)
 - Implementation description
-- Specification reference (.agents/specifications/NN-name/)
+- Specification reference (specifications/NN-name/)
 - Requirements.md location
 - Tasks.md location
 - Expected behavior
@@ -1000,7 +1000,7 @@ Main Agent responsibilities:
 1. Identify related specification directory
 2. Spawn Specification Update Agent
 3. Provide agent with:
-   - Specification path (.agents/specifications/NN-spec-name/)
+   - Specification path (specifications/NN-spec-name/)
    - Verification report (full PASS report)
    - List of tasks that were completed
    - Implementation summary
@@ -1064,7 +1064,7 @@ Main Agent MUST:
 6. ✅ Identify related specification directory
 7. ✅ Spawn Specification Update Agent (NEVER update directly)
 8. ✅ Provide Specification Agent with:
-   - Specification path (.agents/specifications/NN-spec-name/)
+   - Specification path (specifications/NN-spec-name/)
    - Full verification FAIL report
    - Failed checks details
    - Files affected
@@ -1121,7 +1121,7 @@ IMPORTANT: verification.md is TRANSIENT:
 **Status**: FAIL ❌
 **Date**: 2026-01-11 15:30:45
 **Language**: Rust
-**Specification**: .agents/specifications/03-user-authentication/
+**Specification**: specifications/03-user-authentication/
 
 ## Failed Checks
 
@@ -1249,7 +1249,7 @@ Action Required:
 3. Verification will run again automatically
 4. Code will only be committed after verification passes
 
-Specification updated: .agents/specifications/NN-name/tasks.md
+Specification updated: specifications/NN-name/tasks.md
 New urgent task added at top of task list.
 ```
 
@@ -1361,7 +1361,7 @@ Before spawning verification agent:
 1. User: "Implement user authentication in Rust"
 
 2. Main Agent:
-   - Reads specification: .agents/specifications/03-user-authentication/
+   - Reads specification: specifications/03-user-authentication/
    - Reads requirements.md and tasks.md
    - Identifies tasks to complete
 
@@ -1406,7 +1406,7 @@ Before spawning verification agent:
 7. Main Agent:
    - Receives PASS report
    - Marks active_verifications['rust'] = null
-   - Identifies specification: .agents/specifications/03-user-authentication/
+   - Identifies specification: specifications/03-user-authentication/
    - Spawns Specification Update Agent
    - Provides context:
      * Verification report (PASS)
@@ -1414,7 +1414,7 @@ Before spawning verification agent:
      * Files changed: [list]
 
 8. Specification Update Agent:
-   - Reads .agents/specifications/03-user-authentication/tasks.md
+   - Reads specifications/03-user-authentication/tasks.md
    - Marks completed tasks as [x]:
      * [x] Implement authentication middleware
      * [x] Add JWT token generation
@@ -1449,7 +1449,7 @@ Before spawning verification agent:
      - Security: PASS (cargo audit)
      - Coverage: 89%
 
-     Specification: .agents/specifications/03-user-authentication/
+     Specification: specifications/03-user-authentication/
      Tasks completed: 3
      Tasks remaining: 2
 
@@ -1483,7 +1483,7 @@ Before spawning verification agent:
 1. User: "Add data validation to API endpoints"
 
 2. Main Agent:
-   - Reads specification: .agents/specifications/05-data-validation/
+   - Reads specification: specifications/05-data-validation/
    - Spawns Python Implementation Agent
 
 3. Python Implementation Agent:
@@ -1505,7 +1505,7 @@ Before spawning verification agent:
 6. Main Agent:
    - Receives FAIL report
    - DOES NOT COMMIT code ❌
-   - Identifies specification: .agents/specifications/05-data-validation/
+   - Identifies specification: specifications/05-data-validation/
    - Spawns Specification Update Agent
    - Provides context:
      * Verification report (FAIL with full details)
@@ -1514,7 +1514,7 @@ Before spawning verification agent:
      * Recommended fixes
 
 7. Specification Update Agent:
-   - Reads .agents/specifications/05-data-validation/tasks.md
+   - Reads specifications/05-data-validation/tasks.md
    - Creates verification.md with full FAIL report:
      * All lint errors with line numbers
      * All type errors
@@ -1568,7 +1568,7 @@ Before spawning verification agent:
      4. Re-submit for verification
 
      Specification updated: urgent task added, verification.md created
-     Full details: .agents/specifications/05-data-validation/verification.md
+     Full details: specifications/05-data-validation/verification.md
      ```
 
 9. Main Agent:
@@ -1719,7 +1719,7 @@ Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review �
 - ❌ **USER WILL SHOUT AT YOU** for writing implementation before tests
 
 **Learning Documentation Requirements**:
-- ✅ Create/update `.agents/specifications/[NN-spec-name]/learnings.md` for specification-specific insights
+- ✅ Create/update `specifications/[NN-spec-name]/learnings.md` for specification-specific insights
 - ✅ Update `.agents/stacks/[stack].md` for generic programming language learnings
 - ✅ Document critical decisions, gotchas, failures, and solutions
 - ✅ Help future agents avoid mistakes and succeed faster

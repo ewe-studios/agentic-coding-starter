@@ -146,7 +146,7 @@ MAIN AGENT: Spawn verification agents, orchestrate verification
    - Completed tasks list
    - Files changed
    - Implementation description
-4. Specification Agent reads `.agents/specifications/NN-spec-name/tasks.md`
+4. Specification Agent reads `specifications/NN-spec-name/tasks.md`
 5. Specification Agent marks relevant tasks as `[x]` completed
 6. Specification Agent updates frontmatter (`completed: N`, `uncompleted: M`)
 7. Specification Agent deletes `verification.md` if exists (cleanup from previous failure)
@@ -170,7 +170,7 @@ MAIN AGENT: Spawn verification agents, orchestrate verification
    - Build: PASS
    - Coverage: [N]%
 
-   Specification: .agents/specifications/NN-name/
+   Specification: specifications/NN-name/
    Tasks completed: [N]
    Tasks remaining: [M]
 
@@ -270,7 +270,7 @@ MAIN AGENT: Spawn verification agents, orchestrate verification
 - **Read** by Implementation Agent to understand fixes needed
 - **Overwritten** by Specification Agent on subsequent failures
 - **Deleted** by Specification Update Agent on verification PASS
-- **Lives** in specification directory beside tasks.md (`.agents/specifications/NN-name/verification.md`)
+- **Lives** in specification directory beside tasks.md (`specifications/NN-name/verification.md`)
 
 ---
 
@@ -406,7 +406,7 @@ Violations have severe consequences:
 1. User: "Implement user authentication in Rust"
 
 2. Main Agent:
-   - Reads specification: .agents/specifications/03-user-authentication/
+   - Reads specification: specifications/03-user-authentication/
    - Reads requirements.md and tasks.md
    - Identifies tasks to complete
    - Spawns Rust Implementation Agent
@@ -448,7 +448,7 @@ Violations have severe consequences:
 6. Main Agent:
    - Receives PASS report
    - Marks active_verifications['rust'] = null
-   - Opens .agents/specifications/03-user-authentication/tasks.md
+   - Opens specifications/03-user-authentication/tasks.md
    - Updates completed tasks:
      * [x] Implement authentication middleware
      * [x] Add JWT token generation
@@ -480,7 +480,7 @@ Violations have severe consequences:
      - Security: PASS (cargo audit)
      - Coverage: 89%
 
-     Specification: .agents/specifications/03-user-authentication/
+     Specification: specifications/03-user-authentication/
      Tasks completed: 3
      Tasks remaining: 2
 
@@ -515,7 +515,7 @@ Violations have severe consequences:
 1. User: "Add data validation to API endpoints"
 
 2. Main Agent:
-   - Reads specification: .agents/specifications/05-data-validation/
+   - Reads specification: specifications/05-data-validation/
    - Spawns Python Implementation Agent
 
 3. Python Implementation Agent:
@@ -537,7 +537,7 @@ Violations have severe consequences:
 6. Main Agent:
    - Receives FAIL report
    - DOES NOT COMMIT code ❌
-   - Opens .agents/specifications/05-data-validation/tasks.md
+   - Opens specifications/05-data-validation/tasks.md
    - Adds NEW task at TOP:
      ```markdown
      ## URGENT: Failed Verification Tasks

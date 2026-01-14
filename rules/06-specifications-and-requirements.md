@@ -48,7 +48,20 @@ specifications/
 │   ├── VERIFICATION_SIGNOFF.md
 │   └── LEARNINGS.md
 └── ...
+
+documentation/
+├── module-1/
+│   ├── doc.md                       # (MANDATORY) Detailed module documentation
+│   ├── diagrams/                    # (OPTIONAL) Architecture diagrams
+│   └── assets/                      # (OPTIONAL) Additional documentation assets
+├── module-2/
+│   ├── doc.md
+│   ├── diagrams/
+│   └── assets/
+└── ...
 ```
+
+**CRITICAL**: The `documentation/` directory exists at the project root level, parallel to `specifications/`, NOT inside any specification directory.
 
 ### Naming Convention
 - Each specification gets its own numbered directory
@@ -862,6 +875,696 @@ This specification taught us the importance of systematic code quality improveme
 *Learnings Documented: 2026-01-14*
 ```
 
+## Module Documentation System (MANDATORY)
+
+### Purpose
+The `documentation/` directory provides living, detailed documentation of individual code modules. This ensures agents have a clear, up-to-date understanding of what each module implements, imports, exports, and does **BEFORE** making any changes.
+
+### Why Module Documentation Is Critical
+
+**Problem Without Module Documentation:**
+- Agents waste time using Grep/Glob to understand what code does
+- Agents miss critical context about module purpose and design
+- Agents make changes without understanding full impact
+- Documentation in code comments alone isn't comprehensive enough
+- No central place to understand module architecture and relationships
+
+**Solution With Module Documentation:**
+- Agents read `documentation/[module]/doc.md` first for immediate understanding
+- Clear documentation of what module implements, imports, calls, and does
+- Architecture diagrams and visual aids when needed
+- Line number references to key implementations
+- Faster onboarding and safer changes
+- Living documentation that stays up-to-date with code
+
+### When Module Documentation Is Created
+
+**Initial Creation (After requirements.md Completed):**
+
+Once `specifications/[NN-spec-name]/requirements.md` is documented and user has approved requirements, Main Agent **MUST**:
+
+1. **Identify Affected Modules**: Determine which modules (existing or new) will be modified/created
+2. **Spawn Documentation Agent(s)**: Launch specialized documentation agent(s) to create/update module documentation
+3. **Parallel Execution When Possible**: If modules are independent, spawn multiple documentation agents in parallel
+4. **Sequential When Dependencies Exist**: If modules are highly interdependent, spawn single agent for related modules
+
+**Documentation Agent Responsibilities:**
+
+Documentation agents **MUST**:
+1. Read the specification `requirements.md` to understand what needs to be implemented
+2. For **NEW modules**: Create new `documentation/[module-name]/doc.md` with initial structure
+3. For **EXISTING modules**:
+   - Read current `documentation/[module-name]/doc.md` (if exists)
+   - Analyze actual module code
+   - Compare documentation vs reality
+   - Update documentation to match current state
+   - Flag discrepancies to Main Agent
+4. Document with extreme factual accuracy (see doc.md structure below)
+5. Reference documentation path in `requirements.md` (Main Agent will do this after agent reports)
+
+**CRITICAL ASSUMPTION RULE:**
+
+**NEVER assume existing module documentation is complete or accurate.**
+
+Before starting ANY work on a specification:
+- Main Agent **MUST** spawn documentation agent to review/update relevant module documentation
+- Documentation agent **MUST** verify documentation matches actual code
+- Documentation agent **MUST** report discrepancies to Main Agent
+- If documentation doesn't match code: STOP ALL WORK, update documentation FIRST
+
+### Documentation Agent Must STOP If Mismatch Found
+
+If documentation agent discovers that `documentation/[module]/doc.md` does NOT match actual module code:
+
+1. **STOP immediately** - do not proceed with implementation
+2. **Report to Main Agent** with detailed mismatch findings:
+   - What documentation claims
+   - What code actually does
+   - Specific line numbers and functions affected
+   - Severity of mismatch (minor vs critical)
+3. **Main Agent MUST**:
+   - Halt all specification work
+   - Spawn documentation agent(s) to update documentation FIRST
+   - Wait for documentation to be corrected and verified
+   - ONLY THEN resume specification implementation
+
+**Why This Matters:**
+- Prevents implementation based on false assumptions
+- Ensures agents always work with accurate information
+- Maintains documentation as single source of truth
+- Catches documentation drift before it causes problems
+
+### Module Documentation Directory Structure
+
+```
+documentation/
+├── module-name/
+│   ├── doc.md                 # (MANDATORY) Main documentation file
+│   ├── diagrams/              # (OPTIONAL) Visual architecture diagrams
+│   │   ├── architecture.svg
+│   │   ├── flow-diagram.svg
+│   │   └── class-diagram.svg
+│   └── assets/                # (OPTIONAL) Additional assets
+│       ├── screenshots/
+│       ├── examples/
+│       └── references/
+└── ...
+```
+
+**Naming Convention:**
+- Module directory name should match actual module/package/crate name when possible
+- Use lowercase with dashes for multi-word names: `user-auth`, `http-client`, `data-validator`
+- Keep names concise but descriptive
+
+### doc.md File Structure
+
+Every `documentation/[module]/doc.md` **MUST** contain:
+
+```markdown
+---
+module: [Exact module/package/crate name]
+language: [rust|javascript|typescript|python|go|etc]
+status: [active|deprecated|experimental|planning]
+last_updated: [YYYY-MM-DD]
+maintainer: [Primary responsible agent or team]
+related_specs:
+  - specifications/NN-spec-name
+  - specifications/MM-spec-name
+---
+
+# [Module Name] - Documentation
+
+## Overview
+[2-3 sentence summary of what this module does and why it exists]
+
+## Purpose and Responsibility
+[Detailed explanation of module's purpose, primary responsibilities, and role in the system]
+
+## Module Location
+- **Path**: `[exact file path or directory]`
+- **Entry Point**: `[main file or entry point]`
+- **Language**: [language and version]
+- **Package Manager**: [cargo/npm/pip/go mod/etc]
+
+## What It Implements
+
+### Core Functionality
+1. **[Feature/Function Name]** (Line [NNN-MMM])
+   - What: [What this feature does]
+   - Why: [Why it exists, what problem it solves]
+   - How: [Brief explanation of how it works]
+   - Key Functions: `function_name()`, `another_function()`
+
+2. **[Another Feature]** (Line [NNN-MMM])
+   - What: [Description]
+   - Why: [Rationale]
+   - How: [Implementation approach]
+   - Key Functions: `foo()`, `bar()`
+
+### Public API
+**Exported Functions:**
+- `function_name(args) -> return_type` (Line NNN): [Purpose and usage]
+- `another_function(args) -> return_type` (Line MMM): [Purpose and usage]
+
+**Exported Types/Classes:**
+- `TypeName` (Line NNN): [Purpose and fields]
+- `ClassName` (Line MMM): [Purpose and methods]
+
+**Exported Constants:**
+- `CONSTANT_NAME` (Line NNN): [Purpose and value]
+
+## What It Imports
+
+### External Dependencies
+- `dependency-name` (v1.2.3): [Why this dependency is used, what features]
+- `another-dependency` (v2.0.0): [Purpose]
+
+### Internal Dependencies
+- `internal/module/path`: [What is imported and why]
+  - `function_a()`: Used for [purpose]
+  - `Type_B`: Used for [purpose]
+
+## What It Calls
+
+### External Function Calls
+- **Database Operations**: Calls `db.query()`, `db.insert()` (Lines NNN-MMM)
+  - Purpose: [Why these calls are made]
+  - Context: [When and how they're used]
+
+- **API Calls**: Calls `http.request()` (Lines NNN-MMM)
+  - Purpose: [What APIs are called and why]
+  - Context: [Request/response handling]
+
+### Internal Function Calls
+- **Helper Functions**: `helper.validate()`, `helper.transform()` (Lines NNN-MMM)
+  - Purpose: [What helper functions do]
+
+- **Utility Functions**: `util.format()`, `util.parse()` (Lines NNN-MMM)
+  - Purpose: [Utility function usage]
+
+## What It Does (Step-by-Step)
+
+### Primary Workflows
+
+#### Workflow 1: [Workflow Name]
+1. **Input**: [What triggers this workflow]
+2. **Processing Steps**:
+   - Step 1: [Action] (Line NNN)
+   - Step 2: [Action] (Line MMM)
+   - Step 3: [Action] (Line PPP)
+3. **Output**: [What the workflow produces]
+4. **Error Handling**: [How errors are handled]
+
+#### Workflow 2: [Another Workflow]
+[Same structure as above]
+
+### Edge Cases and Special Handling
+- **Case 1**: [Description] (Lines NNN-MMM)
+  - Condition: [When this occurs]
+  - Handling: [How it's handled]
+
+- **Case 2**: [Description] (Lines NNN-MMM)
+  - Condition: [When this occurs]
+  - Handling: [How it's handled]
+
+## Architecture
+
+### Design Patterns Used
+- **Pattern Name**: [How and why this pattern is used]
+- **Another Pattern**: [Explanation]
+
+### Module Structure
+```
+module-directory/
+├── main_file.ext         # [Purpose]
+├── submodule_a.ext       # [Purpose]
+├── submodule_b.ext       # [Purpose]
+├── tests/                # [Test organization]
+└── docs/                 # [Additional docs]
+```
+
+### Diagrams
+[Include or reference architecture diagrams if they exist in diagrams/ directory]
+
+## Key Implementation Details
+
+### Performance Considerations
+- [Any performance-critical code or optimization notes]
+- Line references: [NNN-MMM]
+
+### Security Considerations
+- [Any security-relevant implementations]
+- Line references: [NNN-MMM]
+
+### Concurrency/Async Handling
+- [How concurrency is handled]
+- Line references: [NNN-MMM]
+
+## Tests
+
+### Test Coverage
+- **Unit Tests**: `[test file path]`
+  - Coverage: [XX%]
+  - Key test cases: [List important tests]
+
+- **Integration Tests**: `[test file path]`
+  - Coverage: [XX%]
+  - Key test cases: [List important tests]
+
+### Testing Strategy
+- [Explanation of how module is tested]
+- [Any special testing considerations]
+
+## Dependencies and Relationships
+
+### Depends On
+- **Module A**: [Why this dependency exists]
+- **Module B**: [Purpose of dependency]
+
+### Used By
+- **Module C**: [How this module is used]
+- **Module D**: [Purpose of usage]
+
+### Sibling Modules
+- **Module E**: [Related module and relationship]
+
+## Configuration
+
+### Environment Variables
+- `ENV_VAR_NAME`: [Purpose and default value]
+- `ANOTHER_VAR`: [Purpose and default value]
+
+### Configuration Files
+- `config.json`: [What is configured]
+- `.env`: [Environment-specific settings]
+
+## Known Issues and Limitations
+
+### Current Limitations
+1. **[Limitation Name]**: [Description and workaround]
+2. **[Another Limitation]**: [Description]
+
+### Known Bugs
+- **[Bug Description]**: [Impact and status] (Issue #NNN)
+
+### Technical Debt
+- **[Debt Item]**: [Description and plan for resolution]
+
+## Future Improvements
+
+### Planned Enhancements
+- **[Enhancement Name]**: [Description and priority]
+- **[Another Enhancement]**: [Description and timeline]
+
+### Refactoring Opportunities
+- **[Refactor Item]**: [Why and when it should be done]
+
+## Related Documentation
+
+### Specifications
+- [Link to related specifications]
+
+### External Resources
+- [Links to relevant documentation, RFCs, articles]
+
+### Related Modules
+- [Links to related module documentation]
+
+## Version History
+
+### [Version X.Y.Z] - YYYY-MM-DD
+- [Major changes in this version]
+- [Breaking changes if any]
+- [Bug fixes]
+
+### [Version X.Y.Z-1] - YYYY-MM-DD
+- [Previous version changes]
+
+---
+*Last Updated: [Date]*
+*Documentation Version: [Version]*
+```
+
+### Referencing Module Documentation in requirements.md
+
+After documentation agent(s) complete module documentation, Main Agent **MUST** update `specifications/[NN-spec-name]/requirements.md` to reference the module documentation:
+
+**Add to requirements.md:**
+```markdown
+## Module Documentation References
+
+This specification modifies the following modules:
+
+### [Module Name 1]
+- **Documentation**: `documentation/[module-1]/doc.md`
+- **Purpose**: [Brief summary]
+- **Changes Needed**: [What will be changed in this module]
+
+### [Module Name 2]
+- **Documentation**: `documentation/[module-2]/doc.md`
+- **Purpose**: [Brief summary]
+- **Changes Needed**: [What will be changed in this module]
+
+**CRITICAL**: Agents MUST read module documentation BEFORE making changes.
+```
+
+This creates a clear connection between specifications and the modules they affect.
+
+### Implementation Agent Workflow With Module Documentation
+
+When implementation agent is spawned for a specification, they **MUST**:
+
+1. **Read Specification Files**:
+   - `specifications/[NN-spec-name]/requirements.md`
+   - `specifications/[NN-spec-name]/tasks.md`
+
+2. **Read Module Documentation** (if referenced in requirements.md):
+   - Locate module documentation paths in requirements.md
+   - Read **ALL** `documentation/[module]/doc.md` files for affected modules
+   - Understand what module currently does BEFORE making changes
+   - Verify understanding matches actual code (spot check key functions)
+
+3. **Report Discrepancies Immediately**:
+   - If module documentation doesn't match actual code: STOP
+   - Report mismatch to Main Agent with details
+   - Wait for Main Agent to resolve (spawn documentation agent to fix)
+
+4. **Implement Changes**:
+   - Make changes with full context of module's current state
+   - Update module documentation as part of implementation if structure changes
+   - Keep documentation synchronized with code changes
+
+5. **Report Completion**:
+   - Notify Main Agent of completed work
+   - Note if module documentation needs updates due to changes
+
+### Documentation Agent Workflow
+
+Documentation agents are specialized agents spawned by Main Agent to create/update module documentation.
+
+**Agent Type**: Documentation Agent (should be documented in `.agents/agents/documentation.md`)
+
+**When Spawned**:
+- After requirements.md is completed (before implementation)
+- When module documentation needs verification/update
+- When documentation mismatch is reported
+- When new modules are created
+
+**Responsibilities**:
+1. **Read Specification**: Understand what will be implemented
+2. **Analyze Module Code**:
+   - Use Glob to find module files
+   - Use Grep to search for key functions/types
+   - Read key files to understand implementation
+3. **Create/Update doc.md**:
+   - Fill in all sections with factual accuracy
+   - Include line number references
+   - Document all imports, exports, calls, and workflows
+   - Add diagrams if helpful (in diagrams/ directory)
+4. **Verify Accuracy**: Cross-reference documentation against actual code
+5. **Report to Main Agent**:
+   - Completion status
+   - Path to documentation
+   - Any discrepancies found
+   - Recommendation (GO/STOP/UPDATE)
+
+**Documentation Agent MUST NOT**:
+- ❌ Make assumptions about code without reading it
+- ❌ Copy stale documentation without verification
+- ❌ Document planned features (only document what EXISTS)
+- ❌ Skip line number references
+- ❌ Assume documentation is complete
+
+### Parallelization Strategy
+
+**When to Spawn Multiple Documentation Agents (Parallel):**
+- Modules are independent with minimal interdependencies
+- Different modules in different directories/packages
+- No shared state or tight coupling
+
+**When to Spawn Single Documentation Agent (Sequential):**
+- Modules are highly interdependent
+- Changes in one module affect others
+- Shared types/interfaces across modules
+- Need to document relationships between modules
+
+Main Agent makes the decision based on specification requirements.
+
+### Documentation Maintenance
+
+**When to Update Module Documentation**:
+1. **Before Work Begins**: Verify documentation matches reality
+2. **During Implementation**: Update if module structure changes significantly
+3. **After Verification Passes**: Ensure documentation reflects final state
+4. **When Bugs Found**: Document bug fixes and why they were needed
+5. **When Refactoring**: Update to reflect new architecture
+
+**Who Updates**:
+- **Documentation Agent**: For major reviews/updates (spawned by Main Agent)
+- **Implementation Agent**: For minor updates during implementation (if structure changes)
+- **Main Agent**: Never updates directly, always delegates to agents
+
+### Integration with Specification Workflow
+
+Updated workflow with module documentation:
+
+```
+1. User Requests Feature
+   ↓
+2. Main Agent Conversation with User
+   ↓
+3. Create Specification Directory
+   ↓
+4. Document Requirements (requirements.md)
+   ↓
+4.5 **SPAWN DOCUMENTATION AGENT(S)** (NEW STEP)
+   ├─ Main Agent identifies affected modules
+   ├─ Spawns documentation agent(s) for each module
+   ├─ Documentation agents create/update documentation/[module]/doc.md
+   ├─ Documentation agents verify accuracy
+   ├─ Documentation agents report completion or discrepancies
+   ├─ If discrepancies: STOP, fix documentation, then continue
+   ├─ Main Agent updates requirements.md with module doc references
+   └─ Main Agent commits module documentation
+   ↓
+5. Create Task List (tasks.md)
+   ↓
+6. Update Spec.md Master Index
+   ↓
+7. Commit Specification Files
+   ↓
+8. LAUNCH REVIEW AGENT (reads requirements.md, tasks.md, AND module docs)
+   ↓
+9. Launch Implementation Agents
+   ├─ Agents read requirements.md
+   ├─ Agents read tasks.md
+   ├─ **Agents read module documentation** (NEW)
+   ├─ Agents verify module docs match reality
+   ├─ If mismatch: STOP, report to Main Agent
+   ├─ Agents implement with full context
+   └─ Agents update module docs if structure changes
+   ↓
+10-17. [Continue with existing workflow: PROGRESS.md, FINAL_REPORT.md, etc.]
+```
+
+### Enforcement - Zero Tolerance
+
+**Violations:**
+- ❌ **Starting implementation without module documentation** (if module exists)
+- ❌ **Not verifying module documentation accuracy before work**
+- ❌ **Assuming module documentation is complete/correct without verification**
+- ❌ **Proceeding when documentation doesn't match code**
+- ❌ **Not updating module documentation when structure changes**
+- ❌ **Creating vague or incomplete module documentation**
+- ❌ **Documenting planned features instead of existing code**
+- ❌ **Omitting line number references for key implementations**
+
+**Consequences:**
+- **Wasted time**: Implementing based on false assumptions
+- **Bugs introduced**: Misunderstanding current code leads to breaking changes
+- **Confusion**: Future agents can't understand what code does
+- **Documentation drift**: Docs become useless when they don't match reality
+
+**THE USER WILL BE VERY UPSET** if agents work without reading/verifying module documentation!
+
+### Examples
+
+**Example 1: Creating Module Documentation for New Module**
+
+```
+Specification: 03-user-authentication
+Requirements: Implement JWT-based authentication system
+
+Main Agent workflow:
+1. Requirements documented in specifications/03-user-authentication/requirements.md
+2. Main Agent identifies: NEW module "user-auth" will be created
+3. Main Agent spawns Documentation Agent with context:
+   - Specification: 03-user-authentication
+   - Module: user-auth (NEW)
+   - Task: Create initial documentation structure
+
+Documentation Agent:
+1. Creates documentation/user-auth/ directory
+2. Creates documentation/user-auth/doc.md with:
+   - Frontmatter (status: planning)
+   - Overview: "Handles JWT token generation and validation"
+   - Module Location: src/auth/ (planned)
+   - Sections left as placeholders (module doesn't exist yet)
+   - Note: "Module not yet implemented, documentation will be updated during implementation"
+3. Reports to Main Agent: "Initial documentation structure created"
+
+Main Agent:
+1. Updates requirements.md with reference:
+   ```markdown
+   ## Module Documentation References
+   ### User Auth
+   - **Documentation**: `documentation/user-auth/doc.md`
+   - **Purpose**: JWT authentication (new module)
+   - **Changes Needed**: Full implementation from scratch
+   ```
+2. Commits documentation
+3. Continues with task list creation
+
+Implementation Agent (later):
+1. Reads requirements.md, sees module doc reference
+2. Reads documentation/user-auth/doc.md (sees it's planning status)
+3. Implements authentication module
+4. Updates documentation/user-auth/doc.md as implementation progresses:
+   - Changes status: planning → active
+   - Fills in all sections with actual implementation details
+   - Adds line numbers for key functions
+   - Documents actual imports, exports, calls
+5. Reports completion to Main Agent
+
+✅ Documentation created before implementation
+✅ Documentation updated during implementation
+✅ Living documentation stays synchronized with code
+```
+
+**Example 2: Verifying Existing Module Documentation**
+
+```
+Specification: 05-add-caching-layer
+Requirements: Add Redis caching to API responses
+
+Main Agent workflow:
+1. Requirements documented
+2. Main Agent identifies: EXISTING module "http-client" will be modified
+3. Main Agent spawns Documentation Agent:
+   - Specification: 05-add-caching-layer
+   - Module: http-client (EXISTING)
+   - Task: Verify documentation matches current code
+
+Documentation Agent:
+1. Reads documentation/http-client/doc.md (created 2 months ago)
+2. Globs for http-client files: src/http/*.ts
+3. Greps for key functions mentioned in doc.md
+4. Reads main implementation files
+5. **DISCOVERS MISMATCH**:
+   - doc.md says: "Uses axios library for requests"
+   - Code actually uses: native fetch API (axios was removed)
+   - doc.md line numbers are outdated (code was refactored)
+   - doc.md missing: recently added retry logic
+6. Reports to Main Agent: "STOP - Documentation does not match code"
+
+Documentation Agent Report:
+---
+STATUS: STOP
+REASON: Documentation out of date, does not match current code
+
+MISMATCHES FOUND:
+- Documentation claims axios library is used (Line 45 reference)
+  Reality: Code uses native fetch API (axios removed in commit abc123)
+
+- Documentation line numbers outdated
+  Example: Claims makeRequest() is at Line 120
+  Reality: makeRequest() is at Line 89
+
+- Documentation missing retry logic
+  Reality: Retry logic added in commit def456
+
+RECOMMENDATION: Update documentation before proceeding with caching implementation
+
+Main Agent actions:
+1. STOPS all work on specification (does not spawn implementation agents)
+2. Spawns Documentation Agent again with task: "Update documentation to match reality"
+3. Documentation Agent:
+   - Updates all sections
+   - Corrects library references
+   - Updates line numbers
+   - Documents retry logic
+   - Verifies everything matches code
+   - Reports: "Documentation updated and verified"
+4. Main Agent commits updated documentation
+5. Main Agent updates requirements.md with correct module doc reference
+6. NOW Main Agent continues with implementation
+
+✅ Caught documentation drift BEFORE implementation
+✅ Prevented implementation based on false assumptions
+✅ Ensured agents have accurate information
+✅ No time wasted on wrong approach
+```
+
+**Example 3: Documentation Mismatch Found by Implementation Agent**
+
+```
+Specification: 07-add-payment-webhooks
+Implementation Agent spawned to add webhook handling
+
+Implementation Agent workflow:
+1. Reads specifications/07-add-payment-webhooks/requirements.md
+2. Sees module reference: documentation/payment-processor/doc.md
+3. Reads documentation/payment-processor/doc.md
+4. Documentation says: "Payment validation in validatePayment() at Line 234"
+5. Implementation Agent checks code:
+   - Greps for validatePayment
+   - Finds it at Line 312 (not 234)
+   - Reads function - logic is different than documented
+6. **STOPS IMMEDIATELY**
+7. Reports to Main Agent:
+
+Implementation Agent Report:
+---
+I cannot proceed with webhook implementation.
+
+ISSUE: Module documentation does not match actual code.
+
+DISCREPANCY:
+- documentation/payment-processor/doc.md claims:
+  * validatePayment() at Line 234
+  * Function validates amount and currency
+
+- Actual code shows:
+  * validatePayment() at Line 312
+  * Function validates amount, currency, AND merchant ID
+  * Additional validation logic not documented
+
+This affects my implementation of webhooks because I need to understand the full validation process.
+
+REQUEST: Please update payment-processor documentation before I continue.
+
+Main Agent actions:
+1. Acknowledges the issue
+2. Spawns Documentation Agent to update documentation/payment-processor/doc.md
+3. Documentation Agent:
+   - Corrects line number
+   - Documents full validation logic including merchant ID check
+   - Verifies all other sections
+   - Reports: "Documentation corrected"
+4. Main Agent commits updated documentation
+5. Main Agent resumes Implementation Agent: "Documentation updated, please continue"
+6. Implementation Agent:
+   - Re-reads documentation (now correct)
+   - Implements webhooks with accurate understanding
+   - Successfully completes work
+
+✅ Implementation Agent caught mismatch during work
+✅ Stopped immediately instead of proceeding with false assumptions
+✅ Main Agent resolved issue by updating documentation
+✅ Work resumed with accurate information
+✅ Final implementation is correct
+```
+
 ## tasks.md File
 
 ### Purpose
@@ -1094,6 +1797,19 @@ Step 0: LAUNCH REVIEW AGENT (MANDATORY)
    ├─ List detailed requirements
    └─ Include agent notes
    ↓
+4.5 Create/Update Module Documentation (MANDATORY - NEW STEP)
+   ├─ Main Agent identifies which modules (existing or new) are affected
+   ├─ For each module:
+   │  ├─ Spawn Documentation Agent (parallel if independent, sequential if interdependent)
+   │  ├─ Documentation Agent analyzes existing code (if module exists)
+   │  ├─ Documentation Agent creates/updates documentation/[module]/doc.md
+   │  ├─ Documentation Agent verifies accuracy against actual code
+   │  ├─ Documentation Agent reports completion or STOP if mismatch found
+   │  └─ If STOP: Fix documentation first, then continue
+   ├─ Main Agent updates requirements.md with module documentation references
+   ├─ Main Agent commits module documentation
+   └─ Ensures all module docs are accurate before proceeding
+   ↓
 5. Create Task List
    ├─ Fill in tasks.md frontmatter
    ├─ Break down work into tasks
@@ -1127,8 +1843,12 @@ Step 0: LAUNCH REVIEW AGENT (MANDATORY)
    ├─ Agents MUST read requirements.md
    ├─ Agents MUST read tasks.md
    ├─ Agents MUST read review agent's report
+   ├─ **Agents MUST read module documentation** (if referenced in requirements.md)
+   ├─ **Agents MUST verify module docs match reality** (spot check)
+   ├─ **If mismatch found: STOP, report to Main Agent**
    ├─ Agents work on tasks based on verified status
-   └─ Agents follow review agent's recommendations
+   ├─ Agents follow review agent's recommendations
+   └─ Agents update module docs if structure changes during implementation
    ↓
 10. Agent Updates During Work
     ├─ Add new tasks BEFORE starting work on them
@@ -1646,6 +2366,10 @@ Any of the following constitutes a serious violation:
 - **Starting implementation without running review agent first (CRITICAL)**
 - **Ignoring review agent's STOP or CLARIFY directive (CRITICAL)**
 - **Proceeding when review agent identifies blockers (CRITICAL)**
+- **Starting implementation without module documentation (CRITICAL - NEW)**
+- **Not verifying module documentation accuracy before work (CRITICAL - NEW)**
+- **Proceeding when module docs don't match code (CRITICAL - NEW)**
+- **Assuming module documentation is accurate without verification (CRITICAL - NEW)**
 - **Completing specification without creating PROGRESS.md (VIOLATION)**
 - **Completing specification without creating FINAL_REPORT.md (VIOLATION)**
 - **Completing specification without creating LEARNINGS.md (VIOLATION)**
@@ -1660,6 +2384,8 @@ Any of the following constitutes a serious violation:
 - Starting work on tasks not yet added to tasks.md
 - Incomplete or vague requirements documentation
 - Not updating Spec.md master index
+- Not creating module documentation for new modules
+- Not updating module documentation when structure changes
 
 ### User Impact
 Violations have serious consequences:
@@ -1671,6 +2397,8 @@ Violations have serious consequences:
 - **Rework**: May need to redo work due to misunderstanding
 - **Time waste**: Building on false assumptions wastes hours of development time
 - **Trust erosion**: User loses confidence in agent reliability
+- **Breaking changes**: Misunderstanding modules leads to bugs and broken functionality
+- **Documentation drift**: Module docs become useless when they don't match reality
 
 **Review Agent Violations Are Especially Costly:**
 - Skipping review agent leads to hours of wasted implementation effort
@@ -1679,7 +2407,14 @@ Violations have serious consequences:
 - User becomes frustrated watching agents work on wrong things
 - Review agent could have prevented all of this in minutes
 
-**THE USER WILL BE UPSET** if work proceeds without proper requirements documentation, status verification, and mandatory review agent execution!
+**Module Documentation Violations Are Equally Costly:**
+- Implementing without understanding current module state causes breaking changes
+- False assumptions about module behavior lead to bugs
+- Time wasted searching code instead of reading clear documentation
+- Documentation drift makes future work exponentially harder
+- Agents repeat mistakes that documentation could have prevented
+
+**THE USER WILL BE UPSET** if work proceeds without proper requirements documentation, status verification, mandatory review agent execution, **or accurate module documentation**!
 
 ### Corrective Action
 
@@ -1688,14 +2423,18 @@ When a violation occurs:
 2. **Launch review agent** if it was skipped (CRITICAL)
 3. **Read and act on review agent report** (MANDATORY)
 4. **Do not proceed** if review agent reports STOP or CLARIFY
-5. **Create specification** if missing
-6. **Document requirements** by having conversation with user
-7. **Create task list** before proceeding
-8. **Verify status** by searching codebase if relying on checkboxes
-9. **Update files** to reflect accurate status
-10. **Commit changes** following proper git workflow
-11. **Re-run review agent** if specifications were updated
-12. **Only proceed with implementation** when review agent reports GO
+5. **Create/verify module documentation** if missing or unverified (CRITICAL - NEW)
+6. **Spawn documentation agent** to verify/update module docs if needed (NEW)
+7. **Do not proceed** if module docs don't match reality (NEW)
+8. **Create specification** if missing
+9. **Document requirements** by having conversation with user
+10. **Create task list** before proceeding
+11. **Verify status** by searching codebase if relying on checkboxes
+12. **Update files** to reflect accurate status
+13. **Commit changes** following proper git workflow
+14. **Re-run review agent** if specifications were updated
+15. **Re-verify module documentation** if code was changed
+16. **Only proceed with implementation** when review agent reports GO and module docs are accurate
 
 ## Special Cases
 
@@ -1743,23 +2482,35 @@ For pure documentation updates:
 
 ## Summary
 
-**Core Principle**: Never start significant work without documented requirements and a clear task list. Always launch a review agent to verify specifications before implementation. Never trust checkboxes blindly. Always create all mandatory documentation files.
+**Core Principle**: Never start significant work without documented requirements and a clear task list. Always launch a review agent to verify specifications before implementation. Never trust checkboxes blindly. Always create all mandatory documentation files. **Always create/verify module documentation before implementation.**
 
 **Key Points**:
 - ✅ Requirements conversation comes first
 - ✅ Document everything in specification directory
 - ✅ Create comprehensive task list before work begins
+- ✅ **Create/verify module documentation after requirements (MANDATORY - NEW)**
+- ✅ **Spawn documentation agent(s) to create/update module docs**
+- ✅ **Never assume module documentation is accurate**
+- ✅ **Verify module docs match actual code**
+- ✅ **Reference module docs in requirements.md**
 - ✅ **Launch review agent BEFORE implementation (MANDATORY)**
 - ✅ **Act on review agent's report (GO/STOP/CLARIFY)**
 - ✅ Agents read specifications before working
+- ✅ **Agents read module documentation before making changes**
+- ✅ **Agents verify module docs match reality (spot check)**
+- ✅ **Agents STOP if module docs don't match code**
 - ✅ Verify status by searching codebase
 - ✅ Update tasks.md as work progresses
+- ✅ **Update module documentation if structure changes during implementation**
 - ✅ **Create PROGRESS.md at mid-work checkpoint (MANDATORY)**
 - ✅ **Create FINAL_REPORT.md when work is complete (MANDATORY)**
 - ✅ **Create LEARNINGS.md to capture insights (MANDATORY)**
 - ✅ **Run final verification before completion (MANDATORY)**
 - ✅ **Create VERIFICATION_SIGNOFF.md with verification report (MANDATORY)**
 - ✅ Keep Spec.md master index current
+- ❌ **Never skip module documentation creation/verification (CRITICAL VIOLATION - NEW)**
+- ❌ **Never assume module docs are accurate without verification (CRITICAL - NEW)**
+- ❌ **Never proceed when module docs don't match code (CRITICAL - NEW)**
 - ❌ **Never skip review agent requirement (CRITICAL VIOLATION)**
 - ❌ **Never ignore review agent's STOP or CLARIFY (CRITICAL VIOLATION)**
 - ❌ **Never skip mandatory documentation files (VIOLATION)**
@@ -1777,6 +2528,20 @@ Every specification **MUST** have these 6 files:
 5. **LEARNINGS.md** - Lessons learned and insights (created at completion)
 6. **VERIFICATION_SIGNOFF.md** - Official verification report (created after verification)
 
+**Module Documentation System (NEW):**
+Every affected module **MUST** have accurate documentation:
+1. **documentation/[module]/doc.md** - Detailed module documentation with:
+   - What the module implements (all features and functions)
+   - What it imports (external and internal dependencies)
+   - What it calls (external and internal function calls)
+   - What it does (step-by-step workflows)
+   - Line number references for key implementations
+   - Architecture diagrams when helpful
+2. **Created/verified after requirements.md, before implementation**
+3. **Updated when module structure changes**
+4. **Referenced in requirements.md** so agents know to read it
+5. **Verified to match actual code** (never assume it's accurate)
+
 **Review Agent Is Mandatory:**
 The review agent requirement is non-negotiable. It saves hours of wasted effort by:
 - Verifying task status accuracy before implementation
@@ -1785,6 +2550,14 @@ The review agent requirement is non-negotiable. It saves hours of wasted effort 
 - Preventing work based on false assumptions
 - Ensuring specifications are actionable and complete
 
+**Module Documentation Is Mandatory:**
+The module documentation requirement is non-negotiable. It saves hours of wasted effort by:
+- Providing immediate understanding of what module currently does
+- Preventing breaking changes from misunderstanding module behavior
+- Catching documentation drift before implementation begins
+- Giving agents clear context instead of forcing them to grep/glob through code
+- Ensuring all agents have same accurate understanding of module state
+
 **Documentation Files Are Mandatory:**
 The new documentation files (PROGRESS.md, FINAL_REPORT.md, LEARNINGS.md, VERIFICATION_SIGNOFF.md) are non-negotiable. They provide:
 - **PROGRESS.md**: Mid-work visibility for users, helps track momentum and identify blockers
@@ -1792,7 +2565,9 @@ The new documentation files (PROGRESS.md, FINAL_REPORT.md, LEARNINGS.md, VERIFIC
 - **LEARNINGS.md**: Knowledge transfer, helps future work avoid pitfalls and build on insights
 - **VERIFICATION_SIGNOFF.md**: Formal quality assurance, independent validation of completeness
 
-**Remember**: The user will be upset if work proceeds without proper requirements, without status verification, without running the mandatory review agent first, **or without creating all mandatory documentation files**!
+**Remember**: The user will be upset if work proceeds without proper requirements, without status verification, without running the mandatory review agent first, **without creating/verifying module documentation**, or without creating all mandatory documentation files!
 
 ---
 *Created: 2026-01-11*
+*Last Updated: 2026-01-14*
+*Version: 2.0 (Added Module Documentation System)*

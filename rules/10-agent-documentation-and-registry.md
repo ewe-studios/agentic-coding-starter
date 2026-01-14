@@ -501,6 +501,91 @@ Large docs (>8-10KB) → Use tools only → Request Documentation Agent
 - **Specialized Updates**: Documentation Agent handles complex doc updates
 - **Efficiency**: Right agent for the right task
 
+### Documentation Agent: Comprehensive Asset Creation
+
+When Main Agent spawns Documentation Agent to create or update module documentation, the Documentation Agent **MUST** create comprehensive documentation assets beyond just the `doc.md` file.
+
+**Mandatory Asset Creation by Module Type:**
+
+#### For API Modules:
+- **OpenAPI Specification** (`assets/openapi.yaml` or `.json`)
+  - Complete endpoint documentation
+  - Request/response schemas
+  - Authentication requirements
+  - Error responses
+  - Examples for each endpoint
+- **API Examples** (`assets/examples/`)
+  - cURL examples
+  - Language-specific client code
+  - Postman collections
+
+#### For Data Model Modules:
+- **JSON Schema** (`assets/schemas/[model-name].json`)
+  - Complete type definitions
+  - Validation rules (min/max, patterns)
+  - Required vs optional fields
+  - Field descriptions and examples
+- **TypeScript Definitions** (`assets/types/`) (optional)
+- **GraphQL Schema** (`assets/schema.graphql`) (if applicable)
+
+#### For Library/SDK Modules:
+- **Usage Examples** (`assets/examples/`)
+  - Basic usage examples
+  - Advanced patterns
+  - Common scenarios
+- **Configuration Examples** (`assets/configs/`)
+  - Config file templates
+  - Environment variable templates
+
+#### For All Modules:
+- **Architecture Diagrams** (`assets/diagrams/`)
+  - Component diagrams (SVG preferred)
+  - Flow diagrams
+  - Sequence diagrams
+  - ER diagrams for data models
+- **Reference Documentation** (`assets/references/`)
+  - Links to external resources
+  - RFCs and specifications
+
+**Complete Asset Directory Structure:**
+```
+documentation/[module]/
+├── doc.md                        # Main documentation
+└── assets/                       # Supplementary documentation
+    ├── openapi.yaml              # API specification
+    ├── schemas/                  # JSON schemas
+    │   ├── model-1.json
+    │   └── model-2.json
+    ├── types/                    # TypeScript definitions
+    │   └── index.d.ts
+    ├── examples/                 # Code examples
+    │   ├── basic-usage.md
+    │   ├── advanced.md
+    │   └── postman-collection.json
+    ├── configs/                  # Configuration templates
+    │   ├── config.example.toml
+    │   └── .env.example
+    ├── diagrams/                 # Visual documentation
+    │   ├── architecture.svg
+    │   └── flow.png
+    └── references/               # External resources
+        └── links.md
+```
+
+**Why Comprehensive Assets Matter:**
+- **API Consumers**: OpenAPI specs enable automatic client generation
+- **Data Validation**: JSON schemas enable automatic validation
+- **Quick Start**: Examples enable rapid integration
+- **Visual Understanding**: Diagrams clarify complex architectures
+- **Tooling Integration**: Standard formats work with existing tools (Swagger UI, JSON Schema validators, etc.)
+
+**Documentation Agent Responsibilities:**
+- ✅ Identify module type (API/Model/Library/General)
+- ✅ Create appropriate assets for module type
+- ✅ Ensure asset quality (complete, accurate, usable)
+- ✅ Update assets when code changes
+- ✅ Report created/updated assets to Main Agent
+
 ### Main Agent Workflow
 
 ```

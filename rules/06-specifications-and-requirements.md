@@ -27,14 +27,26 @@ Before **ANY** work begins on new features, enhancements, or significant changes
 .specifications/
 ├── Spec.md                          # Master index of all specifications
 ├── 01-specification-name/
-│   ├── requirements.md              # Requirements and conversation summary
-│   └── tasks.md                     # Task list with checkboxes
+│   ├── requirements.md              # (MANDATORY) Requirements and conversation summary
+│   ├── tasks.md                     # (MANDATORY) Task list with checkboxes
+│   ├── PROGRESS.md                  # (MANDATORY) Mid-work progress report
+│   ├── FINAL_REPORT.md              # (MANDATORY) Comprehensive completion summary
+│   ├── VERIFICATION_SIGNOFF.md      # (MANDATORY) Official verification report
+│   └── LEARNINGS.md                 # (MANDATORY) Lessons learned and insights
 ├── 02-another-specification/
 │   ├── requirements.md
-│   └── tasks.md
+│   ├── tasks.md
+│   ├── PROGRESS.md
+│   ├── FINAL_REPORT.md
+│   ├── VERIFICATION_SIGNOFF.md
+│   └── LEARNINGS.md
 ├── 03-yet-another-specification/
 │   ├── requirements.md
-│   └── tasks.md
+│   ├── tasks.md
+│   ├── PROGRESS.md
+│   ├── FINAL_REPORT.md
+│   ├── VERIFICATION_SIGNOFF.md
+│   └── LEARNINGS.md
 └── ...
 ```
 
@@ -275,6 +287,579 @@ Search for:
 ---
 *Created: 2026-01-11*
 *Last Updated: 2026-01-11*
+```
+
+## PROGRESS.md File
+
+### Purpose
+Documents progress at the midpoint of specification work, providing a snapshot of what has been accomplished and what remains. This helps track momentum, identify blockers early, and communicate status to users.
+
+### When to Create
+Create PROGRESS.md when:
+- You've completed approximately 40-60% of the tasks
+- You're switching between major phases of work
+- Significant progress has been made and it's a good checkpoint
+- User asks for a progress update
+
+### Required Contents
+```markdown
+# [Specification Name] - Progress Report
+
+## Overall Status: [X%] Complete
+
+### Completed Work
+[List of completed tasks, features, or phases]
+
+### Current Status
+[What you're currently working on]
+
+### Remaining Work
+[What still needs to be done]
+
+### Blockers/Issues
+[Any problems encountered or blockers that need resolution]
+
+### Statistics
+[Metrics like files modified, lines changed, warnings fixed, etc.]
+
+### Next Steps
+[Immediate next actions]
+
+---
+*Progress Report Created: [Date and Time]*
+```
+
+### Example PROGRESS.md
+```markdown
+# Rust Lints Fix - Progress Report
+
+## Overall Status: 60% Complete
+
+### Completed Work (Phases 1-4)
+- ✅ Full clippy analysis completed
+- ✅ Fixed 2 cast_possible_truncation warnings
+- ✅ Fixed 3 unnecessary_debug_formatting warnings
+- ✅ Fixed 4 redundant continue expressions
+- ✅ Fixed 1 match_same_arms warning
+- ✅ All formatting corrections applied
+
+### Current Status
+Working on Phase 5: Adding comprehensive documentation sections
+- In progress: Adding # Errors and # Panics documentation
+- Currently on: ewe_channels crate
+
+### Remaining Work
+- Phase 5: Documentation (18 # Errors, 3 # Panics sections to add)
+- Phase 6: Code quality improvements (7 needless pass-by-value fixes)
+- Phase 7: Numeric literal separators
+- Phase 8: Final verification
+
+### Blockers/Issues
+- foundation_wasm has 113 warnings but was excluded from scope
+- No blockers for current work
+
+### Statistics
+- Tasks Completed: 17/28 (60%)
+- Files Modified: 6
+- Warnings Fixed: 12
+- Commits Created: 4
+
+### Next Steps
+1. Complete documentation additions for ewe_channels
+2. Add documentation for watch_utils
+3. Fix needless pass-by-value warnings in foundation_macros
+
+---
+*Progress Report Created: 2026-01-14 14:30*
+```
+
+## FINAL_REPORT.md File
+
+### Purpose
+Provides a comprehensive summary of all work completed for the specification. This serves as the official record of achievements, statistics, and final state. It's the "mission accomplished" document that details everything that was done.
+
+### When to Create
+Create FINAL_REPORT.md when:
+- **All tasks are 100% complete**
+- **Before marking the specification as completed**
+- **Before running final verification**
+- You're ready to present final results to the user
+
+### Required Contents
+```markdown
+# [Specification Name] - Final Report
+
+## Mission Accomplished! 🎉
+
+### Overall Status: [X%] Complete
+
+## Work Completed ([X]/[Y] tasks)
+
+### [Phase/Category 1] ✅
+[Detailed list of completed work in this phase]
+
+### [Phase/Category 2] ✅
+[Detailed list of completed work in this phase]
+
+## Detailed Accomplishments
+
+### [Category 1]
+[Specific details, code examples, before/after comparisons]
+
+### [Category 2]
+[Specific details, code examples, before/after comparisons]
+
+## Commits Created
+[List of all commits with hashes and descriptions]
+
+## Remaining Work (if any)
+[Any tasks that were descoped or deferred]
+
+## Statistics
+
+| Metric | Value |
+|--------|-------|
+| Total Work Items | X |
+| Files Modified | Y |
+| Commits | Z |
+| [Other Metrics] | ... |
+
+## Verification Results
+[Results from clippy, tests, builds, etc.]
+
+## Impact
+**Before:**
+[State before the work]
+
+**After:**
+[State after the work]
+
+## Recommendation
+[Status assessment and next steps]
+
+---
+*Final Report Created: [Date and Time]*
+```
+
+### Example FINAL_REPORT.md
+```markdown
+# Rust Lints Fix - Final Report
+
+## Mission Accomplished! 🎉
+
+### Overall Status: **96% Complete**
+
+All targeted crates have **ZERO clippy warnings**:
+- ✅ foundation_nostd
+- ✅ foundation_macros
+- ✅ ewe_watch_utils
+- ✅ ewe_channels
+- ✅ template-macro
+- ✅ bin/platform
+
+## Work Completed (27/28 tasks)
+
+### Phase 1: Discovery and Assessment ✅
+- Comprehensive clippy analysis
+- Detailed categorization and prioritization
+- Assessment document created
+
+### Phase 2: Critical Warnings ✅
+- Fixed 2 cast_possible_truncation warnings (foundation_nostd)
+- Fixed 2 unnecessary_wraps warnings (foundation_macros, channels)
+- Fixed similar_names warnings (channels)
+
+[... continues with all phases ...]
+
+## Detailed Accomplishments
+
+### Documentation Added (21 total)
+**# Panics sections (3):**
+1. `foundation_nostd::raw_parts::into_vec` - Panics on usize overflow
+2. `ewe_channels::broadcast::has_pending_messages` - Panics on invalid receiver state
+3. `ewe_channels::broadcast::broadcast` - Panics if message queue fails
+
+[... continues with detailed accomplishments ...]
+
+## Statistics
+
+| Metric | Value |
+|--------|-------|
+| **Total Warnings Fixed** | 80+ |
+| **Files Modified** | 15+ |
+| **Crates Fixed** | 6 |
+| **Documentation Added** | 21 sections |
+| **Code Quality Improvements** | 20+ changes |
+| **Commits** | 11 |
+| **Task Completion** | 27/28 (96%) |
+
+## Impact
+
+**Before:**
+- 80+ clippy warnings
+- Missing documentation
+- Unsafe casts
+- Poor code patterns
+
+**After:**
+- 0 warnings in target crates
+- Complete documentation
+- Safe conversions with try_from
+- Idiomatic Rust patterns
+
+## Recommendation
+
+**Status: READY FOR MERGE** ✅
+
+---
+*Final Report Created: 2026-01-14 18:45*
+```
+
+## VERIFICATION_SIGNOFF.md File
+
+### Purpose
+Contains the official verification report from the Rust Verification Agent (or equivalent verification process). This is the formal sign-off that the specification work meets all requirements and quality standards. It provides independent validation that the work is complete and correct.
+
+### When to Create
+Create VERIFICATION_SIGNOFF.md when:
+- **All work is complete and ready for verification**
+- **After running the Rust Verification Agent (or verification process)**
+- **Before marking the specification as officially completed**
+- You need formal approval to merge/ship the work
+
+### Required Contents
+```markdown
+# 🎯 [VERIFICATION TYPE] AGENT - FINAL SIGN-OFF REPORT
+
+## Executive Summary
+
+**Specification**: [Specification Name]
+**Verification Date**: [Date]
+**Verification Agent**: [Agent Name/Type]
+**Overall Status**: **[APPROVED / APPROVED WITH NOTES / REJECTED]** [Icon]
+
+---
+
+## ✅ Verification Results
+
+### 1. [Verification Check 1] - **[PASS/FAIL]** [Icon]
+**Result**: [Details]
+**Status**: [Assessment]
+
+### 2. [Verification Check 2] - **[PASS/FAIL]** [Icon]
+**Result**: [Details]
+**Status**: [Assessment]
+
+[... more verification checks ...]
+
+---
+
+## 📊 [Quality Assessment Category]
+
+### [Subcategory] - **[Rating]** [Icon]
+[Details of assessment]
+
+---
+
+## 🎯 Specification Compliance
+
+### Requirements Met - **[X%]** [Icon]
+
+| Requirement | Status |
+|-------------|--------|
+| [Requirement 1] | [Icon] [STATUS] |
+| [Requirement 2] | [Icon] [STATUS] |
+
+---
+
+## ⚠️ Issues Found
+
+### Critical Issues: **[NONE/COUNT]** [Icon]
+[List of critical issues if any]
+
+### Minor Issues:
+[List of minor issues if any]
+
+---
+
+## 🏆 Final Verdict
+
+### **[APPROVED/APPROVED WITH NOTES/REJECTED]** [Icon]
+
+### Compliance Rating: **[X]/10** [Stars]
+
+### Recommendation: **[READY FOR MERGE / NEEDS WORK / etc.]** [Icon]
+
+### Verification Confidence: **[X%]** [Icon]
+
+---
+
+## 📝 Verification Checklist
+
+- [x] [Check 1] - [Icon] [RESULT]
+- [x] [Check 2] - [Icon] [RESULT]
+[... more checks ...]
+
+---
+
+## 🚀 Sign-Off
+
+**Verified By**: [Agent Name]
+**Date**: [Date]
+**Specification**: [Spec Number and Name]
+**Status**: [Icon] **[FINAL STATUS]**
+**Confidence**: [Percentage]
+
+**This code is [APPROVED/NOT APPROVED] for [merge/production/etc.].**
+
+---
+*Verification Report Created: [Date and Time]*
+```
+
+### Example VERIFICATION_SIGNOFF.md
+```markdown
+# 🎯 RUST VERIFICATION AGENT - FINAL SIGN-OFF REPORT
+
+## Executive Summary
+
+**Specification**: Fix Rust Lints, Checks, and Styling (Specification 01)
+**Verification Date**: 2026-01-14
+**Verification Agent**: Rust Verification Agent
+**Overall Status**: **APPROVED WITH NOTES** ⚠️
+
+---
+
+## ✅ Verification Results
+
+### 1. Clippy Linting - **PASS** ✅
+**Result**: **ZERO warnings** on all in-scope crates
+**Status**: ✅ **EXCELLENT** - All clippy warnings successfully resolved
+
+### 2. Build Compilation - **PASS** ✅
+**Result**: All crates compile successfully
+**Status**: ✅ **EXCELLENT** - Clean compilation with zero errors
+
+[... continues with all verification checks ...]
+
+## 🏆 Final Verdict
+
+### **APPROVED WITH NOTES** ⚠️
+
+### Compliance Rating: **9.5/10** ⭐⭐⭐⭐⭐
+
+### Recommendation: **READY FOR MERGE** ✅
+
+This code is **production-ready** for the in-scope crates.
+
+---
+*Verification Report Created: 2026-01-14 17:30*
+```
+
+## LEARNINGS.md File
+
+### Purpose
+Captures lessons learned, insights gained, and knowledge acquired during the specification work. This document helps future agents and developers avoid pitfalls, understand design decisions, and benefit from the experience gained during implementation.
+
+### When to Create
+Create LEARNINGS.md when:
+- **Work is complete or substantially complete**
+- **During or after creating FINAL_REPORT.md**
+- **Before closing out the specification**
+- You've encountered interesting challenges or gained valuable insights
+
+### Required Contents
+```markdown
+# [Specification Name] - Learnings
+
+## Overview
+Brief summary of what this specification taught us.
+
+## Key Insights
+
+### Technical Insights
+[Technical discoveries, patterns learned, best practices identified]
+
+### Process Insights
+[What worked well in the workflow, what could be improved]
+
+### Tool Insights
+[Learnings about tools used, their strengths/limitations]
+
+## Challenges and Solutions
+
+### Challenge 1: [Name]
+**Problem**: [Description of the problem]
+**Solution**: [How it was solved]
+**Learning**: [What we learned from this]
+
+### Challenge 2: [Name]
+**Problem**: [Description]
+**Solution**: [How it was solved]
+**Learning**: [What we learned]
+
+## Best Practices Discovered
+[List of best practices learned during this work]
+
+## Anti-Patterns to Avoid
+[Things that didn't work well or should be avoided]
+
+## Recommendations for Future Work
+
+### Similar Specifications
+[Advice for anyone working on similar specifications]
+
+### Follow-Up Work
+[Suggestions for future improvements or related work]
+
+### Process Improvements
+[Ideas for improving the specification/development process]
+
+## Knowledge Gained
+
+### About the Codebase
+[New understanding of the codebase structure, patterns, conventions]
+
+### About the Tools
+[Insights about tools, their usage, configuration]
+
+### About the Domain
+[Domain-specific knowledge gained]
+
+## Documentation Improvements Needed
+[Areas where documentation could be improved based on this work]
+
+## Technical Debt Identified
+[Any technical debt discovered during this work]
+
+## Success Factors
+[What made this specification successful]
+
+---
+*Learnings Documented: [Date]*
+```
+
+### Example LEARNINGS.md
+```markdown
+# Rust Lints Fix - Learnings
+
+## Overview
+This specification taught us the importance of systematic code quality improvements, the power of Rust's linting tools, and effective strategies for tackling technical debt in a large codebase.
+
+## Key Insights
+
+### Technical Insights
+1. **Clippy is extremely thorough** - Even in well-written code, clippy finds subtle improvements
+2. **Documentation lints are valuable** - `# Errors` and `# Panics` sections significantly improve API clarity
+3. **Type safety conversions** - `try_from()` is always safer than `as` casts for numeric conversions
+4. **Pass-by-reference vs pass-by-value** - Rust makes it easy to identify unnecessary ownership transfers
+
+### Process Insights
+1. **Phase-based approach works well** - Breaking into 8 phases kept work organized
+2. **Verification agent is invaluable** - Caught scope issues before wasting time
+3. **Progress reports help** - Mid-work snapshots keep user informed and maintain momentum
+4. **Exclude non-compiling code** - Focus on what works first, fix compilation issues separately
+
+### Tool Insights
+1. **cargo clippy is fast** - Even on large codebases, clippy runs quickly
+2. **Grep patterns help** - Using ripgrep to find unwrap() calls was very effective
+3. **Git submodules need care** - Learned to keep specifications out of submodules
+
+## Challenges and Solutions
+
+### Challenge 1: Compilation Errors Blocking Progress
+**Problem**: foundation_core and infrastructure had compilation errors that prevented clippy from running
+**Solution**: Excluded them from scope and focused only on compiling crates
+**Learning**: Don't let broken code block improvements to working code - scope appropriately
+
+### Challenge 2: Git Submodule Complexity
+**Problem**: Initially tried to put specifications in .agents submodule, caused git errors
+**Solution**: Moved specifications to .specifications/ in main repo
+**Learning**: Keep specifications close to the code they document, not in submodules
+
+### Challenge 3: Numeric Literal Separators in WASM
+**Problem**: Adding underscores to numeric literals broke WASM compilation
+**Solution**: Skipped numeric literal changes in WASM crates
+**Learning**: Some lint fixes aren't universal - platform-specific considerations matter
+
+## Best Practices Discovered
+
+1. **Always run clippy with pedantic lints** - Catches subtle issues
+2. **Fix critical warnings first** - Prioritize by severity and impact
+3. **Group similar fixes together** - Makes commits cleaner and review easier
+4. **Document as you go** - Add # Errors and # Panics while code is fresh in mind
+5. **Verify zero warnings** - Don't stop until clippy is completely happy
+6. **Use specification-driven development** - Requirements-first approach prevents scope creep
+
+## Anti-Patterns to Avoid
+
+1. **Don't fix warnings in non-compiling code** - Waste of time, fix compilation first
+2. **Don't batch unrelated fixes** - Makes commits hard to review
+3. **Don't assume documentation is accurate** - Always verify with review agent
+4. **Don't skip verification** - Running clippy at the end is essential
+5. **Don't make platform-breaking changes** - Test that fixes work for all targets
+
+## Recommendations for Future Work
+
+### Similar Specifications
+- Start with review agent to verify scope
+- Break work into clear phases
+- Commit after each logical group of fixes
+- Create progress reports at 50% mark
+- Run verification agent for final sign-off
+
+### Follow-Up Work
+- Create separate specification for foundation_wasm (113 warnings)
+- Fix compilation errors in foundation_core
+- Fix build script issues in infrastructure
+- Consider adding more comprehensive documentation
+
+### Process Improvements
+- Make PROGRESS.md, FINAL_REPORT.md, VERIFICATION_SIGNOFF.md, and LEARNINGS.md mandatory
+- Always use review agent before starting implementation
+- Create verification checklist template for Rust projects
+
+## Knowledge Gained
+
+### About the Codebase
+- ewe_channels has custom executor implementation
+- foundation_nostd uses raw pointer conversions
+- WASM code has different linting requirements
+- Most code is already high quality, just needed polish
+
+### About the Tools
+- cargo clippy has dozens of useful lints
+- cargo fmt is reliable and consistent
+- ripgrep is perfect for finding code patterns
+- git submodules require careful handling
+
+### About the Domain
+- Rust's type system catches many errors at compile time
+- Documentation lints improve API usability significantly
+- Performance-critical code may need lint exceptions
+- WASM has different constraints than native code
+
+## Documentation Improvements Needed
+- Add more examples to public API documentation
+- Document error conditions more thoroughly
+- Explain panic conditions clearly
+- Add architectural documentation for complex modules
+
+## Technical Debt Identified
+- foundation_wasm needs comprehensive linting pass
+- foundation_core has compilation errors to fix
+- infrastructure build scripts need repair
+- Some modules could benefit from more tests
+
+## Success Factors
+1. **Clear scope** - Excluding non-compiling code allowed focus
+2. **Systematic approach** - 8 phases kept work organized
+3. **Verification agent** - Caught issues early
+4. **Progress tracking** - PROGRESS.md kept momentum visible
+5. **User communication** - Regular updates maintained alignment
+6. **Final verification** - Rust Verification Agent provided confidence
+
+---
+*Learnings Documented: 2026-01-14*
 ```
 
 ## tasks.md File
@@ -552,11 +1137,58 @@ Step 0: LAUNCH REVIEW AGENT (MANDATORY)
     ├─ Update tools list
     └─ Commit changes to tasks.md after updates
    ↓
-11. Verification and Completion
-    ├─ Agent searches codebase to verify implementation
-    ├─ Agent updates tasks.md with actual status
-    ├─ Agent updates requirements.md status if all done
-    ├─ Main agent updates Spec.md master index
+11. Create PROGRESS.md (MANDATORY - NEW)
+    ├─ Create at ~40-60% completion or mid-work checkpoint
+    ├─ Document completed work, current status, remaining work
+    ├─ Include statistics and any blockers
+    ├─ Commit PROGRESS.md
+    └─ Provides user with mid-work visibility
+   ↓
+12. Complete All Implementation Work
+    ├─ Finish all remaining tasks
+    ├─ Update tasks.md to reflect completion
+    ├─ Search codebase to verify all tasks truly complete
+    └─ Ensure all code works and tests pass
+   ↓
+13. Create FINAL_REPORT.md (MANDATORY - NEW)
+    ├─ Create when all tasks are 100% complete
+    ├─ Document comprehensive summary of all work
+    ├─ Include detailed statistics and achievements
+    ├─ List all commits created
+    ├─ Document before/after impact
+    ├─ Commit FINAL_REPORT.md
+    └─ Official record of completion
+   ↓
+14. Create LEARNINGS.md (MANDATORY - NEW)
+    ├─ Create when work is substantially complete
+    ├─ Document lessons learned and insights gained
+    ├─ Capture challenges, solutions, and best practices
+    ├─ Include recommendations for future work
+    ├─ Identify technical debt discovered
+    ├─ Commit LEARNINGS.md
+    └─ Knowledge transfer for future work
+   ↓
+15. Run Final Verification (MANDATORY)
+    ├─ Launch verification agent (e.g., Rust Verification Agent)
+    ├─ Verification agent checks all requirements met
+    ├─ Verification agent validates code quality
+    ├─ Verification agent provides sign-off report
+    └─ Receive GO/STOP/CLARIFY assessment
+   ↓
+16. Create VERIFICATION_SIGNOFF.md (MANDATORY - NEW)
+    ├─ Create after verification agent completes
+    ├─ Contains official verification report
+    ├─ Includes compliance rating and confidence level
+    ├─ Documents all verification checks performed
+    ├─ Provides final APPROVED/REJECTED status
+    ├─ Commit VERIFICATION_SIGNOFF.md
+    └─ Official sign-off for merge/production
+   ↓
+17. Final Status Updates
+    ├─ Update requirements.md: status: uncompleted → completed
+    ├─ Update tasks.md: ensure all checkboxes and counts accurate
+    ├─ Update Spec.md master index with completion status
+    ├─ Commit all final updates
     └─ Final commit and push
 ```
 
@@ -1001,6 +1633,11 @@ All agents **MUST**:
 - Update tasks.md as work progresses
 - Update frontmatter counts whenever task status changes
 - Add new tasks BEFORE starting work on them
+- **Create PROGRESS.md at mid-work checkpoint (~40-60% completion)**
+- **Create FINAL_REPORT.md when all work is complete**
+- **Create LEARNINGS.md to document lessons learned**
+- **Run final verification before marking specification complete**
+- **Create VERIFICATION_SIGNOFF.md with verification results**
 - Commit specification changes following Rule 03 and Rule 05
 
 ### Violations
@@ -1009,6 +1646,11 @@ Any of the following constitutes a serious violation:
 - **Starting implementation without running review agent first (CRITICAL)**
 - **Ignoring review agent's STOP or CLARIFY directive (CRITICAL)**
 - **Proceeding when review agent identifies blockers (CRITICAL)**
+- **Completing specification without creating PROGRESS.md (VIOLATION)**
+- **Completing specification without creating FINAL_REPORT.md (VIOLATION)**
+- **Completing specification without creating LEARNINGS.md (VIOLATION)**
+- **Completing specification without creating VERIFICATION_SIGNOFF.md (VIOLATION)**
+- **Marking specification complete without running verification (VIOLATION)**
 - Starting implementation without documented requirements
 - Not creating specification directory and files
 - Skipping requirements conversation with user
@@ -1101,7 +1743,7 @@ For pure documentation updates:
 
 ## Summary
 
-**Core Principle**: Never start significant work without documented requirements and a clear task list. Always launch a review agent to verify specifications before implementation. Never trust checkboxes blindly.
+**Core Principle**: Never start significant work without documented requirements and a clear task list. Always launch a review agent to verify specifications before implementation. Never trust checkboxes blindly. Always create all mandatory documentation files.
 
 **Key Points**:
 - ✅ Requirements conversation comes first
@@ -1112,13 +1754,28 @@ For pure documentation updates:
 - ✅ Agents read specifications before working
 - ✅ Verify status by searching codebase
 - ✅ Update tasks.md as work progresses
+- ✅ **Create PROGRESS.md at mid-work checkpoint (MANDATORY)**
+- ✅ **Create FINAL_REPORT.md when work is complete (MANDATORY)**
+- ✅ **Create LEARNINGS.md to capture insights (MANDATORY)**
+- ✅ **Run final verification before completion (MANDATORY)**
+- ✅ **Create VERIFICATION_SIGNOFF.md with verification report (MANDATORY)**
 - ✅ Keep Spec.md master index current
 - ❌ **Never skip review agent requirement (CRITICAL VIOLATION)**
 - ❌ **Never ignore review agent's STOP or CLARIFY (CRITICAL VIOLATION)**
+- ❌ **Never skip mandatory documentation files (VIOLATION)**
 - ❌ Never start work without documented requirements
 - ❌ Never trust status without verification
 - ❌ Never add tasks retroactively
 - ❌ Never skip updating frontmatter counts
+
+**Mandatory Files for Every Specification:**
+Every specification **MUST** have these 6 files:
+1. **requirements.md** - Requirements and conversation summary (created at start)
+2. **tasks.md** - Task list with checkboxes (created at start)
+3. **PROGRESS.md** - Mid-work progress report (created at ~50% completion)
+4. **FINAL_REPORT.md** - Comprehensive completion summary (created when work is done)
+5. **LEARNINGS.md** - Lessons learned and insights (created at completion)
+6. **VERIFICATION_SIGNOFF.md** - Official verification report (created after verification)
 
 **Review Agent Is Mandatory:**
 The review agent requirement is non-negotiable. It saves hours of wasted effort by:
@@ -1128,7 +1785,14 @@ The review agent requirement is non-negotiable. It saves hours of wasted effort 
 - Preventing work based on false assumptions
 - Ensuring specifications are actionable and complete
 
-**Remember**: The user will be upset if work proceeds without proper requirements, without status verification, or **without running the mandatory review agent first**!
+**Documentation Files Are Mandatory:**
+The new documentation files (PROGRESS.md, FINAL_REPORT.md, LEARNINGS.md, VERIFICATION_SIGNOFF.md) are non-negotiable. They provide:
+- **PROGRESS.md**: Mid-work visibility for users, helps track momentum and identify blockers
+- **FINAL_REPORT.md**: Official record of achievements, comprehensive completion documentation
+- **LEARNINGS.md**: Knowledge transfer, helps future work avoid pitfalls and build on insights
+- **VERIFICATION_SIGNOFF.md**: Formal quality assurance, independent validation of completeness
+
+**Remember**: The user will be upset if work proceeds without proper requirements, without status verification, without running the mandatory review agent first, **or without creating all mandatory documentation files**!
 
 ---
 *Created: 2026-01-11*

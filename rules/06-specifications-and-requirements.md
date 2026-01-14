@@ -20,6 +20,84 @@ Before **ANY** work begins on new features, enhancements, or significant changes
 - **NO skipping** the requirements conversation
 - This applies to **ALL significant development work**
 
+### Main Agent Frontmatter Enforcement (CRITICAL)
+
+**Main Agent MUST validate and enforce complete frontmatter** when creating or updating specifications.
+
+#### When Creating specifications/*/requirements.md:
+
+Main Agent **MUST** include ALL required frontmatter fields:
+- ✅ `description`: One-sentence summary
+- ✅ `status`: in-progress | completed | blocked
+- ✅ `priority`: high | medium | low
+- ✅ `created`: YYYY-MM-DD (date of creation)
+- ✅ `author`: "Main Agent" or "User Name"
+- ✅ `metadata`: Complete object with:
+  - `version`: "1.0" (semantic version)
+  - `last_updated`: YYYY-MM-DD
+  - `estimated_effort`: small | medium | large | xl
+  - `tags`: Array with minimum 1 tag
+- ✅ `builds_on`: (if applicable) Array of parent specs
+- ✅ `related_specs`: (if applicable) Array of related specs
+
+#### When Creating specifications/*/tasks.md:
+
+Main Agent **MUST** include ALL required frontmatter fields:
+- ✅ `completed`: Count of [x] tasks
+- ✅ `uncompleted`: Count of [ ] tasks
+- ✅ `created`: YYYY-MM-DD
+- ✅ `author`: "Main Agent" or "User Name"
+- ✅ `metadata`: Complete object with:
+  - `version`: "1.0"
+  - `last_updated`: YYYY-MM-DD
+  - `total_tasks`: completed + uncompleted
+  - `completion_percentage`: (completed / total) * 100
+- ✅ `tools`: Array of tools/technologies
+- ✅ `skills`: (if applicable) Array of skill names
+
+#### Validation Requirements:
+
+Before creating any specification file, Main Agent MUST:
+1. **Check frontmatter completeness**
+   - All REQUIRED fields present
+   - All metadata sub-fields present
+   - Dates in correct format (YYYY-MM-DD)
+   - Arrays properly formatted
+2. **Validate field values**
+   - Status is valid enum value
+   - Priority is valid enum value
+   - Dates are valid and logical (created ≤ last_updated)
+   - Tags are lowercase with hyphens
+   - Version follows semantic versioning
+3. **Calculate derived fields**
+   - completion_percentage from completed/total_tasks
+   - Ensure total_tasks = completed + uncompleted
+4. **Report if validation fails**
+   - Stop creation process
+   - Report missing or invalid fields to user
+   - Request correction before proceeding
+
+#### Sub-Agent Updates:
+
+When sub-agents update specifications:
+- ✅ Sub-agents MUST update `metadata.last_updated`
+- ✅ Sub-agents MUST increment `metadata.version` if significant changes
+- ✅ Sub-agents MUST update counts in tasks.md (completed, uncompleted, completion_percentage)
+- ✅ Sub-agents MUST add new tools to `tools` array as discovered
+- ❌ Sub-agents MUST NOT modify other frontmatter fields without Main Agent approval
+
+#### Enforcement Consequences:
+
+**If Main Agent creates specification without complete frontmatter:**
+- ❌ Violation of Rule 06
+- ❌ Specification is invalid and must be corrected
+- ❌ No work can proceed until frontmatter is complete
+
+**If Sub-Agent fails to update metadata on changes:**
+- ❌ Specification becomes stale
+- ❌ Main Agent must audit and correct
+- ❌ Sub-agent must be reminded of requirements
+
 ## Directory Structure
 
 ### Overview
@@ -281,10 +359,29 @@ This directory contains all project specifications and requirements. Each specif
 Documents the detailed requirements from the conversation between main agent and user.
 
 ### File Structure
+
+**requirements.md frontmatter MUST include these fields:**
+
 ```markdown
 ---
 description: Brief one-sentence description of what this specification is for
-status: completed | uncompleted
+status: in-progress | completed | blocked
+priority: high | medium | low
+created: YYYY-MM-DD
+author: "Main Agent" or "User Name"
+metadata:
+  version: "1.0"
+  last_updated: YYYY-MM-DD
+  estimated_effort: "small | medium | large | xl"
+  tags:
+    - feature
+    - enhancement
+    - bugfix
+    - refactoring
+builds_on:
+  - specifications/NN-spec-name (if applicable)
+related_specs:
+  - specifications/MM-related-spec (if applicable)
 ---
 
 # [Specification Name] - Requirements
@@ -353,6 +450,43 @@ Agents cannot rely solely on the status field or task checkboxes. They **MUST**:
 *Created: [Date]*
 *Last Updated: [Date]*
 ```
+
+### Frontmatter Fields Explained
+
+**REQUIRED Fields:**
+
+- **`description`**: One-sentence summary of specification purpose
+- **`status`**: Current state
+  - `in-progress`: Work is ongoing
+  - `completed`: All work done, verified, and signed off
+  - `blocked`: Cannot proceed due to dependencies or issues
+- **`priority`**: Importance level
+  - `high`: Critical, blocking other work
+  - `medium`: Important but not blocking
+  - `low`: Nice to have, can be deferred
+- **`created`**: Date specification was created (YYYY-MM-DD)
+- **`author`**: Who created the specification
+  - Examples: "Main Agent", "John Doe", "Team Name"
+- **`metadata`**: Structured metadata object
+  - **`version`**: Semantic version (e.g., "1.0", "2.1.0")
+  - **`last_updated`**: Date of last update (YYYY-MM-DD)
+  - **`estimated_effort`**: Size estimate
+    - `small`: 1-2 days
+    - `medium`: 3-5 days
+    - `large`: 1-2 weeks
+    - `xl`: 2+ weeks
+  - **`tags`**: Array of categorization tags
+    - Use lowercase with hyphens
+    - Examples: `feature`, `enhancement`, `bugfix`, `refactoring`, `security`, `performance`
+    - Minimum 1 tag, recommended 2-3
+
+**OPTIONAL Fields (use when applicable):**
+
+- **`builds_on`**: Array of parent specifications this extends
+  - Use full path: `specifications/NN-spec-name`
+  - Creates lineage chain
+- **`related_specs`**: Array of related specifications
+  - Context only, not dependencies
 
 ### Example requirements.md
 ```markdown
@@ -1801,15 +1935,27 @@ Main Agent actions:
 Tracks all tasks required to complete the specification using markdown checkboxes.
 
 ### File Structure with Frontmatter
+
+**tasks.md frontmatter MUST include these fields:**
+
 ```markdown
 ---
 completed: 5
 uncompleted: 3
+created: YYYY-MM-DD
+author: "Main Agent" or "User Name"
+metadata:
+  version: "1.0"
+  last_updated: YYYY-MM-DD
+  total_tasks: 8
+  completion_percentage: 62
 tools:
   - TypeScript
   - Jest
   - ESLint
   - Prettier
+skills:
+  - playwright-web-interaction (if applicable)
 ---
 
 # [Specification Name] - Tasks
@@ -1845,17 +1991,33 @@ tools:
 *Last Updated: 2026-01-11*
 ```
 
-### Frontmatter Fields
+### Frontmatter Fields Explained
 
-#### Required Fields
-- **completed**: Total count of completed tasks (checkbox count with `[x]`)
-- **uncompleted**: Total count of uncompleted tasks (checkbox count with `[ ]`)
-- **tools**: List of tools, skills, and MCP tools required or used
+**REQUIRED Fields:**
 
-#### Counting Rules
-- Count must match actual number of checkboxes in the file
-- Update counts every time task status changes
-- Use search/count to verify accuracy
+- **`completed`**: Total count of completed tasks (checkbox count with `[x]`)
+  - Must match actual number of completed checkboxes
+  - Update every time task status changes
+- **`uncompleted`**: Total count of uncompleted tasks (checkbox count with `[ ]`)
+  - Must match actual number of uncompleted checkboxes
+  - Update every time task status changes
+- **`created`**: Date tasks file was created (YYYY-MM-DD)
+- **`author`**: Who created the tasks file
+  - Examples: "Main Agent", "John Doe", "Team Name"
+- **`metadata`**: Structured metadata object
+  - **`version`**: Semantic version (e.g., "1.0", "2.1.0")
+  - **`last_updated`**: Date of last update (YYYY-MM-DD)
+  - **`total_tasks`**: Total number of tasks (completed + uncompleted)
+  - **`completion_percentage`**: Percentage complete (calculated: completed / total * 100)
+- **`tools`**: List of tools, technologies, and MCP tools required or used
+  - Include all tools needed for implementation
+  - Update as new tools are discovered
+
+**OPTIONAL Fields (use when applicable):**
+
+- **`skills`**: List of skill names from `.agents/skills/` directory
+  - Only include if skills are required for this specification
+  - Use skill directory names (e.g., `playwright-web-interaction`)
 
 ### Checkbox Format
 - Uncompleted task: `- [ ] Task description`

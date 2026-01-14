@@ -672,6 +672,147 @@ Context Package:
 
 #### Verification Agent Execution
 
+Each verification agent **MUST** execute ALL checks for their language, including any user-specified verification scripts/commands.
+
+##### User-Specified Verification Scripts (MANDATORY)
+
+**CRITICAL**: Before executing standard language checks, verification agents **MUST** check for and execute user-specified verification scripts or commands.
+
+**Where to Find Verification Scripts**:
+
+1. **Specification requirements.md** (PRIMARY SOURCE):
+   - Check for `## Verification Scripts` or `## Verification Commands` section
+   - Contains scripts/commands specific to this specification
+   - Main Agent MUST ask user during specification creation what scripts to run
+   - Main Agent MUST document these in requirements.md
+
+2. **Project Makefile/makefile** (SECONDARY SOURCE):
+   - Look for common verification targets:
+     - `make verify`
+     - `make check`
+     - `make security-scan`
+     - `make lint`
+     - `make test-all`
+   - If Makefile exists and contains verification targets, run them
+
+3. **Package scripts** (TERTIARY SOURCE):
+   - `package.json` → `"scripts": { "verify": "...", "security": "..." }`
+   - `Cargo.toml` → `[package.metadata.verification]`
+   - `pyproject.toml` → `[tool.verification]`
+
+**Execution Order**:
+```
+1. User-specified scripts from requirements.md (if present)
+2. Makefile targets (if present and user didn't specify scripts)
+3. Standard language checks (always run)
+```
+
+**User-Specified Script Examples in requirements.md**:
+
+```markdown
+## Verification Scripts
+
+### Security Scanning
+```bash
+make security-scan
+```
+Runs OWASP dependency check and static analysis.
+
+### Integration Tests
+```bash
+make integration-test
+```
+Runs full integration test suite against test environment.
+
+### License Compliance
+```bash
+./scripts/check-licenses.sh
+```
+Verifies all dependencies have approved licenses.
+
+### Performance Benchmarks
+```bash
+cargo bench --no-fail-fast
+```
+Runs performance benchmarks and fails if regression detected.
+```
+
+**Verification Agent Script Execution**:
+
+When verification agent finds user-specified scripts:
+
+1. ✅ Read verification scripts from requirements.md
+2. ✅ Execute each script in order specified
+3. ✅ Capture full output (stdout and stderr)
+4. ✅ Check exit codes (0 = success, non-zero = failure)
+5. ✅ Include script results in verification report
+6. ✅ If ANY script fails → Report FAIL to Main Agent
+7. ✅ Continue to standard language checks regardless of script results
+
+**Script Execution Format**:
+```bash
+# Execute with full output capture
+script_output=$(command 2>&1)
+exit_code=$?
+
+# Record results
+if [ $exit_code -eq 0 ]; then
+  echo "✅ PASS: command"
+else
+  echo "❌ FAIL: command (exit code: $exit_code)"
+  echo "Output: $script_output"
+fi
+```
+
+**Benefits of User-Specified Scripts**:
+- **Security scans**: OWASP, Snyk, Trivy, etc.
+- **Enterprise tooling**: Company-specific compliance checks
+- **Performance tests**: Benchmark validation
+- **License compliance**: Legal requirements
+- **Custom linting**: Project-specific rules
+- **Integration tests**: Full system validation
+- **Database migrations**: Schema validation
+- **API contract tests**: OpenAPI/Swagger validation
+
+**Main Agent Responsibility During Specification Creation**:
+
+When creating a specification, Main Agent **MUST** ask user:
+
+```
+Main Agent Questions:
+1. "Are there any custom verification scripts or commands that should be run during verification?"
+2. "Do you have a Makefile with verification targets I should use?"
+3. "Are there security scans, compliance checks, or enterprise tools that need to run?"
+4. "What commands should verification agents execute beyond standard language checks?"
+```
+
+Main Agent **MUST** document user responses in requirements.md:
+```markdown
+## Verification Scripts
+
+[Document all scripts/commands user specified]
+
+### Script 1: [Name]
+```bash
+[command]
+```
+[Description of what it does]
+
+### Script 2: [Name]
+```bash
+[command]
+```
+[Description]
+```
+
+**Why This Matters**:
+- Agents can't know about enterprise-specific tooling
+- Security scanners vary by organization
+- Custom validation logic is project-specific
+- Compliance requirements differ per company
+- Performance benchmarks are context-dependent
+- **USER EXPECTS their verification tools to be used**
+
 Each verification agent **MUST** execute ALL checks for their language:
 
 ##### Rust Verification Agent
@@ -734,7 +875,17 @@ Each verification agent returns:
 ## Files Verified
 - [list of files checked]
 
-## Check Results
+## User-Specified Scripts (if any)
+1. [Script Name]: PASS ✅ / FAIL ❌
+   - Command: `[command executed]`
+   - Duration: [X.X]s
+   - Output: [summary or full output if failed]
+2. [Script Name]: PASS ✅ / FAIL ❌
+   - Command: `[command executed]`
+   - Duration: [X.X]s
+   - Output: [summary or full output if failed]
+
+## Standard Check Results
 1. Format: PASS ✅ / FAIL ❌
 2. Lint: PASS ✅ / FAIL ❌
 3. Type Check: PASS ✅ / FAIL ❌
@@ -752,11 +903,68 @@ Each verification agent returns:
 - Failed: [N]
 - Coverage: [N]%
 
+## User Script Details (if any failures)
+### [Script Name] - FAIL ❌
+```
+[Full output from failed script]
+```
+Exit Code: [N]
+Recommendation: [What needs to be fixed]
+
 ## Blockers
 [Issues preventing commit, if any]
 
 ## Recommendations
 [Suggestions for improvement, if any]
+```
+
+**Example with User Scripts**:
+```markdown
+# Rust Verification Report
+
+## Status: PASS ✅
+
+## Files Verified
+- src/auth/token.rs
+- src/auth/middleware.rs
+- tests/auth_tests.rs
+
+## User-Specified Scripts
+1. Security Scan: PASS ✅
+   - Command: `make security-scan`
+   - Duration: 12.3s
+   - Output: No vulnerabilities found (scanned 47 dependencies)
+
+2. Performance Benchmarks: PASS ✅
+   - Command: `cargo bench --no-fail-fast`
+   - Duration: 45.7s
+   - Output: All benchmarks within acceptable range (no regressions)
+
+3. License Compliance: PASS ✅
+   - Command: `./scripts/check-licenses.sh`
+   - Duration: 2.1s
+   - Output: All 47 dependencies have approved licenses
+
+## Standard Check Results
+1. Format: PASS ✅ (rustfmt)
+2. Lint: PASS ✅ (clippy, 0 warnings)
+3. Tests: PASS ✅ (45 passed, 0 failed)
+4. Build: PASS ✅ (debug and release)
+5. Doc: PASS ✅ (cargo doc)
+6. Security: PASS ✅ (cargo audit)
+7. Standards: PASS ✅
+
+## Test Results
+- Total: 45
+- Passed: 45
+- Failed: 0
+- Coverage: 89%
+
+## Blockers
+None
+
+## Recommendations
+- Consider adding more edge case tests for token expiry
 ```
 
 ### Phase 3: Main Agent Decision
@@ -1465,7 +1673,7 @@ Violations have severe consequences:
 
 **Core Workflow** (IRON-CLAD):
 ```
-Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review → Document Learnings → Report → Verify → Update Spec → Commit → Push
+Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review → Document Learnings → Report → Verify (Scripts + Standard Checks) → Update Spec → Commit → Push
 ```
 
 **Key Rules**:
@@ -1473,13 +1681,27 @@ Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review �
 2. ✅ **Implementation agents MUST follow TDD: Write tests FIRST, verify failure, then implement**
 3. ✅ Implementation agents MUST perform self-review before reporting completion
 4. ✅ Implementation agents MUST document learnings (specification-specific or stack-generic)
-5. ✅ Main Agent ALWAYS delegates to verification
-6. ✅ ONE verification agent per language stack (no more)
-7. ✅ ALL checks must PASS before commit
-8. ✅ Specifications updated based on verification results
-9. ✅ Failed verification creates urgent task
-10. ✅ Process repeats until verification passes
-11. ✅ **ONLY Main Agent can spawn verification agents** (sub-agents cannot)
+5. ✅ **Main Agent MUST ask user about verification scripts during specification creation**
+6. ✅ **Main Agent MUST document verification scripts in requirements.md**
+7. ✅ Main Agent ALWAYS delegates to verification
+8. ✅ **Verification agents MUST check for and execute user-specified scripts**
+9. ✅ **Verification agents MUST execute scripts from requirements.md, Makefile, or package files**
+10. ✅ ONE verification agent per language stack (no more)
+11. ✅ ALL checks (user scripts + standard checks) must PASS before commit
+12. ✅ Specifications updated based on verification results
+13. ✅ Failed verification creates urgent task
+14. ✅ Process repeats until verification passes
+15. ✅ **ONLY Main Agent can spawn verification agents** (sub-agents cannot)
+
+**Verification Script Requirements**:
+- ✅ **Main Agent asks user during spec creation**: "What verification scripts/commands should run?"
+- ✅ **Main Agent documents scripts in requirements.md** under `## Verification Scripts` section
+- ✅ **Verification agents check requirements.md FIRST** for user-specified scripts
+- ✅ **Verification agents execute Makefile targets** if present (`make verify`, `make security-scan`, etc.)
+- ✅ **Verification agents run user scripts BEFORE standard checks**
+- ✅ **Verification report includes user script results** with output, duration, exit codes
+- ✅ **Any failed user script fails entire verification** (just like standard checks)
+- ✅ **User scripts enable enterprise tooling**: security scans, compliance checks, benchmarks, etc.
 
 **Critical Self-Review Requirements**:
 - ✅ **Check TDD followed: Tests written first, verified failing, then implementation**
@@ -1523,9 +1745,12 @@ Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review �
 - ❌ No partial passes
 - ❌ No concurrent verifications per stack
 - ❌ No committing on failure
+- ❌ **No skipping user-specified verification scripts**
+- ❌ **No forgetting to ask about verification scripts during spec creation**
 
 **Result**: **100% VERIFIED, COMPLETE, SIMPLE, WELL-DOCUMENTED, TEST-DRIVEN CODE** - Every commit is guaranteed to:
-- Pass all quality gates
+- Pass all quality gates (user scripts + standard checks)
+- Execute user-specified security scans, compliance checks, and enterprise tooling
 - Meet all requirements completely
 - Be developed using TDD (tests written first, implementation driven by failing tests)
 - Be simple, clear, and easy to understand (no unnecessary complexity)
@@ -1535,4 +1760,4 @@ Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review �
 
 ---
 *Created: 2026-01-11*
-*Last Updated: 2026-01-13 (Added TDD requirement, test documentation, code simplicity, and conciseness)*
+*Last Updated: 2026-01-14 (Added user-specified verification scripts requirement)*

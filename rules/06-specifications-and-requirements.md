@@ -20,6 +20,181 @@ Before **ANY** work begins on new features, enhancements, or significant changes
 - **NO skipping** the requirements conversation
 - This applies to **ALL significant development work**
 
+### Requirements Conversation Process (MANDATORY)
+
+**CRITICAL REQUIREMENT**: The Main Agent **MUST NOT** passively accept the user's initial request. Instead, the Main Agent **MUST** actively engage in a detailed conversation to fully understand requirements.
+
+#### Main Agent Responsibilities During Conversation
+
+**The Main Agent MUST**:
+
+1. ✅ **Listen to the initial request carefully**
+   - Understand what the user is asking for
+   - Identify the high-level goal or problem to solve
+
+2. ✅ **Ask clarifying questions proactively**
+   - **NEVER assume** details not explicitly stated
+   - **ALWAYS ask** when requirements are ambiguous
+   - **ALWAYS probe** for edge cases and constraints
+   - **ALWAYS confirm** technical approaches before documenting
+
+3. ✅ **Ask questions in these critical areas**:
+   - **Scope**: What exactly should be included/excluded?
+   - **Technical Approach**: Which technologies, patterns, or architectures?
+   - **Constraints**: Performance requirements, limitations, dependencies?
+   - **Success Criteria**: How will we know when this is complete?
+   - **Edge Cases**: What unusual scenarios should be handled?
+   - **Integration**: How does this fit with existing systems?
+   - **Priority**: What's most important if trade-offs are needed?
+   - **Timeline**: Are there deadlines or milestones?
+
+4. ✅ **Continue asking until all details are clear**
+   - Don't stop after one round of questions
+   - If answers reveal new ambiguities, ask more questions
+   - Ensure every requirement is specific and actionable
+
+5. ✅ **Confirm understanding before documenting**
+   - Summarize what you understood
+   - Ask user to confirm your summary is correct
+   - Make corrections based on user feedback
+
+**The Main Agent MUST NOT**:
+
+- ❌ Accept vague requests without clarification
+- ❌ Make assumptions about unspecified requirements
+- ❌ Skip questioning to "save time"
+- ❌ Proceed with incomplete understanding
+- ❌ Document requirements without user confirmation
+
+#### Examples of Good vs Bad Conversation
+
+**❌ BAD - Passive Acceptance:**
+```
+User: "Add user authentication to the app"
+Main Agent: "Ok, I'll create a specification for user authentication."
+→ Creates spec immediately without questions
+→ VIOLATION: No clarifying questions asked
+```
+
+**✅ GOOD - Active Engagement:**
+```
+User: "Add user authentication to the app"
+
+Main Agent: "I'd like to understand the authentication requirements better.
+Let me ask some clarifying questions:
+
+1. What authentication method would you prefer?
+   - Username/password with sessions?
+   - JWT tokens?
+   - OAuth 2.0 with external providers (Google, GitHub, etc.)?
+   - Something else?
+
+2. What user data needs to be stored?
+   - Just username and password?
+   - Email, profile information?
+   - Roles/permissions?
+
+3. Are there specific security requirements?
+   - Password complexity rules?
+   - Multi-factor authentication?
+   - Session timeout duration?
+   - Rate limiting on login attempts?
+
+4. Should users be able to:
+   - Register themselves or admin-only creation?
+   - Reset forgotten passwords?
+   - Change their passwords?
+
+5. Integration considerations:
+   - Does this need to work with existing user data?
+   - Should it integrate with any external systems?
+
+6. What happens on authentication failure?
+   - Specific error messages?
+   - Account lockout after N attempts?
+
+Please help me understand these aspects so I can document comprehensive requirements."
+
+User: [Provides detailed answers...]
+
+Main Agent: "Thank you! Let me confirm my understanding:
+- You want JWT-based authentication
+- Users can self-register with email verification
+- Passwords must meet complexity requirements (8+ chars, mixed case, numbers)
+- Include password reset via email
+- Lock accounts after 5 failed attempts
+- No OAuth integration needed initially
+- Sessions expire after 24 hours of inactivity
+
+Is this correct?"
+
+User: "Yes, exactly!"
+
+Main Agent: "Perfect! I'll now create the specification with these detailed requirements."
+→ CORRECT: Thorough questioning, confirmation, then documentation
+```
+
+#### Minimum Questions Required
+
+**Main Agent MUST ask AT LEAST**:
+- ✅ 3-5 clarifying questions for small features
+- ✅ 5-10 clarifying questions for medium features
+- ✅ 10+ clarifying questions for large/complex features
+
+**If fewer questions are needed**, it may indicate:
+- The user provided exceptionally detailed initial requirements (rare)
+- OR the Main Agent is not probing deeply enough (more likely - ASK MORE)
+
+#### Documentation of Conversation
+
+After the conversation, the Main Agent **MUST** document the entire exchange in the "Requirements Conversation Summary" section of requirements.md:
+
+```markdown
+## Requirements Conversation Summary
+
+### User's Initial Request
+[Exact summary of what user initially asked for]
+
+### Clarifying Questions Asked
+1. Question about authentication method
+   - Answer: JWT-based authentication
+2. Question about user registration
+   - Answer: Self-registration with email verification
+3. Question about password requirements
+   - Answer: 8+ characters, mixed case, numbers
+[... all questions and answers ...]
+
+### Final Requirements Agreement
+Based on the conversation, we agreed on:
+- [Clear statement of final understanding]
+- [All important details confirmed]
+- [Any trade-offs or decisions made]
+```
+
+#### Why This Matters
+
+**Without thorough questioning**:
+- ❌ Agents implement the wrong solution
+- ❌ Work needs to be redone (wasted time)
+- ❌ User is frustrated with incorrect implementation
+- ❌ Requirements are incomplete or ambiguous
+- ❌ Edge cases are missed
+- ❌ Integration problems occur
+
+**With thorough questioning**:
+- ✅ Agents implement exactly what's needed
+- ✅ All edge cases are considered upfront
+- ✅ Technical approach is validated
+- ✅ User expectations are clearly set
+- ✅ Implementation proceeds smoothly
+- ✅ Less rework and iteration needed
+
+**USER WILL BE VERY FRUSTRATED** if you:
+- Skip clarifying questions
+- Make assumptions about requirements
+- Document incomplete specifications
+- Start work without full understanding
+
 ### Main Agent Frontmatter Enforcement (CRITICAL)
 
 **Main Agent MUST validate and enforce complete frontmatter** when creating or updating specifications.
@@ -2755,6 +2930,10 @@ All agents **MUST**:
 ### Violations
 
 Any of the following constitutes a serious violation:
+- **Passively accepting user request without asking clarifying questions (CRITICAL - NEW)**
+- **Making assumptions about unspecified requirements (CRITICAL - NEW)**
+- **Documenting requirements without user confirmation (CRITICAL - NEW)**
+- **Asking fewer than minimum required questions (CRITICAL - NEW)**
 - **Starting implementation without running review agent first (CRITICAL)**
 - **Ignoring review agent's STOP or CLARIFY directive (CRITICAL)**
 - **Proceeding when review agent identifies blockers (CRITICAL)**
@@ -2770,6 +2949,8 @@ Any of the following constitutes a serious violation:
 - Starting implementation without documented requirements
 - Not creating specification directory and files
 - Skipping requirements conversation with user
+- Not documenting the full conversation in requirements.md
+- Incomplete requirements conversation summary
 - Trusting task status without verifying in codebase
 - Not updating tasks.md during work
 - Not updating frontmatter counts
@@ -2874,10 +3055,14 @@ For pure documentation updates:
 
 ## Summary
 
-**Core Principle**: Never start significant work without documented requirements and a clear task list. Always launch a review agent to verify specifications before implementation. Never trust checkboxes blindly. Always create all mandatory documentation files. **Always create/verify module documentation before implementation.**
+**Core Principle**: Never start significant work without documented requirements and a clear task list. **Always engage in thorough requirements conversation with clarifying questions first.** Always launch a review agent to verify specifications before implementation. Never trust checkboxes blindly. Always create all mandatory documentation files. **Always create/verify module documentation before implementation.**
 
 **Key Points**:
-- ✅ Requirements conversation comes first
+- ✅ **Requirements conversation with clarifying questions comes FIRST (MANDATORY - UPDATED)**
+- ✅ **Main Agent MUST ask 3-10+ clarifying questions depending on complexity**
+- ✅ **Main Agent MUST NOT passively accept user requests**
+- ✅ **Main Agent MUST confirm understanding before documenting**
+- ✅ **Document complete conversation summary in requirements.md**
 - ✅ Document everything in specification directory
 - ✅ Create comprehensive task list before work begins
 - ✅ **Create/verify module documentation after requirements (MANDATORY - NEW)**
@@ -2900,6 +3085,9 @@ For pure documentation updates:
 - ✅ **Run final verification before completion (MANDATORY)**
 - ✅ **Create VERIFICATION_SIGNOFF.md with verification report (MANDATORY)**
 - ✅ Keep Spec.md master index current
+- ❌ **Never skip clarifying questions (CRITICAL VIOLATION - NEW)**
+- ❌ **Never make assumptions about requirements (CRITICAL VIOLATION - NEW)**
+- ❌ **Never document without user confirmation (CRITICAL VIOLATION - NEW)**
 - ❌ **Never skip module documentation creation/verification (CRITICAL VIOLATION - NEW)**
 - ❌ **Never assume module docs are accurate without verification (CRITICAL - NEW)**
 - ❌ **Never proceed when module docs don't match code (CRITICAL - NEW)**

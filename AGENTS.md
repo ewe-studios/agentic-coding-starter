@@ -1,8 +1,8 @@
 ---
 purpose: Central entry point for AI agent configuration
 description: Minimal configuration file that directs agents to detailed rules and standards
-version: 3.0.0
-last_updated: 2026-01-11
+version: 3.0.1
+last_updated: 2026-01-18
 ---
 
 # Agent Configuration
@@ -52,13 +52,31 @@ All agents **MUST** follow this sequence at the start of every session:
 │   ├── python.md       # Python standards
 │   └── ...
 │
-└── specifications/     # Feature specifications and requirements
-    ├── Spec.md         # Master index
-    ├── NN-spec-name/
-    │   ├── requirements.md
-    │   ├── tasks.md
-    │   └── verification.md  # (transient, created on verification failure)
-    └── ...
+├── skills/             # Documented know-how for specific tasks
+│   └── [skill-name]/
+│       ├── skill.md    # Canonical skill documentation
+│       └── learnings.md # Practical insights from usage
+│
+└── agents/             # Agent documentation and registry
+    └── [agent-name].md # Agent capabilities and responsibilities
+
+specifications/         # Feature specifications (project root level)
+├── Spec.md             # Master index
+├── NN-spec-name/
+│   ├── requirements.md
+│   ├── tasks.md
+│   ├── PROGRESS.md     # Mid-work progress report
+│   ├── FINAL_REPORT.md # Completion summary
+│   ├── LEARNINGS.md    # Lessons learned
+│   ├── VERIFICATION_SIGNOFF.md # Official verification
+│   ├── verification.md # (transient, created on verification failure)
+│   └── learnings.md    # (optional, specification-specific insights)
+└── ...
+
+documentation/          # Module documentation (project root level)
+└── [module]/
+    ├── doc.md          # Detailed module documentation
+    └── assets/         # Supplementary documentation
 
 CLAUDE.md              # Backward compatibility redirect
 ```
@@ -110,19 +128,37 @@ CLAUDE.md              # Backward compatibility redirect
 
 → **For full details**: Read `.agents/stacks/[language].md` for your language(s) ONLY
 
-### `.agents/specifications/` - WHAT to Build
+### `specifications/` - WHAT to Build
 
-**Purpose**: Feature requirements, task tracking, verification reports.
+**Location**: Project root level (parallel to `.agents/` directory)
+
+**Purpose**: Feature requirements, task tracking, progress reports, verification.
 
 **Contains**:
 
 - `requirements.md`: What to build and why
 - `tasks.md`: Task list with checkboxes and progress tracking
+- `PROGRESS.md`: Mid-work progress report (~50% completion)
+- `FINAL_REPORT.md`: Comprehensive completion summary
+- `LEARNINGS.md`: Lessons learned and insights
+- `VERIFICATION_SIGNOFF.md`: Official verification report
 - `verification.md`: Detailed verification failure reports (transient)
+- `learnings.md`: Specification-specific practical insights (optional)
 
 **⚠️ MANDATORY**: Read specification files when working on a feature.
 
-→ **For full details**: Read files in `.agents/specifications/NN-spec-name/`
+→ **For full details**: Read files in `specifications/NN-spec-name/`
+
+### `documentation/` - Module Documentation
+
+**Location**: Project root level (parallel to `.agents/` and `specifications/`)
+
+**Purpose**: Living documentation of individual code modules.
+
+**Contains**:
+
+- `doc.md`: Detailed module documentation (what implements, imports, calls, does)
+- `assets/`: Supplementary documentation (diagrams, schemas, examples)
 
 ---
 
@@ -173,11 +209,14 @@ Before starting ANY work:
 
 - `.agents/rules/*` (HOW agents work)
 - `.agents/stacks/*` (HOW to write code)
-- `.agents/specifications/*` (WHAT to build)
+- `.agents/skills/*` (WHAT specialized knowledge to use)
+- `.agents/agents/*` (WHO does the work - agent registry)
+- `specifications/*` (WHAT to build - project root)
+- `documentation/*` (WHERE code lives - module docs, project root)
 
 **MANDATORY**: Load and read all relevant files before starting work.
 
 ---
 
-_Last updated: 2026-01-11_
-_Version: 3.0.0 - Streamlined entry point, full details in referenced files_
+_Last updated: 2026-01-18_
+_Version: 3.0.1 - Corrected specifications/ and documentation/ locations to project root (not .agents/)_

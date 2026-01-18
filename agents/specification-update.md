@@ -13,9 +13,8 @@ skills_required:
 spawned_by: main-agent
 spawns: []
 related_rules:
-  - Rule 05
   - Rule 06
-  - Rule 08
+  - Rule 12
 status: active
 ---
 

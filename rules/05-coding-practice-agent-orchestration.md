@@ -1,6 +1,15 @@
-# Coding Practice: Agent Orchestration and Mandatory Verification
+# Agent Orchestration and Verification (Main Agent Only)
 
 ## Purpose
+
+This rule is for **Main Agent only** - it covers agent orchestration, verification coordination, and the mandatory verification workflow. Implementation agents should load **Rule 13 (Implementation Agent Guide)** for their specific coding practices.
+
+**Context Optimization**: Implementation agents only need Rule 13 (~400 lines) instead of this full rule (~1,100 lines).
+
+---
+
+## Overview
+
 This rule establishes the mandatory practice for code development, requiring specialized agent orchestration with **MANDATORY CODE VERIFICATION** before any commit. This is an **IRON-CLAD REQUIREMENT** with **ZERO TOLERANCE** for violations.
 
 ## Core Principles
@@ -1137,4 +1146,12 @@ Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review �
 
 ---
 *Created: 2026-01-11*
-*Last Updated: 2026-01-18 (Optimized from 1,791 to ~1,000 lines - removed verbose examples, condensed workflows, referenced template file)*
+*Last Updated: 2026-01-19 (Split into Rule 05 for orchestration and Rule 13 for implementation)*
+
+---
+
+## Related Rules
+
+- **Rule 13 (Implementation Agent Guide)**: Concise guide for implementation agents (TDD, self-review, learnings)
+- **Rule 08 (Verification Workflow)**: Details for verification agents
+- **Rule 06 (Specifications)**: How specifications work with verification

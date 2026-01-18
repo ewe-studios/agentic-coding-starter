@@ -1,6 +1,15 @@
-# Agent Documentation and Registry
+# Agent Documentation and Registry (Main Agent Only)
 
 ## Purpose
+
+This rule is for **Main Agent only** when creating or documenting agents. Sub-agents should load **Rule 12 (Agent Registry Usage)** instead for a concise guide on being spawned and following their documentation.
+
+**Context Optimization**: This full rule (~770 lines) is only needed when creating/documenting agents. Sub-agents only need Rule 12 (~150 lines).
+
+---
+
+## Overview
+
 This rule establishes a mandatory agent documentation system that ensures **ALL agents** (existing and new) are properly documented before use. This creates a centralized registry of agent capabilities, responsibilities, and requirements, enabling the Main Agent to make informed decisions about which specialized agents to spawn for specific tasks.
 
 ## Rule
@@ -578,20 +587,20 @@ Sub-Agent **MUST NOT**:
 
 ## Integration with Other Rules
 
-### Rule 04 (Agent Orchestration)
+### Rule 05 (Agent Orchestration)
 - Main Agent uses registry to select appropriate agents
 - Documentation defines which agents can spawn others
 - Clear hierarchy maintained through documentation
-
-### Rule 05 (Coding Practice)
-- Verification agents documented with specific checks
-- Implementation agents documented with TDD requirements
-- Learning documentation requirements included
 
 ### Rule 06 (Specifications)
 - Specification Update Agent documented
 - Review Agent documented with pre-work requirements
 - Clear integration points defined
+
+### Rule 12 (Agent Registry Usage)
+- Sub-agents load Rule 12 for concise usage guide
+- Sub-agents read own documentation when spawned
+- Reduces context usage for sub-agents
 
 ## Enforcement
 
@@ -768,5 +777,12 @@ When violation occurs:
 
 ---
 *Created: 2026-01-14*
-*Last Updated: 2026-01-14*
-*Version: 1.1 - Added mandatory documentation path requirement and duplicate prevention*
+*Last Updated: 2026-01-19 (Split into Rule 10 for documentation and Rule 12 for usage)*
+
+---
+
+## Related Rules
+
+- **Rule 12 (Agent Registry Usage)**: Concise guide for sub-agents being spawned
+- **Rule 05 (Agent Orchestration)**: How Main Agent spawns and coordinates agents
+- **Rule 09 (Skills Creation)**: How to create skills that agents use

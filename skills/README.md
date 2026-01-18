@@ -149,10 +149,12 @@ tools:
 
 ## See Also
 
-- **Rule 09**: Skills Identification and Creation (complete workflow)
-- **Rule 04**: Agent Orchestration (when skills are identified)
-- **Rule 06**: Specifications and Requirements (skill integration)
+- **Rule 09**: Skills Creation and Review - Main Agent creating skills
+- **Rule 11**: Skills Usage - Sub-agents using existing skills (concise)
+- **Rule 06**: Specifications and Requirements - Skill integration
 
 ---
 
-For complete details on the skills workflow, see `.agents/rules/09-skills-identification-and-creation.md`
+For complete details on skills workflow:
+- Main Agent: `.agents/rules/09-skills-identification-and-creation.md`
+- Sub-agents: `.agents/rules/11-skills-usage.md`

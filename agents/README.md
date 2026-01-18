@@ -113,9 +113,9 @@ git commit -m "Add [Agent Name] documentation"
 
 ## See Also
 
-- **Rule 10**: Agent Documentation and Registry (complete specification)
-- **Rule 04**: Agent Orchestration (spawning and coordination)
-- **Rule 05**: Coding Practice (verification workflow)
+- **Rule 10**: Agent Documentation and Registry - Main Agent creating agents
+- **Rule 12**: Agent Registry Usage - Sub-agents being spawned (concise)
+- **Rule 05**: Agent Orchestration - Spawning and coordination
 
 ---
-*This directory is governed by Rule 10: Agent Documentation and Registry*
+*This directory is governed by Rule 10 (Main Agent) and Rule 12 (Sub-agents)*

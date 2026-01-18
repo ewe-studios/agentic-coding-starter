@@ -18,9 +18,9 @@ skills_required:
 spawned_by: main-agent
 spawns: []
 related_rules:
-  - Rule 05
-  - Rule 06
-  - Rule 08
+  - Rule 13
+  - Rule 11
+  - Rule 12
 status: active
 ---
 
@@ -96,8 +96,11 @@ If you were spawned by the Main Agent, you are a **SUB-AGENT**, which means:
    - Load all system rules
    - Understand workflow
 
-3. **Load All Rules** from `.agents/rules/*`
-   - Rule 05: Coding Practice and Agent Orchestration
+3. **Load Required Rules** from `.agents/rules/*`
+   - Rules 01-04: Mandatory core rules
+   - Rule 12: Agent Registry Usage (how to be a sub-agent)
+   - Rule 13: Implementation Agent Guide (TDD, self-review, learnings)
+   - Rule 11: Skills Usage (if using skills)
    - Rule 06: Specifications and Requirements
    - Rule 07: Language Conventions
    - Rule 08: Verification Workflow

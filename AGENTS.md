@@ -1,66 +1,23 @@
 ---
 purpose: Central entry point for AI agent configuration
-description: Minimal configuration file that directs agents to detailed rules and standards
-version: 4.0.0
-last_updated: 2026-01-18
+description: Minimal configuration directing agents to load rules selectively
+version: 5.0.0
+last_updated: 2026-01-19
 ---
 
 # Agent Configuration
 
 ## Core Principle
 
-This file is the **entry point** for all AI agents. For detailed rules, standards, and workflows, agents **MUST** load the files referenced below.
+Agents load rules **selectively** based on role and task to optimize context window usage.
 
-**CRITICAL**: If conflicts arise, `.agents/rules/*` takes precedence over this file.
-
----
-
-## Mandatory Loading Sequence
-
-All agents **MUST** follow this sequence at the start of every session:
-
-1. ✅ **Read `AGENTS.md`** (this file)
-2. ✅ **Load ALL rules from `.agents/rules/*`** (in numerical order)
-3. ✅ **Load ONLY relevant stack files** from `.agents/stacks/[language].md`
-4. ✅ **Read specification files** (if working on a specific feature)
-
-**Context Window Efficiency**: Only load stack files for languages you will actually use.
+**CRITICAL**: `.agents/rules/*` takes precedence over this file if conflicts arise.
 
 ---
 
-## Directory Structure
+## Rule Loading
 
-```
-.agents/
-├── AGENTS.md           # This file (entry point)
-├── rules/              # Project rules (READ ALL)
-├── stacks/             # Language-specific standards (READ ONLY WHAT YOU USE)
-├── skills/             # Documented know-how for specific tasks
-├── agents/             # Agent documentation and registry
-└── templates/          # File templates
-
-specifications/         # Feature specifications (PROJECT ROOT)
-documentation/          # Module documentation (PROJECT ROOT)
-CLAUDE.md              # Backward compatibility redirect
-```
-
----
-
-## What Each Directory Contains
-
-| Directory | Purpose | Details In |
-|-----------|---------|------------|
-| `.agents/rules/` | HOW agents work (workflow, verification, commits) | Read all files |
-| `.agents/stacks/` | HOW to write code (language standards) | `[language].md` |
-| `.agents/skills/` | Specialized task knowledge | `skill.md` per skill |
-| `.agents/agents/` | Agent capabilities and registry | `[agent-name].md` |
-| `.agents/templates/` | Reusable file templates | Reference when creating files |
-| `specifications/` | WHAT to build (requirements, tasks) | Rule 06 |
-| `documentation/` | Module documentation | Rule 06 |
-
----
-
-## Key Rules Summary
+### Mandatory (ALL Agents)
 
 | Rule | Topic |
 |------|-------|
@@ -68,45 +25,70 @@ CLAUDE.md              # Backward compatibility redirect
 | 02 | Directory policies |
 | 03 | Dangerous operations safety |
 | 04 | Work commit and push rules |
-| 05 | Coding practice and agent orchestration |
-| 06 | Specifications and requirements |
-| 07 | Language conventions and standards |
-| 08 | Verification workflow |
-| 09 | Skills identification and creation |
-| 10 | Agent documentation and registry |
 
-**⚠️ MANDATORY**: Read ALL rule files before starting any work.
+### By Role
+
+| Agent Type | Load These Rules |
+|------------|------------------|
+| **Main Agent** | 01-04, 05, 06 (+ 09, 10 when creating skills/agents) |
+| **Implementation Agent** | 01-04, 13, 11 (if skills), stack file, spec |
+| **Verification Agent** | 01-04, 08, stack file |
+| **Specification Agent** | 01-04, 06 |
+| **Any Sub-Agent** | 01-04, 12, own agent doc, relevant stack |
+
+---
+
+## Rules Reference
+
+| Rule | For | Purpose |
+|------|-----|---------|
+| 01-04 | All | Core mandatory rules |
+| 05 | Main Agent | Agent orchestration and verification coordination |
+| 06 | Main Agent, Spec agents | Specifications and requirements |
+| 07 | Code writers | Language conventions |
+| 08 | Verification agents | Verification workflow |
+| 09 | Main Agent | Skills creation and review |
+| 10 | Main Agent | Agent documentation and creation |
+| 11 | Sub-agents | Skills usage (concise) |
+| 12 | Sub-agents | Agent registry usage (concise) |
+| 13 | Implementation agents | Coding practice guide (concise) |
+
+---
+
+## Directory Structure
+
+```
+.agents/
+├── AGENTS.md           # This file
+├── rules/              # Load selectively
+├── stacks/             # Load for your language only
+├── skills/             # Scan frontmatter, read when using
+├── agents/             # Scan frontmatter, read own doc
+└── templates/          # Reference when creating files
+
+specifications/         # Read when working on features
+documentation/          # Read for modules you're changing
+```
+
+---
+
+## Spawning Sub-Agents
+
+Include in spawn prompt:
+```
+MANDATORY: Load Rules 01-04, Rule 12, your doc at .agents/agents/[name].md
+OPTIONAL: Rule 11 (skills), Rule 13 (implementation), stack file, spec
+```
 
 ---
 
 ## Critical Reminders
 
-1. **Main Agent Role**: Orchestrator ONLY - delegates ALL work to specialized agents
-2. **Verification Required**: NO code commits without verification passing
-3. **Zero Deviation**: All standards must be followed exactly
-4. **Delegation Always**: Main Agent spawns agents for specification updates
-5. **Learning Logs**: Update when mistakes are made or patterns discovered
-
-→ **For complete details**: Read `.agents/rules/*`
+1. **Main Agent**: Orchestrator only - delegates ALL work
+2. **Verification Required**: NO commits without verification passing
+3. **Context Optimization**: Load ONLY what you need
+4. **Sub-agents**: Never commit directly, never spawn verification agents
 
 ---
 
-## Quick Reference
-
-| Need To... | Read |
-|------------|------|
-| Understand workflow | Rule 05 |
-| Write specifications | Rule 06 |
-| Run verification | Rule 08 |
-| Write Rust/JS/Python | `.agents/stacks/[language].md` |
-| Create a skill | Rule 09 |
-| Document an agent | Rule 10 |
-
----
-
-**MANDATORY**: Load and read all relevant files before starting work.
-
----
-
-_Last updated: 2026-01-18_
-_Version: 4.0.0 - Simplified to minimal entry point (removed duplicated details now in Rule 06)_
+_Version: 5.0.0 - Selective rule loading for context optimization_

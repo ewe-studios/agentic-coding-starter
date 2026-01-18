@@ -1,6 +1,15 @@
-# Skills Identification and Creation
+# Skills Creation and Review (Main Agent Only)
 
 ## Purpose
+
+This rule is for **Main Agent only** when creating new skills or reviewing skill documents. Sub-agents should load **Rule 11 (Skills Usage)** instead for a concise guide on using existing skills.
+
+**Context Optimization**: This full rule (~900 lines) is only needed when creating/reviewing skills. Sub-agents using skills only need Rule 11 (~150 lines).
+
+---
+
+## Overview
+
 This rule establishes a structured approach for agents to identify knowledge gaps, document required skills, and obtain user approval before using them. This ensures agents have proper guidance for complex tasks while maintaining user oversight and control.
 
 ## Core Principles
@@ -809,9 +818,10 @@ const products = JSON.parse(fs.readFileSync('./data/products.json'));
 
 ## Integration with Other Rules
 
-- **Rule 04 (Agent Orchestration)**: Skills identified during "Before Starting Work" phase
+- **Rule 05 (Agent Orchestration)**: Skills identified during "Before Starting Work" phase
 - **Rule 06 (Specifications)**: Specifications frontmatter includes `skills` field
 - **Rule 07 (Language Conventions)**: Skills may be stack-specific
+- **Rule 11 (Skills Usage)**: Sub-agents load this concise guide for using skills
 
 ## Benefits
 
@@ -911,4 +921,12 @@ Update learnings.md with insights
 
 ---
 *Created: 2026-01-13*
-*Last Updated: 2026-01-13 (Optimized from 1,815 lines to ~900 lines while preserving all critical information)*
+*Last Updated: 2026-01-19 (Split into Rule 09 for creation and Rule 11 for usage)*
+
+---
+
+## Related Rules
+
+- **Rule 11 (Skills Usage)**: Concise guide for sub-agents using existing skills
+- **Rule 06 (Specifications)**: How specifications reference skills
+- **Rule 05 (Agent Orchestration)**: How skills are identified during work

@@ -18,7 +18,32 @@ Before **ANY** work begins on new features, enhancements, or significant changes
 - **NO coding** without documented requirements
 - **NO starting work** without a specification
 - **NO skipping** the requirements conversation
+- **NO implementation** until user explicitly approves and requests it
 - This applies to **ALL significant development work**
+
+### User Approval Required Before Implementation (MANDATORY)
+
+**CRITICAL**: After creating a complete specification (requirements.md + tasks.md), the Main Agent **MUST**:
+
+1. ✅ **Present the specification to the user**
+2. ✅ **Wait for explicit user approval**
+3. ✅ **Wait for explicit user request to begin implementation**
+4. ❌ **NEVER start implementation automatically** after creating specs
+5. ❌ **NEVER assume approval** because user said "ok" to something else
+
+**User phrases that grant implementation approval:**
+- "Start implementation"
+- "Go ahead and implement"
+- "Begin coding"
+- "Proceed with implementation"
+- "Let's build it"
+
+**User phrases that do NOT grant implementation approval:**
+- "Ok" (could mean acknowledgment, not approval)
+- "Looks good" (may want to review first)
+- "Thanks" (acknowledgment only)
+
+**When in doubt, ASK**: "Would you like me to begin implementation now?"
 
 ### Requirements Conversation Process (MANDATORY)
 
@@ -148,15 +173,35 @@ When sub-agents update specifications:
 ```
 specifications/
 ├── Spec.md                          # Master index of all specifications
-├── 01-specification-name/
+├── 01-simple-specification/         # Simple spec (no features needed)
 │   ├── requirements.md              # (MANDATORY) Requirements and conversation summary
 │   ├── tasks.md                     # (MANDATORY) Task list with checkboxes
+│   ├── templates/                   # (OPTIONAL) Code/structure templates
 │   ├── PROGRESS.md                  # (MANDATORY) Mid-work progress report
 │   ├── FINAL_REPORT.md              # (MANDATORY) Comprehensive completion summary
 │   ├── VERIFICATION_SIGNOFF.md      # (MANDATORY) Official verification report
 │   └── LEARNINGS.md                 # (MANDATORY) Lessons learned and insights
-├── 02-another-specification/
-│   └── [same structure]
+│
+├── 02-complex-specification/        # Complex spec with features
+│   ├── requirements.md              # High-level requirements + feature references
+│   ├── tasks.md                     # Feature priority list (not individual tasks)
+│   ├── features/                    # (OPTIONAL) Feature breakdown directory
+│   │   ├── foundation/
+│   │   │   ├── feature.md           # Feature-specific requirements
+│   │   │   ├── tasks.md             # Feature-specific task checkboxes
+│   │   │   └── templates/           # Feature-specific templates
+│   │   ├── connection/
+│   │   │   ├── feature.md
+│   │   │   ├── tasks.md
+│   │   │   └── templates/
+│   │   └── public-api/
+│   │       ├── feature.md
+│   │       ├── tasks.md
+│   │       └── templates/
+│   ├── PROGRESS.md                  # (MANDATORY) Overall progress report
+│   ├── FINAL_REPORT.md              # (MANDATORY) Overall completion summary
+│   ├── VERIFICATION_SIGNOFF.md      # (MANDATORY) Overall verification report
+│   └── LEARNINGS.md                 # (MANDATORY) Overall lessons learned
 └── ...
 
 documentation/
@@ -169,16 +214,137 @@ documentation/
 
 **CRITICAL**: The `documentation/` directory exists at project root level, parallel to `specifications/`.
 
+### Feature-Based Specifications (OPTIONAL)
+
+For complex specifications, the Main Agent MAY create a `features/` subdirectory to break down work into manageable components.
+
+#### When to Use Features
+
+**Use features when:**
+- Specification is large (>15KB requirements.md)
+- Multiple distinct components or phases
+- User explicitly requests breakdown
+- Different components have different dependencies
+- Context size needs to be reduced for agent efficiency
+
+**Keep simple (no features) when:**
+- Specification is small and focused
+- Single coherent piece of work
+- Few tasks (< 10)
+- No logical component boundaries
+
+#### Feature Structure
+
+Each feature directory contains:
+
+| File | Required | Purpose |
+|------|----------|---------|
+| `feature.md` | Yes | Feature-specific requirements, context, success criteria |
+| `tasks.md` | Yes | Feature-specific task checkboxes with progress tracking |
+| `templates/` | No | Feature-specific code templates, examples |
+
+#### Main Specification Files (With Features)
+
+When using features, the main specification files change:
+
+**requirements.md** contains:
+- High-level overview and goals
+- Requirements conversation summary
+- Feature list with descriptions and dependencies
+- Links to each feature's `feature.md`
+- Overall success criteria
+- Module documentation references
+
+**tasks.md** contains:
+- Feature priority order (not individual tasks)
+- Feature status (pending, in-progress, completed)
+- Dependencies between features
+- Overall progress percentage
+
+Example main tasks.md with features:
+```markdown
+---
+completed: 1
+uncompleted: 4
+created: 2026-01-18
+features:
+  - foundation
+  - connection
+  - request-response
+  - task-iterator
+  - public-api
+---
+
+# HTTP Client - Feature Progress
+
+## Feature Priority Order
+
+1. [x] **foundation** - Error types and DNS resolution
+2. [ ] **connection** - URL parsing, TCP, TLS (depends on: foundation)
+3. [ ] **request-response** - Request builder, response types (depends on: connection)
+4. [ ] **task-iterator** - TaskIterator, executors (depends on: request-response)
+5. [ ] **public-api** - User-facing API, integration (depends on: task-iterator)
+
+## Notes
+- Complete features in order due to dependencies
+- Each feature has its own tasks.md with detailed checkboxes
+```
+
+#### Feature Frontmatter
+
+**feature.md frontmatter:**
+```yaml
+---
+feature: feature-name
+description: Brief one-sentence description
+status: pending | in-progress | completed
+depends_on:
+  - other-feature-name
+estimated_effort: small | medium | large
+---
+```
+
+**feature tasks.md frontmatter:**
+```yaml
+---
+feature: feature-name
+completed: 0
+uncompleted: 5
+last_updated: 2026-01-18
+---
+```
+
+#### Verification Files Remain at Main Level
+
+**CRITICAL**: These files are ONLY at the main specification level, NOT in features:
+- `PROGRESS.md` - Overall specification progress
+- `FINAL_REPORT.md` - Overall completion summary
+- `VERIFICATION_SIGNOFF.md` - Overall verification
+- `LEARNINGS.md` - Overall lessons learned
+
+Features do NOT have their own verification/report files.
+
+### Simple Specifications (No Features)
+
+For simple specifications, the structure remains as before:
+- `requirements.md` - Full requirements with all details
+- `tasks.md` - All task checkboxes with progress
+- `templates/` - (Optional) Code templates
+- Standard verification files
+
 ### Naming Convention
 - Each specification gets its own numbered directory
 - Format: `NN-descriptive-name/` where NN is two-digit (01, 02, 03, etc.)
 - Use dash separators for multi-word names
+- Feature directories use lowercase with dashes: `feature-name/`
 
 **Examples:**
 - ✅ `01-build-http-client/`
 - ✅ `02-implement-user-authentication/`
+- ✅ `features/dns-resolution/`
 - ❌ `http-client/` (missing number prefix)
 - ❌ `1-http-client/` (single digit)
+- ❌ `features/DnsResolution/` (wrong case)
 
 ### Specification Versioning and Evolution (CRITICAL)
 

@@ -1,7 +1,7 @@
 ---
 purpose: Central entry point for AI agent configuration
 description: Minimal configuration file that directs agents to detailed rules and standards
-version: 3.1.0
+version: 3.2.0
 last_updated: 2026-01-18
 ---
 
@@ -59,8 +59,19 @@ All agents **MUST** follow this sequence at the start of every session:
 │       ├── skill.md    # Canonical skill documentation
 │       └── learnings.md # Practical insights from usage
 │
-└── agents/             # Agent documentation and registry
-    └── [agent-name].md # Agent capabilities and responsibilities
+├── agents/             # Agent documentation and registry
+│   └── [agent-name].md # Agent capabilities and responsibilities
+│
+└── templates/          # File templates for specifications, skills, agents
+    ├── skill-template.md
+    ├── learnings-template.md
+    ├── requirements-template.md
+    ├── tasks-template.md
+    ├── PROGRESS-template.md
+    ├── FINAL_REPORT-template.md
+    ├── LEARNINGS-template.md
+    ├── VERIFICATION_SIGNOFF-template.md
+    └── agent-documentation-template.md
 
 specifications/         # Feature specifications (PROJECT ROOT LEVEL)
 ├── Spec.md             # Master index
@@ -192,6 +203,18 @@ CLAUDE.md              # Backward compatibility redirect
 
 → **For full details**: Read `.agents/agents/[agent-name].md`
 
+### `.agents/templates/` - File Templates
+
+**Purpose**: Reusable templates for creating specifications, skills, and agent documentation.
+
+**Contains**:
+
+- Specification templates: requirements, tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF
+- Skill templates: skill.md, learnings.md
+- Agent documentation template
+
+**Usage**: Reference these templates when creating new specifications, skills, or agents.
+
 ---
 
 ## Quick Start Checklist
@@ -246,6 +269,7 @@ Before starting ANY work:
 - `.agents/stacks/*` (HOW to write code)
 - `.agents/skills/*` (WHAT specialized knowledge to use)
 - `.agents/agents/*` (WHO does the work - agent registry)
+- `.agents/templates/*` (TEMPLATES for specifications, skills, agents)
 - `specifications/*` (WHAT to build - project root)
 - `documentation/*` (WHERE code lives - module docs, project root)
 
@@ -254,4 +278,4 @@ Before starting ANY work:
 ---
 
 _Last updated: 2026-01-18_
-_Version: 3.1.0 - Added Rules 09-10, corrected specifications/documentation locations to project root, added skills and agents directories_
+_Version: 3.2.0 - Added templates/ directory, optimized Rules 05, 06, 09, 10 (2,616 lines saved - 40% reduction)_

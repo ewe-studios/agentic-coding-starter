@@ -81,40 +81,6 @@ Main Agent creating new agent documentation:
 6. Commit changes
 ```
 
-**Example - Duplicate Found**:
-```
-Existing: rust-verification.md
-  name: Rust Verification Agent
-  type: verification
-  purpose: Verify Rust code quality, tests, and standards
-
-New request: rust-code-checker.md
-  name: Rust Code Checker
-  type: verification
-  purpose: Verify Rust code quality and run tests
-
-→ DUPLICATE! Same purpose, same type, same language
-→ Action: Merge into rust-verification.md (keep existing)
-→ Delete: rust-code-checker.md concept
-```
-
-**Example - Not Duplicate**:
-```
-Existing: rust-verification.md
-  name: Rust Verification Agent
-  type: verification
-  purpose: Verify Rust code quality, tests, and standards
-
-New request: rust-security-audit.md
-  name: Rust Security Audit Agent
-  type: specialized
-  purpose: Perform security audit and vulnerability scanning
-
-→ NOT DUPLICATE: Different specialization (general vs security)
-→ Action: Create rust-security-audit.md
-→ Clarify: frontmatter must clearly distinguish from rust-verification.md
-```
-
 ## Agent Documentation Format
 
 ### Frontmatter Importance (CRITICAL)
@@ -162,189 +128,59 @@ Every agent documentation file **MUST** have:
 8. **Integration** - How it works with other agents
 9. **Examples** - Real usage scenarios
 
-### Template
+### Template Reference
 
-**Agent documentation frontmatter MUST include these fields:**
+**Full template available at**: `.agents/templates/agent-documentation-template.md`
 
-```markdown
+**Quick frontmatter structure**:
+```yaml
 ---
 name: [Agent Name]
 type: [verification|implementation|review|utility|specialized]
 language: [rust|javascript|python|language-agnostic|multiple]
-purpose: Brief one-sentence description of agent purpose
+purpose: Brief one-sentence description
 created: YYYY-MM-DD
 author: "Main Agent" or "Team Name"
-license: "MIT" or other appropriate license
+license: "MIT" or other
 metadata:
   version: "1.0"
   last_updated: YYYY-MM-DD
   complexity: "simple | moderate | complex"
-  tags:
-    - verification
-    - rust
-    - testing
-tools_required:
-  - Tool 1
-  - Tool 2
-skills_required:
-  - Skill 1 (if applicable)
+  tags: [verification, rust, testing]
+tools_required: [Tool 1, Tool 2]
+skills_required: [Skill 1, Skill 2]
 spawned_by: [main-agent|sub-agent-name|both]
-spawns: [list of agents this agent can spawn, if any]
-related_rules:
-  - Rule NN (relevant rule numbers)
+spawns: [list of spawnable agents]
+related_rules: [Rule NN]
 status: [active|deprecated|experimental]
 ---
+```
 
-# [Agent Name]
+### Frontmatter Fields Reference
 
-## Overview
-High-level description of what this agent does and why it exists.
-
-## Purpose
-Detailed explanation of the agent's role in the system.
-
-## Capabilities
-What this agent can do:
-- Capability 1
-- Capability 2
-- Capability 3
-
-## Requirements
-
-### Tools Required
-- Tool 1 (version, if applicable)
-- Tool 2
-- Tool 3
-
-### Skills Required (if applicable)
-- Skill 1: Description
-- Skill 2: Description
-
-### Dependencies
-- Other agents this depends on
-- External services
-- Configuration needed
-
-## Responsibilities
-
-### Primary Responsibilities
-1. Responsibility 1: Description
-2. Responsibility 2: Description
-3. Responsibility 3: Description
-
-### Secondary Responsibilities
-1. Optional task 1
-2. Optional task 2
-
-## Workflow
-
-### Step-by-Step Process
-1. **Step 1**: Description
-   - Substep A
-   - Substep B
-
-2. **Step 2**: Description
-   - Substep A
-   - Substep B
-
-3. **Step 3**: Description
-
-### Input Requirements
-What this agent expects when spawned:
-- Input 1: Description
-- Input 2: Description
-
-### Output Format
-What this agent returns:
-- Output 1: Description
-- Output 2: Description
-
-### Frontmatter Fields Explained
-
-**REQUIRED Fields:**
-
-- **`name`**: Clear, descriptive agent name
-  - Use title case (e.g., "Rust Verification Agent")
-  - Be specific about what the agent does
-- **`type`**: Agent category
-  - `verification`: Validates code quality, runs tests, checks standards
-  - `implementation`: Writes code, implements features
-  - `review`: Reviews code, provides feedback
-  - `utility`: Helper agent for specific tasks
-  - `specialized`: Domain-specific agent
-- **`language`**: Programming language or scope
-  - Specific language: `rust`, `javascript`, `python`, etc.
-  - Multiple languages: `multiple`
-  - Any language: `language-agnostic`
-- **`purpose`**: One-sentence summary (10-15 words max)
-  - Must be immediately understandable
-  - Describes exactly what agent does
-  - Used by Main Agent for selection
-- **`created`**: Date agent was created (YYYY-MM-DD)
-- **`author`**: Who created the agent
-  - Examples: "Main Agent", "Team Name", "Developer Name"
-- **`license`**: License for agent documentation and code
-  - Examples: "MIT", "Apache-2.0", "Proprietary"
-- **`metadata`**: Structured metadata object
-  - **`version`**: Semantic version (e.g., "1.0", "2.1.0")
-  - **`last_updated`**: Date of last update (YYYY-MM-DD)
-  - **`complexity`**: Agent complexity level
-    - `simple`: Straightforward, single purpose
-    - `moderate`: Multiple responsibilities, some complexity
-    - `complex`: Advanced logic, many dependencies
-  - **`tags`**: Array of categorization tags
-    - Use lowercase with hyphens
-    - Examples: `verification`, `testing`, `rust`, `code-quality`, `security`
-    - Minimum 2 tags, recommended 3-5
-- **`tools_required`**: List of tools this agent needs
-  - Include all required tools
-  - Specify versions if critical
-- **`spawned_by`**: Who can spawn this agent
-  - `main-agent`: Only Main Agent can spawn
-  - `sub-agent-name`: Specific sub-agent can spawn
-  - `both`: Main Agent or sub-agents can spawn
-- **`related_rules`**: Array of relevant rule numbers
-  - Reference rules this agent must follow
-  - Examples: "Rule 03", "Rule 07"
-- **`status`**: Current agent status
-  - `active`: Fully functional, ready for use
-  - `deprecated`: Old version, use newer agent instead
-  - `experimental`: Testing phase, may change
-
-**OPTIONAL Fields (use when applicable):**
-
-- **`skills_required`**: List of skills from `.agents/skills/` directory
-  - Only include if agent needs specific skills
-  - Use skill directory names
-- **`spawns`**: List of agents this agent can spawn
-  - Only if this agent spawns sub-agents
-  - Examples: `["Rust Implementation Agent", "Test Runner Agent"]`
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | ✅ | Clear, descriptive agent name (title case) |
+| `type` | enum | ✅ | verification\|implementation\|review\|utility\|specialized |
+| `language` | string | ✅ | rust\|javascript\|python\|language-agnostic\|multiple |
+| `purpose` | string | ✅ | One sentence (10-15 words max), crystal clear |
+| `created` | date | ✅ | YYYY-MM-DD format |
+| `author` | string | ✅ | "Main Agent", "Team Name", etc. |
+| `license` | string | ✅ | "MIT", "Apache-2.0", etc. |
+| `metadata.version` | string | ✅ | Semantic version (e.g., "1.0") |
+| `metadata.last_updated` | date | ✅ | YYYY-MM-DD format |
+| `metadata.complexity` | enum | ✅ | simple\|moderate\|complex |
+| `metadata.tags` | array | ✅ | Minimum 2 tags, lowercase-with-hyphens |
+| `tools_required` | array | ✅ | List of required tools |
+| `spawned_by` | string | ✅ | main-agent\|sub-agent-name\|both |
+| `related_rules` | array | ✅ | Rule numbers (e.g., ["Rule 03", "Rule 07"]) |
+| `status` | enum | ✅ | active\|deprecated\|experimental |
+| `skills_required` | array | ⚪ | Optional: skills from `.agents/skills/` |
+| `spawns` | array | ⚪ | Optional: agents this can spawn |
 
 ### Main Agent Frontmatter Enforcement (CRITICAL)
 
 **Main Agent MUST validate and enforce complete frontmatter** when creating agent documentation.
-
-#### When Creating .agents/agents/*.md:
-
-Main Agent **MUST** include ALL required frontmatter fields:
-- ✅ `name`: Clear, descriptive agent name (title case)
-- ✅ `type`: verification | implementation | review | utility | specialized
-- ✅ `language`: Specific language, multiple, or language-agnostic
-- ✅ `purpose`: One-sentence summary (10-15 words max)
-- ✅ `created`: YYYY-MM-DD (date of creation)
-- ✅ `author`: "Main Agent" or "Team Name"
-- ✅ `license`: "MIT" or other appropriate license
-- ✅ `metadata`: Complete object with:
-  - `version`: "1.0" (semantic version)
-  - `last_updated`: YYYY-MM-DD
-  - `complexity`: simple | moderate | complex
-  - `tags`: Array with minimum 2 tags
-- ✅ `tools_required`: Array of required tools
-- ✅ `spawned_by`: main-agent | sub-agent-name | both
-- ✅ `related_rules`: Array of relevant rule numbers
-- ✅ `status`: active | deprecated | experimental
-- ✅ `skills_required`: (if applicable) Array of skill names
-- ✅ `spawns`: (if applicable) Array of spawnable agents
 
 #### Validation Requirements:
 
@@ -392,95 +228,6 @@ When updating agent documentation:
 - ❌ Main Agent cannot make proper selection decisions
 - ❌ Wrong agent may be spawned for tasks
 - ❌ Purpose must be rewritten to be specific
-
-## Boundaries and Limitations
-
-### What This Agent DOES NOT Do
-- ❌ Limitation 1
-- ❌ Limitation 2
-- ❌ Limitation 3
-
-### What This Agent MUST NOT Do
-- ❌ **CRITICAL**: Violation 1
-- ❌ **CRITICAL**: Violation 2
-
-### Known Limitations
-- Limitation 1: Workaround
-- Limitation 2: Workaround
-
-## Integration with Other Agents
-
-### Spawned By
-- [Main Agent | Specific Sub-Agent]
-- Context provided: [list]
-
-### Can Spawn (if applicable)
-- Agent 1: When to spawn
-- Agent 2: When to spawn
-
-### Reports To
-- [Main Agent | Parent Agent]
-- Report format: [description]
-
-## Related Rules
-- **Rule NN**: [Rule Name] - How it relates
-- **Rule MM**: [Rule Name] - How it relates
-
-## Examples
-
-### Example 1: [Scenario Name]
-```
-Context:
-- Situation description
-
-Process:
-1. Step 1
-2. Step 2
-3. Step 3
-
-Result:
-- Outcome
-```
-
-### Example 2: [Scenario Name]
-```
-Context:
-- Different situation
-
-Process:
-1. Step 1
-2. Step 2
-
-Result:
-- Different outcome
-```
-
-## Best Practices
-- ✅ Best practice 1
-- ✅ Best practice 2
-- ✅ Best practice 3
-
-## Common Pitfalls
-- ❌ Pitfall 1: How to avoid
-- ❌ Pitfall 2: How to avoid
-
-## Troubleshooting
-
-### Issue 1: [Problem]
-**Symptom**: Description
-**Cause**: Explanation
-**Solution**: Fix
-
-### Issue 2: [Problem]
-**Symptom**: Description
-**Cause**: Explanation
-**Solution**: Fix
-
----
-*Created: [Date]*
-*Last Updated: [Date]*
-*Version: [X.Y]*
-```
 
 ## Workflow for Agent Usage
 
@@ -552,9 +299,7 @@ Your task: [specific task description]
 - Prevents sub-agent from guessing or assuming
 - Ensures consistent behavior across spawns
 
-### Context Management: Module Documentation (CRITICAL)
-
-**IMPORTANT**: In addition to agent documentation, sub-agents often need to work with module documentation (`documentation/[module]/doc.md`). Large module documentation files (>8-10KB) should NOT be loaded by Main Agent.
+### Context Management: Module Documentation
 
 **Main Agent Context Optimization:**
 
@@ -569,52 +314,9 @@ When dealing with module documentation:
    - Keep module documentation up-to-date as they make changes
    - Report documentation updates to Main Agent
 
-**Spawn Pattern with Module Documentation:**
-```
-You are an Implementation Agent.
-
-CRITICAL: Read your agent documentation FIRST:
-- File: .agents/agents/implementation.md
-
-Module Documentation:
-- File: documentation/foundation_core/doc.md (16KB - LARGE)
-- Check size before loading
-- If <8-10KB: Load for overview, use Grep/Glob for details
-- If >8-10KB: Skip loading, use Grep/Glob exclusively
-
-After reading your agent documentation:
-1. Check module documentation size
-2. If reasonable: Read module doc for high-level understanding
-3. Use Grep/Glob/Read to find specific code locations
-4. Make your changes
-5. If doc was small: Update documentation directly
-6. If doc was large: Report "Documentation too large, need Documentation Agent"
-7. Report back with documentation status
-
-Your task: [specific task]
-```
-
-**Why This Pattern:**
-- **Context Efficiency**: Main Agent doesn't waste context on large docs
-- **Targeted Loading**: Sub-agents only load docs they need
-- **Tool Usage**: Sub-agents use Grep/ripgrep for specifics
-- **Documentation Freshness**: Sub-agents update docs as they work
-- **Clear Responsibility**: Agent working on module maintains its documentation
-
-**Sub-Agent Responsibilities with Module Documentation:**
-- ✅ Check module documentation size first
-- ✅ If reasonable size (<8-10KB): Load documentation
-- ✅ If too large (>8-10KB): Skip loading, use tools exclusively
-- ✅ Use tools (Grep/Glob) to find specific implementations
-- ✅ Make code changes as assigned
-- ✅ Report documentation status to Main Agent
-- ✅ If doc too large: Request Main Agent spawn Documentation Agent
-- ❌ NOT skip documentation because "it's too large"
-- ❌ NOT try to update large docs directly (let Documentation Agent handle it)
-
 **Two-Tier Documentation Strategy:**
 
-**Tier 1: Reasonable Size Documentation (<8-10KB)**
+**Tier 1: Reasonable Size (<8-10KB)**
 ```
 Sub-Agent Process:
 1. Load module documentation
@@ -636,18 +338,6 @@ Sub-Agent Process:
 7. Documentation Agent reports completion
 ```
 
-**Tool Strategy for Sub-Agents:**
-```
-Small docs (<8-10KB) → Load doc + Use tools → Update doc
-Large docs (>8-10KB) → Use tools only → Request Documentation Agent
-```
-
-**Why This Tiered Approach:**
-- **Context Preservation**: Even sub-agents don't waste context on huge docs
-- **Tool Mastery**: Sub-agents become proficient with Grep/ripgrep
-- **Specialized Updates**: Documentation Agent handles complex doc updates
-- **Efficiency**: Right agent for the right task
-
 ### Documentation Agent: Comprehensive Asset Creation
 
 When Main Agent spawns Documentation Agent to create or update module documentation, the Documentation Agent **MUST** create comprehensive documentation assets beyond just the `doc.md` file.
@@ -656,43 +346,20 @@ When Main Agent spawns Documentation Agent to create or update module documentat
 
 #### For API Modules:
 - **OpenAPI Specification** (`assets/openapi.yaml` or `.json`)
-  - Complete endpoint documentation
-  - Request/response schemas
-  - Authentication requirements
-  - Error responses
-  - Examples for each endpoint
-- **API Examples** (`assets/examples/`)
-  - cURL examples
-  - Language-specific client code
-  - Postman collections
+- **API Examples** (`assets/examples/`) - cURL, client code, Postman collections
 
 #### For Data Model Modules:
 - **JSON Schema** (`assets/schemas/[model-name].json`)
-  - Complete type definitions
-  - Validation rules (min/max, patterns)
-  - Required vs optional fields
-  - Field descriptions and examples
 - **TypeScript Definitions** (`assets/types/`) (optional)
 - **GraphQL Schema** (`assets/schema.graphql`) (if applicable)
 
 #### For Library/SDK Modules:
-- **Usage Examples** (`assets/examples/`)
-  - Basic usage examples
-  - Advanced patterns
-  - Common scenarios
-- **Configuration Examples** (`assets/configs/`)
-  - Config file templates
-  - Environment variable templates
+- **Usage Examples** (`assets/examples/`) - Basic/advanced patterns
+- **Configuration Examples** (`assets/configs/`) - Config templates
 
 #### For All Modules:
-- **Architecture Diagrams** (`assets/diagrams/`)
-  - Component diagrams (SVG preferred)
-  - Flow diagrams
-  - Sequence diagrams
-  - ER diagrams for data models
-- **Reference Documentation** (`assets/references/`)
-  - Links to external resources
-  - RFCs and specifications
+- **Architecture Diagrams** (`assets/diagrams/`) - Component, flow, sequence, ER diagrams
+- **Reference Documentation** (`assets/references/`) - External links, RFCs
 
 **Complete Asset Directory Structure:**
 ```
@@ -701,37 +368,12 @@ documentation/[module]/
 └── assets/                       # Supplementary documentation
     ├── openapi.yaml              # API specification
     ├── schemas/                  # JSON schemas
-    │   ├── model-1.json
-    │   └── model-2.json
     ├── types/                    # TypeScript definitions
-    │   └── index.d.ts
     ├── examples/                 # Code examples
-    │   ├── basic-usage.md
-    │   ├── advanced.md
-    │   └── postman-collection.json
     ├── configs/                  # Configuration templates
-    │   ├── config.example.toml
-    │   └── .env.example
     ├── diagrams/                 # Visual documentation
-    │   ├── architecture.svg
-    │   └── flow.png
     └── references/               # External resources
-        └── links.md
 ```
-
-**Why Comprehensive Assets Matter:**
-- **API Consumers**: OpenAPI specs enable automatic client generation
-- **Data Validation**: JSON schemas enable automatic validation
-- **Quick Start**: Examples enable rapid integration
-- **Visual Understanding**: Diagrams clarify complex architectures
-- **Tooling Integration**: Standard formats work with existing tools (Swagger UI, JSON Schema validators, etc.)
-
-**Documentation Agent Responsibilities:**
-- ✅ Identify module type (API/Model/Library/General)
-- ✅ Create appropriate assets for module type
-- ✅ Ensure asset quality (complete, accurate, usable)
-- ✅ Update assets when code changes
-- ✅ Report created/updated assets to Main Agent
 
 ### Main Agent Workflow
 
@@ -816,19 +458,6 @@ Create new agent documentation when:
 - ✅ Domain-specific expertise needed (security, performance, etc.)
 - ✅ Complex workflow needs dedicated orchestration
 
-### Who Creates Documentation
-
-**Main Agent** creates documentation when:
-- User requests new agent capability
-- Main Agent identifies need during workflow
-- System evolution requires new agent type
-
-**Sub-Agent** requests documentation creation:
-- Sub-agent recognizes need for new agent
-- Sub-agent reports to Main Agent
-- Main Agent creates documentation
-- Main Agent spawns new agent
-
 ### Process for Creating New Agent Documentation
 
 1. **Main Agent Identifies Need**
@@ -837,7 +466,7 @@ Create new agent documentation when:
    - Determines new agent is needed
 
 2. **Main Agent Creates Documentation**
-   - Uses template above
+   - Uses template from `.agents/templates/agent-documentation-template.md`
    - Fills in all required sections
    - Defines clear boundaries
    - Provides examples
@@ -874,23 +503,6 @@ Main Agent needs to find appropriate agent:
 3. Filter by relevant criteria
 4. Identify best candidate(s)
 5. Read full documentation of selected agent
-```
-
-**Frontmatter Scanning Example**:
-```markdown
-Agent: rust-verification.md
-  name: Rust Verification Agent
-  type: verification
-  language: rust
-  purpose: Verify Rust code quality, tests, and standards compliance
-  → MATCH for "need Rust verification"
-
-Agent: javascript-verification.md
-  name: JavaScript Verification Agent
-  type: verification
-  language: javascript
-  purpose: Verify JavaScript/TypeScript code quality and tests
-  → NO MATCH (wrong language)
 ```
 
 ### Registry Query Patterns
@@ -1036,106 +648,31 @@ When violation occurs:
 ### Example 1: Main Agent Needs Rust Verification
 
 ```
-1. Main Agent identifies need:
-   "Implementation complete, need to verify Rust code"
+1. Main Agent identifies need: "Implementation complete, need to verify Rust code"
 
 2. Main Agent scans registry frontmatter ONLY:
    - Reads .agents/agents/*.md filenames and frontmatter
-   - Finds rust-verification.md:
-     * name: Rust Verification Agent
-     * type: verification
-     * language: rust
-     * purpose: "Verify Rust code quality, run tests, check clippy and formatting"
-     * tools_required: [cargo, clippy, rustfmt]
-   - Identifies as correct agent (frontmatter is clear)
-   - Does NOT read full documentation (not needed)
+   - Finds rust-verification.md with clear purpose
+   - Identifies as correct agent
+   - Does NOT read full documentation
 
-3. Main Agent verifies requirements:
-   - cargo available? Yes
-   - clippy available? Yes
-   - rustfmt available? Yes
-   - Can provide context? Yes
+3. Main Agent verifies requirements and spawns agent WITH documentation path
 
-4. Main Agent spawns agent WITH documentation path:
-   Task(
-     subagent_type: "general-purpose",
-     description: "Verify Rust code quality",
-     prompt: "You are a Rust Verification Agent.
-
-     CRITICAL: Read your agent documentation FIRST:
-     - File: .agents/agents/rust-verification.md
-
-     After reading your documentation:
-     1. Read AGENTS.md
-     2. Read relevant rules
-     3. Execute your documented workflow
-
-     Your task: Verify the following Rust files...
-     Files changed: [list]
-     Specification: specifications/03-user-authentication/
-
-     [additional context]"
-   )
-
-5. Rust Verification Agent starts:
-   - Checks for documentation path: ✅ Found (.agents/agents/rust-verification.md)
-   - Reads .agents/agents/rust-verification.md FIRST
-   - Understands workflow: cargo fmt, clippy, test, build, audit sequence
-   - Reads AGENTS.md
-   - Reads relevant rules
+4. Rust Verification Agent starts:
+   - Checks for documentation path: ✅ Found
+   - Reads documentation FIRST
    - Executes all checks in documented order
-   - Generates report
    - Reports to Main Agent
 
 ✅ Correct workflow: Documentation path provided, sub-agent reads it first
 ```
 
-### Example 2: New Security Scan Agent Needed
-
-```
-1. Main Agent identifies need:
-   "User wants OWASP security scanning during verification"
-
-2. Main Agent checks registry:
-   - Scans .agents/agents/*.md frontmatter
-   - No agent with purpose="security scan"
-   - Determines new agent needed
-
-3. Main Agent creates documentation:
-   - Creates .agents/agents/security-scan.md
-   - Fills in all required sections:
-     * Frontmatter: name, type, purpose, tools
-     * Capabilities: OWASP dependency check
-     * Requirements: OWASP tool installed
-     * Responsibilities: Scan dependencies, report vulnerabilities
-     * Boundaries: Cannot fix vulnerabilities, only report
-     * Examples: Usage scenarios
-   - Saves file
-
-4. Main Agent commits documentation:
-   git add .agents/agents/security-scan.md
-   git commit -m "Add Security Scan Agent documentation"
-
-5. Main Agent spawns new agent:
-   - Provides path: .agents/agents/security-scan.md
-   - Provides context: "Scan these dependencies..."
-   - Agent reads documentation
-   - Agent performs security scan
-   - Agent reports findings
-
-6. Agent now available for future use:
-   - Documented in registry
-   - Main Agent can find via frontmatter scan
-   - Reusable for all security scanning needs
-```
-
-### Example 3: Sub-Agent Needs Help (Correct Process)
+### Example 2: Sub-Agent Needs Help (Correct Process)
 
 ```
 1. Implementation Agent working on task
 
-2. Implementation Agent realizes:
-   "I need database migration validation agent"
+2. Implementation Agent realizes: "I need database migration validation agent"
 
 3. Implementation Agent DOES NOT spawn agent directly
 
@@ -1153,7 +690,6 @@ When violation occurs:
    - Implementation Agent continues work
    - Database Validation Agent validates migrations
    - Both report to Main Agent
-   - Main Agent orchestrates completion
 ```
 
 ## Summary

@@ -192,7 +192,7 @@ All tests MUST include a comment block explaining:
 2. **What**: What specific behavior is being tested
 3. **Importance**: Why this test matters (optional but recommended for critical tests)
 
-**Format Examples by Stack**:
+**Format Examples**:
 
 **Rust**:
 ```rust
@@ -204,35 +204,10 @@ fn test_token_expiry_at_midnight() {
     let token = create_token_with_expiry("2024-01-15T00:00:00Z");
     assert!(is_expired(&token));
 }
-
-/// WHY: Ensures connection pool doesn't deadlock under high load (production incident 2024-01-10)
-/// WHAT: Spawning 100 concurrent requests should not exhaust pool or deadlock
-#[tokio::test]
-async fn test_connection_pool_under_load() {
-    let handles: Vec<_> = (0..100)
-        .map(|_| tokio::spawn(async { db::query("SELECT 1").await }))
-        .collect();
-
-    for handle in handles {
-        assert!(handle.await.is_ok());
-    }
-}
 ```
 
 **TypeScript/JavaScript**:
 ```typescript
-/**
- * WHY: User profile images must be resized before upload (requirement from PM)
- * WHAT: Uploading 4K image should automatically resize to 512x512
- * IMPORTANCE: Prevents S3 cost explosion (4K images are 10x larger)
- */
-test('should resize large images before upload', async () => {
-  const largeImage = createMockImage(3840, 2160);
-  const result = await uploadUserProfile(largeImage);
-
-  expect(result.dimensions).toEqual({ width: 512, height: 512 });
-});
-
 /**
  * WHY: Rate limiter must track per-IP, not per-user (security requirement)
  * WHAT: Same IP with different users should hit rate limit
@@ -240,39 +215,12 @@ test('should resize large images before upload', async () => {
  */
 test('rate limiter tracks by IP address', async () => {
   const ip = '192.168.1.1';
-
   for (let i = 0; i < 100; i++) {
     await makeRequest({ ip, user: `user_${i}` });
   }
-
   await expect(makeRequest({ ip, user: 'another_user' }))
     .rejects.toThrow('Rate limit exceeded');
 });
-```
-
-**Python**:
-```python
-def test_token_expiry_at_midnight():
-    """
-    WHY: Validates token expiration at exactly midnight (edge case from bug #234)
-    WHAT: Token with midnight expiry should be treated as expired
-    IMPORTANCE: Without this, users could access system for extra day after expiry
-    """
-    token = create_token_with_expiry("2024-01-15T00:00:00Z")
-    assert is_expired(token)
-
-def test_webhook_fires_after_db_commit():
-    """
-    WHY: Webhook must fire AFTER db commit, not before (data consistency requirement)
-    WHAT: If db commit fails, webhook should not be sent
-    IMPORTANCE: Prevents webhook notifications for data that doesn't exist in DB
-    """
-    with mock.patch('db.commit', side_effect=DBError):
-        with pytest.raises(DBError):
-            process_payment(payment_data)
-
-    # Webhook should NOT have been called
-    assert mock_webhook.call_count == 0
 ```
 
 **Documentation Guidelines**:
@@ -305,17 +253,6 @@ def test_webhook_fires_after_db_commit():
 - Common testing pitfalls for this specification
 - Testing strategies that proved effective
 - Non-obvious testing insights that apply broadly
-
-**Example Decision Tree**:
-```
-"We discovered token expiry at midnight causes issues"
-├─ Test comment: "WHY: Validates token expiration at exactly midnight (bug #234)"
-└─ learnings.md: "Must test time-boundary edge cases (midnight, year rollover, DST changes)"
-
-"Webhook must fire after DB commit"
-├─ Test comment: "WHY: Webhook fires AFTER db commit (data consistency requirement)"
-└─ learnings.md: "Always test failure paths to ensure no side effects when operations fail"
-```
 
 **Enforcement**:
 
@@ -406,62 +343,11 @@ fn process_user(user: User) -> Result<Response> {
 ```rust
 fn process_user(user: User) -> Result<Response> {
     if !user.is_active { return Err(Error::Inactive); }
-
     let profile = user.profile.ok_or(Error::NoProfile)?;
     if !profile.is_complete() { return Err(Error::Incomplete); }
-
     let data = fetch_data(&profile)?;
     validate(&data)?;
-
     Ok(Response::new(data))
-}
-```
-
-❌ **BAD - Over-abstracted DRY (harder to understand)**:
-```rust
-fn create_user_handler(req: Request) -> Result<Response> {
-    process_entity(req, UserValidator, UserCreator, user_response_mapper)
-}
-
-fn update_user_handler(req: Request) -> Result<Response> {
-    process_entity(req, UserValidator, UserUpdater, user_response_mapper)
-}
-
-// Now you need to read process_entity implementation to understand flow
-```
-
-✅ **GOOD - Some duplication, but crystal clear**:
-```rust
-fn create_user_handler(req: Request) -> Result<Response> {
-    let input = req.json::<UserInput>()?;
-    validate_user_input(&input)?;
-    let user = db::create_user(input).await?;
-    Ok(Response::json(user))
-}
-
-fn update_user_handler(req: Request) -> Result<Response> {
-    let input = req.json::<UserInput>()?;
-    validate_user_input(&input)?;
-    let user = db::update_user(req.user_id, input).await?;
-    Ok(Response::json(user))
-}
-// 3 lines duplicated, but intent is immediately clear
-```
-
-❌ **BAD - "Clever" code (hard to understand)**:
-```rust
-let result = items.iter().fold(HashMap::new(), |mut acc, item| {
-    *acc.entry(item.category).or_insert(0) += item.value;
-    acc
-});
-```
-
-✅ **GOOD - Explicit code (easy to understand)**:
-```rust
-let mut totals = HashMap::new();
-for item in items {
-    let current = totals.get(&item.category).unwrap_or(&0);
-    totals.insert(item.category, current + item.value);
 }
 ```
 
@@ -513,34 +399,29 @@ Ask yourself: Can I understand this learning in 5 seconds?
 - Understanding why certain decisions were made
 - Avoiding repeating mistakes
 
-**What to Document**:
+**Format** (see `.agents/templates/learnings-template.md` for full template):
 ```markdown
 # Learnings - [Specification Name]
 
 ## Critical Implementation Details
 - Auth token must validate BEFORE rate limiter (prevents token leakage)
 - DB pool: exactly 20 connections (downstream service limit)
-- Images must be 512x512 before S3 upload (cost optimization)
 
 ## Common Failures and Fixes
 - Error: `connection timeout` → Increase pool size from 10 to 20
 - Test failure: Mock timing issue → Use `tokio::time::pause()` for deterministic tests
-- Build failed: Missing feature flag → Add `features = ["json"]` to Cargo.toml
 
 ## Dependencies and Interactions
 - Uses `jsonwebtoken` v8.3 (v9 has breaking changes, avoid)
 - Triggers webhook AFTER db commit (order matters for consistency)
-- Requires env var `SECRET_KEY` (min 32 chars, validation in main.rs:45)
 
 ## Testing Insights
 - Must test token expiry edge case (expires at exactly midnight fails)
 - Use `#[serial]` for db tests (parallel tests cause conflicts)
-- Mock S3 with `aws-sdk-s3::Config::builder().endpoint_url()`
 
 ## Future Considerations
 - TODO: Add connection pooling retry logic (currently fails fast)
 - Tech debt: Hardcoded 512x512 size (should be configurable)
-- Scale: Current design supports <10k users (needs sharding beyond that)
 ```
 
 **Format Guidelines**:
@@ -548,11 +429,6 @@ Ask yourself: Can I understand this learning in 5 seconds?
 - Use `→` for cause-effect relationships
 - Include file:line references when relevant
 - Show actual values/code rather than describing them
-
-**When to Create/Update**:
-- Create learnings.md on first task completion for a specification
-- Update after each task if new critical insights are gained
-- Update after any verification failures (document what was learned)
 
 ##### 2. Stack-Specific Generic Learnings
 
@@ -564,36 +440,26 @@ Ask yourself: Can I understand this learning in 5 seconds?
 - Useful for future agents working in this stack
 - Best practices, patterns, or common pitfalls
 
-**What to Document in Stack Files**:
+**Format**:
 ```markdown
 # [Language] Stack - Learning Log
 
 ## Generic Patterns That Work Well
 - Use `?` operator for error propagation (not `unwrap()` or `expect()`)
 - `Arc<Mutex<T>>` for shared mutable state in async (not `Rc<RefCell<T>>`)
-- Pattern: `let handle = tokio::spawn(async move { ... }); handle.await??` for task errors
 
 ## Common Pitfalls to Avoid
 - `tokio::spawn()` doesn't propagate panics → wrap in `Result` and handle explicitly
 - `.clone()` on `Arc` is cheap (ref count), on `Vec` is expensive (deep copy)
-- Deadlock: Never `.lock()` same `Mutex` twice in one function
 
 ## Testing Best Practices
 - Use `#[tokio::test]` for async tests (not `#[test]`)
 - Mock external services with `mockito` crate: `mockito::mock("GET", "/api")`
-- Pattern: `assert_matches!(result, Err(ErrorType::Specific))` for error testing
 
 ## Tooling Tips
 - `cargo clippy -- -D warnings` catches most issues (zero warnings = required)
-- `cargo expand` shows macro output (useful for debugging derive macros)
 - `RUST_BACKTRACE=1` for stack traces, `RUST_LOG=debug` for tracing logs
 ```
-
-**Format Guidelines**:
-- Each entry: 1 line with optional code example (keep code under 5 lines)
-- Use concrete examples, not abstract explanations
-- Show the "right way" with code, not just prose
-- Include actual command flags/syntax when relevant
 
 **Decision Tree for Where to Document**:
 ```
@@ -609,14 +475,10 @@ Is this learning specific to this specification/feature?
 **Specification-Specific** (goes in `learnings.md`):
 - ✅ GOOD: "Auth token validates BEFORE rate limiter (prevents token leakage)"
 - ❌ BAD: "We decided to implement the authentication token validation step before the rate limiting middleware is executed because this prevents a potential security vulnerability where tokens could leak through the rate limiter"
-- ✅ GOOD: "DB pool: 20 connections (downstream limit) - see config.rs:34"
-- ❌ BAD: "The database connection pool has been configured to use exactly twenty connections because the downstream service has limitations"
 
 **Stack-Generic** (goes in `.agents/stacks/rust.md`):
 - ✅ GOOD: "Use `?` for error propagation (not `unwrap()` in production)"
 - ❌ BAD: "You should always use the question mark operator for error propagation instead of using unwrap() or expect() because these can cause panics in production code"
-- ✅ GOOD: "`tokio::spawn()` doesn't propagate panics → wrap in `Result` explicitly"
-- ❌ BAD: "When using tokio::spawn() to spawn asynchronous tasks, it's important to understand that panics won't be propagated automatically to the caller"
 
 **Why Conciseness Matters**:
 - Future agents need to scan 10-50 learnings quickly
@@ -715,12 +577,7 @@ Each verification agent **MUST** execute ALL checks for their language, includin
    - Main Agent MUST document these in requirements.md
 
 2. **Project Makefile/makefile** (SECONDARY SOURCE):
-   - Look for common verification targets:
-     - `make verify`
-     - `make check`
-     - `make security-scan`
-     - `make lint`
-     - `make test-all`
+   - Look for common verification targets: `make verify`, `make check`, `make security-scan`, `make lint`, `make test-all`
    - If Makefile exists and contains verification targets, run them
 
 3. **Package scripts** (TERTIARY SOURCE):
@@ -735,36 +592,6 @@ Each verification agent **MUST** execute ALL checks for their language, includin
 3. Standard language checks (always run)
 ```
 
-**User-Specified Script Examples in requirements.md**:
-
-```markdown
-## Verification Scripts
-
-### Security Scanning
-```bash
-make security-scan
-```
-Runs OWASP dependency check and static analysis.
-
-### Integration Tests
-```bash
-make integration-test
-```
-Runs full integration test suite against test environment.
-
-### License Compliance
-```bash
-./scripts/check-licenses.sh
-```
-Verifies all dependencies have approved licenses.
-
-### Performance Benchmarks
-```bash
-cargo bench --no-fail-fast
-```
-Runs performance benchmarks and fails if regression detected.
-```
-
 **Verification Agent Script Execution**:
 
 When verification agent finds user-specified scripts:
@@ -776,21 +603,6 @@ When verification agent finds user-specified scripts:
 5. ✅ Include script results in verification report
 6. ✅ If ANY script fails → Report FAIL to Main Agent
 7. ✅ Continue to standard language checks regardless of script results
-
-**Script Execution Format**:
-```bash
-# Execute with full output capture
-script_output=$(command 2>&1)
-exit_code=$?
-
-# Record results
-if [ $exit_code -eq 0 ]; then
-  echo "✅ PASS: command"
-else
-  echo "❌ FAIL: command (exit code: $exit_code)"
-  echo "Output: $script_output"
-fi
-```
 
 **Benefits of User-Specified Scripts**:
 - **Security scans**: OWASP, Snyk, Trivy, etc.
@@ -848,17 +660,7 @@ Each verification agent **MUST** execute ALL checks for their language:
 1. ✅ `cargo fmt -- --check` - Format verification
 2. ✅ `cargo clippy -- -D warnings` - Lint (zero warnings)
 3. ✅ `cargo test` - Run ALL tests OR specific crate tests
-   ```bash
-   # All tests
-   cargo test
-
-   # OR specific crate (if changes localized)
-   cargo test --package crate-name
-   ```
-4. ✅ `cargo build` - Ensure successful build
-   ```bash
-   cargo build --all-features
-   ```
+4. ✅ `cargo build --all-features` - Ensure successful build
 5. ✅ `cargo doc --no-deps` - Documentation build
 6. ✅ `cargo audit` - Security check
 7. ✅ Standards compliance checks (see `.agents/stacks/rust.md`)
@@ -908,10 +710,6 @@ Each verification agent returns:
    - Command: `[command executed]`
    - Duration: [X.X]s
    - Output: [summary or full output if failed]
-2. [Script Name]: PASS ✅ / FAIL ❌
-   - Command: `[command executed]`
-   - Duration: [X.X]s
-   - Output: [summary or full output if failed]
 
 ## Standard Check Results
 1. Format: PASS ✅ / FAIL ❌
@@ -944,55 +742,6 @@ Recommendation: [What needs to be fixed]
 
 ## Recommendations
 [Suggestions for improvement, if any]
-```
-
-**Example with User Scripts**:
-```markdown
-# Rust Verification Report
-
-## Status: PASS ✅
-
-## Files Verified
-- src/auth/token.rs
-- src/auth/middleware.rs
-- tests/auth_tests.rs
-
-## User-Specified Scripts
-1. Security Scan: PASS ✅
-   - Command: `make security-scan`
-   - Duration: 12.3s
-   - Output: No vulnerabilities found (scanned 47 dependencies)
-
-2. Performance Benchmarks: PASS ✅
-   - Command: `cargo bench --no-fail-fast`
-   - Duration: 45.7s
-   - Output: All benchmarks within acceptable range (no regressions)
-
-3. License Compliance: PASS ✅
-   - Command: `./scripts/check-licenses.sh`
-   - Duration: 2.1s
-   - Output: All 47 dependencies have approved licenses
-
-## Standard Check Results
-1. Format: PASS ✅ (rustfmt)
-2. Lint: PASS ✅ (clippy, 0 warnings)
-3. Tests: PASS ✅ (45 passed, 0 failed)
-4. Build: PASS ✅ (debug and release)
-5. Doc: PASS ✅ (cargo doc)
-6. Security: PASS ✅ (cargo audit)
-7. Standards: PASS ✅
-
-## Test Results
-- Total: 45
-- Passed: 45
-- Failed: 0
-- Coverage: 89%
-
-## Blockers
-None
-
-## Recommendations
-- Consider adding more edge case tests for token expiry
 ```
 
 ### Phase 3: Main Agent Decision
@@ -1058,28 +807,6 @@ Specification Update Agent MUST:
 7. Report completion to Main Agent
 ```
 
-**Example tasks.md update**:
-```markdown
----
-completed: 7  # was 5, now 7
-uncompleted: 3  # was 5, now 3
-tools:
-  - Rust
-  - Cargo
-  - Clippy
----
-
-# Feature Implementation - Tasks
-
-## Implementation Tasks
-- [x] Create base API structure
-- [x] Implement authentication endpoint  ← Just completed
-- [x] Add error handling  ← Just completed
-- [ ] Add rate limiting
-- [ ] Add monitoring
-- [ ] Write integration tests
-```
-
 #### If ANY Verification FAILS ❌
 
 ```
@@ -1140,145 +867,6 @@ IMPORTANT: verification.md is TRANSIENT:
 - Overwritten on next verification failure
 - Deleted on verification success
 - Agent reads it to understand what to fix
-```
-
-**Example verification.md**:
-```markdown
-# Verification Report - FAILED
-
-**Status**: FAIL ❌
-**Date**: 2026-01-11 15:30:45
-**Language**: Rust
-**Specification**: specifications/03-user-authentication/
-
-## Failed Checks
-
-### 1. Clippy Lint - FAIL ❌
-```
-warning: using `unwrap()` on a `Result` value
-  --> src/auth/token.rs:45:22
-   |
-45 |     let key = key_result.unwrap();
-   |                          ^^^^^^^^
-   |
-   = note: `#[warn(clippy::unwrap_used)]` on by default
-   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#unwrap_used
-
-error: could not compile `auth-service` due to previous error; 2 warnings emitted
-```
-
-### 2. Tests - FAIL ❌
-```
-running 45 tests
-test auth::test_generate_token ... ok
-test auth::test_validate_token_expired ... FAILED
-test auth::test_validate_token_invalid ... FAILED
-...
-
-failures:
-
----- auth::test_validate_token_expired stdout ----
-thread 'auth::test_validate_token_expired' panicked at 'assertion failed: `(left == right)`
-  left: `true`,
- right: `false`', tests/auth_tests.rs:67:5
-
----- auth::test_validate_token_invalid stdout ----
-thread 'auth::test_validate_token_invalid' panicked at 'called `Result::unwrap()` on an `Err` value: InvalidToken', tests/auth_tests.rs:82:37
-
-test result: FAILED. 43 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out
-```
-
-## Files Affected
-- src/auth/token.rs (line 45: unwrap() usage)
-- tests/auth_tests.rs (line 67: wrong assertion)
-- tests/auth_tests.rs (line 82: unwrap() in test)
-
-## Recommended Fixes
-
-1. **Replace unwrap() with proper error handling**:
-   ```rust
-   // Change from:
-   let key = key_result.unwrap();
-
-   // To:
-   let key = key_result?;  // or handle error explicitly
-   ```
-
-2. **Fix test assertion in test_validate_token_expired**:
-   - Expected result was inverted
-   - Update assertion at line 67
-
-3. **Fix test panic in test_validate_token_invalid**:
-   - Should use `unwrap_err()` since we expect an error
-   - Or use pattern matching
-
-## Agent Action Required
-
-Read this verification report, fix all issues listed above, then:
-1. Mark the urgent fix task in tasks.md as complete
-2. Continue with remaining tasks in tasks.md
-3. Report completion to Main Agent
-4. Main Agent will re-run verification
-
-When verification passes, this verification.md file will be deleted.
-```
-
-**Example tasks.md with urgent task**:
-```markdown
----
-completed: 5
-uncompleted: 6  # Incremented by 1 for urgent task
-tools:
-  - Rust
-  - Cargo
-  - Clippy
----
-
-# User Authentication - Tasks
-
-## URGENT: Failed Verification Tasks
-- [ ] **FIX: Verification failures in user authentication**
-  - Verification failed on 2026-01-11 15:30
-  - Language: Rust
-  - Failed checks: Clippy (1 error), Tests (2 failures)
-  - See verification.md for detailed report
-  - Files affected: src/auth/token.rs, tests/auth_tests.rs
-  - Must fix before proceeding
-
-## Implementation Tasks
-- [x] Create base API structure
-- [x] Implement authentication endpoint
-- [ ] Add rate limiting
-- [ ] Add monitoring
-- [ ] Write integration tests
-```
-
-**Notification to Implementation Agent or User**:
-```
-Main Agent reports:
-
-❌ VERIFICATION FAILED ❌
-
-Verification Agent: [Language] Verification Agent
-Status: FAIL
-Failed Checks:
-  - [Check 1]: [Details]
-  - [Check 2]: [Details]
-
-Test Failures:
-  - [Test 1]: [Error]
-  - [Test 2]: [Error]
-
-Code has NOT been committed.
-
-Action Required:
-1. Fix the issues listed above
-2. Re-run implementation
-3. Verification will run again automatically
-4. Code will only be committed after verification passes
-
-Specification updated: specifications/NN-name/tasks.md
-New urgent task added at top of task list.
 ```
 
 ### Phase 4: Fix and Retry (If Verification Failed)
@@ -1364,277 +952,38 @@ Bad ❌:
   → Inconsistent results
 ```
 
-**Prevention Strategy**:
-```
-Main Agent tracks active verification agents:
-  active_verifications = {
-    'rust': null,      # No Rust verification running
-    'javascript': null, # No JS verification running
-    'python': null      # No Python verification running
-  }
-
-Before spawning verification agent:
-  IF active_verifications[language] is not null:
-    WAIT for existing agent to complete
-  ELSE:
-    Spawn new verification agent
-    Mark active_verifications[language] = agent_id
-```
-
 ## Complete Workflow Example
 
-### Successful Workflow ✅
+### Successful Workflow (Condensed) ✅
 
 ```
 1. User: "Implement user authentication in Rust"
-
-2. Main Agent:
-   - Reads specification: specifications/03-user-authentication/
-   - Reads requirements.md and tasks.md
-   - Identifies tasks to complete
-
-3. Main Agent:
-   - Spawns Rust Implementation Agent
-   - Provides context (spec, requirements, tasks)
-
-4. Rust Implementation Agent:
-   - Reads AGENTS.md
-   - Reads all rules from .agents/rules/*
-   - Reads .agents/stacks/rust.md
-   - Reads specification files
-   - Implements authentication code
-   - Writes tests
-   - REPORTS completion to Main Agent:
-     * Files changed: [list]
-     * Language: Rust
-     * Description: [what was built]
-     * Specification: 03-user-authentication
-   - STOPS and WAITS
-
-5. Main Agent:
-   - Receives completion report
-   - Identifies language: Rust
-   - Checks active_verifications['rust'] = null ✅
-   - Spawns ONE Rust Verification Agent
-   - Marks active_verifications['rust'] = agent-id-123
-   - Provides context (files, spec, description)
-
-6. Rust Verification Agent:
-   - Reads .agents/stacks/rust.md
-   - Runs cargo fmt -- --check → PASS ✅
-   - Runs cargo clippy -- -D warnings → PASS ✅
-   - Runs cargo test → PASS ✅ (45 tests passed)
-   - Runs cargo build → PASS ✅
-   - Runs cargo doc → PASS ✅
-   - Runs cargo audit → PASS ✅
-   - Checks standards compliance → PASS ✅
-   - Generates comprehensive report
-   - Reports to Main Agent: PASS ✅
-
-7. Main Agent:
-   - Receives PASS report
-   - Marks active_verifications['rust'] = null
-   - Identifies specification: specifications/03-user-authentication/
-   - Spawns Specification Update Agent
-   - Provides context:
-     * Verification report (PASS)
-     * Completed tasks: authentication middleware, JWT generation, tests
-     * Files changed: [list]
-
-8. Specification Update Agent:
-   - Reads specifications/03-user-authentication/tasks.md
-   - Marks completed tasks as [x]:
-     * [x] Implement authentication middleware
-     * [x] Add JWT token generation
-     * [x] Write authentication tests
-   - Updates frontmatter: completed: 8, uncompleted: 2
-   - Deletes verification.md if it exists (cleanup from previous failure)
-   - Saves tasks.md
-   - Reports completion to Main Agent
-
-9. Main Agent:
-   - Receives completion report from Specification Agent
-   - git add [all changed files including specification]
-   - git commit with message:
-     ```
-     Implement user authentication middleware
-
-     Added JWT token generation and validation with authentication
-     middleware for securing API endpoints.
-
-     Changes made:
-     - Implemented JWT token generation and validation
-     - Created authentication middleware
-     - Added comprehensive tests (45 tests, all passing)
-     - Updated error handling for auth failures
-
-     Verified by Rust Verification Agent: All checks passed
-     - Format: PASS (rustfmt)
-     - Lint: PASS (clippy, 0 warnings)
-     - Tests: 45/45 PASS
-     - Build: PASS (debug and release)
-     - Doc: PASS (cargo doc)
-     - Security: PASS (cargo audit)
-     - Coverage: 89%
-
-     Specification: specifications/03-user-authentication/
-     Tasks completed: 3
-     Tasks remaining: 2
-
-     Co-Authored-By: Claude <noreply@anthropic.com>
-     ```
-   - git status (verify)
-   - git push (automatic, Rule 05)
-
-10. Main Agent:
-   - Reports success to user:
-     ```
-     ✅ User authentication implemented successfully!
-
-     Verification Status: PASS
-     - All 45 tests passing
-     - Code coverage: 89%
-     - Zero lint warnings
-     - Build successful (debug and release)
-     - Documentation complete
-     - No security vulnerabilities
-
-     Specification updated: 3 tasks completed, 2 remaining
-
-     Changes pushed to remote: foundation_ai branch
-     ```
+2. Main Agent: Spawns Rust Implementation Agent with spec context
+3. Implementation Agent: Implements (TDD), self-reviews, documents learnings, reports completion
+4. Main Agent: Spawns ONE Rust Verification Agent
+5. Verification Agent: Runs all checks → PASS ✅
+6. Main Agent: Spawns Specification Update Agent
+7. Specification Agent: Updates tasks.md (marks complete, updates frontmatter)
+8. Main Agent: Commits with verification status, pushes to remote
+9. Main Agent: Reports success to user
 ```
 
-### Failed Verification Workflow ❌
+### Failed Verification Workflow (Condensed) ❌
 
 ```
 1. User: "Add data validation to API endpoints"
-
-2. Main Agent:
-   - Reads specification: specifications/05-data-validation/
-   - Spawns Python Implementation Agent
-
-3. Python Implementation Agent:
-   - Implements validation logic
-   - Writes some tests (but not all edge cases)
-   - REPORTS completion to Main Agent
-
-4. Main Agent:
-   - Spawns ONE Python Verification Agent
-
-5. Python Verification Agent:
-   - Runs black -- --check → PASS ✅
-   - Runs ruff check . → FAIL ❌ (3 lint errors)
-   - Runs mypy . → FAIL ❌ (missing type hints)
-   - Runs pytest → FAIL ❌ (2 tests failing)
-   - Stops checking (failures detected)
-   - Generates FAIL report with details
-
-6. Main Agent:
-   - Receives FAIL report
-   - DOES NOT COMMIT code ❌
-   - Identifies specification: specifications/05-data-validation/
-   - Spawns Specification Update Agent
-   - Provides context:
-     * Verification report (FAIL with full details)
-     * Failed checks summary
-     * Files affected: src/validation.py, tests/test_validation.py
-     * Recommended fixes
-
-7. Specification Update Agent:
-   - Reads specifications/05-data-validation/tasks.md
-   - Creates verification.md with full FAIL report:
-     * All lint errors with line numbers
-     * All type errors
-     * All test failures with stack traces
-     * Recommended fixes
-   - Adds NEW URGENT task at TOP of tasks.md:
-     ```markdown
-     ## URGENT: Failed Verification Tasks
-     - [ ] **FIX: Verification failures in data validation**
-       - Verification failed on 2026-01-11 15:30
-       - Language: Python
-       - Failed checks: Lint (3 errors), Type Check (5 errors), Tests (2 failures)
-       - See verification.md for detailed report
-       - Files affected: src/validation.py, tests/test_validation.py
-       - Must fix before proceeding
-     ```
-   - Updates frontmatter: uncompleted: 4 → 5
-   - Saves tasks.md and verification.md
-   - Reports completion to Main Agent
-
-8. Main Agent:
-   - Receives completion report
-   - DOES NOT commit anything ❌
-   - DOES NOT push anything ❌
-   - Reports to user:
-     ```
-     ❌ VERIFICATION FAILED ❌
-
-     Python Verification Agent found issues:
-
-     Lint Errors (3):
-     - Line 45: Unused import 're'
-     - Line 103: Line too long (115 > 100 characters)
-     - Line 67: Undefined variable 'pattern'
-
-     Type Errors (5):
-     - Function 'validate_email' missing return type hint
-     - Function 'validate_phone' missing parameter type hints
-     [...]
-
-     Test Failures (2):
-     - test_email_validation: Expected True, got False
-     - test_phone_validation: KeyError: 'country_code'
-
-     Code has NOT been committed.
-
-     Action Required:
-     1. Fix the 3 lint errors
-     2. Add missing type hints (5 functions)
-     3. Fix the 2 failing tests
-     4. Re-submit for verification
-
-     Specification updated: urgent task added, verification.md created
-     Full details: specifications/05-data-validation/verification.md
-     ```
-
-9. Main Agent:
-   - Spawns Implementation Agent (or resumes existing)
-   - Provides context:
-     * Specification path
-     * verification.md location
-     * Urgent task to complete
-
-10. Implementation Agent:
-   - Reads verification.md
-   - Fixes all lint errors
-   - Adds all missing type hints
-   - Fixes both failing tests
-   - Marks urgent fix task as [x] in tasks.md
-   - REPORTS completion to Main Agent again
-
-11. Main Agent:
-   - Spawns Python Verification Agent again
-   - Agent runs all checks
-   - All checks PASS ✅
-
-12. Main Agent:
-   - Spawns Specification Update Agent
-   - Provides context (PASS report, completed tasks)
-
-13. Specification Update Agent:
-   - Marks urgent fix task as [x] completed
-   - Marks original validation tasks as [x] completed
-   - Deletes verification.md (verification passed)
-   - Updates frontmatter
-   - Saves tasks.md
-   - Reports completion
-
-14. Main Agent:
-   - Commits code and specification updates
-   - Pushes to remote (Rule 05)
-   - Reports success to user
+2. Main Agent: Spawns Python Implementation Agent
+3. Implementation Agent: Implements, reports completion
+4. Main Agent: Spawns Python Verification Agent
+5. Verification Agent: Runs checks → FAIL ❌ (3 lint errors, 2 test failures)
+6. Main Agent: DOES NOT COMMIT, spawns Specification Update Agent
+7. Specification Agent: Creates verification.md with full report, adds urgent task to tasks.md
+8. Main Agent: Reports failure details to user
+9. Main Agent: Spawns Implementation Agent with fix context
+10. Implementation Agent: Reads verification.md, fixes all issues, marks urgent task complete
+11. Main Agent: Spawns Verification Agent again → PASS ✅
+12. Main Agent: Spawns Specification Agent → Updates tasks.md, deletes verification.md
+13. Main Agent: Commits, pushes, reports success
 ```
 
 ## Integration with Other Rules
@@ -1788,4 +1137,4 @@ Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review �
 
 ---
 *Created: 2026-01-11*
-*Last Updated: 2026-01-14 (Added user-specified verification scripts requirement)*
+*Last Updated: 2026-01-18 (Optimized from 1,791 to ~1,000 lines - removed verbose examples, condensed workflows, referenced template file)*

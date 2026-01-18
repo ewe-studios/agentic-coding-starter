@@ -274,400 +274,37 @@ Specifications that are **NOT completed** can be modified:
 
 ## File Templates
 
-### requirements.md Template
-
-```markdown
----
-description: Brief one-sentence description
-status: in-progress
-priority: medium
-created: YYYY-MM-DD
-author: "Main Agent"
-metadata:
-  version: "1.0"
-  last_updated: YYYY-MM-DD
-  estimated_effort: "medium"
-  tags:
-    - feature
-builds_on: []
-related_specs: []
----
-
-# [Specification Name] - Requirements
-
-## Overview
-Brief summary of what this specification covers and why it's needed.
-
-## Requirements Conversation Summary
-
-### User's Initial Request
-[Summary of what user initially asked for]
-
-### Clarifying Questions Asked
-1. Question about [topic]
-   - Answer: [user's response]
-2. Question about [topic]
-   - Answer: [user's response]
-[... all questions and answers ...]
-
-### Final Requirements Agreement
-Based on the conversation, we agreed on:
-- [Clear statement of final understanding]
-- [All important details confirmed]
-
-## Detailed Requirements
-
-### Functional Requirements
-1. [Requirement 1]
-2. [Requirement 2]
-
-### Non-Functional Requirements
-1. [Performance requirements]
-2. [Security requirements]
-
-### Technical Specifications
-- **Technology Stack:** [Technologies to be used]
-- **Dependencies:** [Required libraries/tools]
-- **Integration Points:** [How this integrates]
-
-### Success Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-
-## Module Documentation References
-
-This specification modifies the following modules:
-
-### [Module Name]
-- **Documentation**: `documentation/[module]/doc.md`
-- **Purpose**: [Brief summary]
-- **Changes Needed**: [What will be changed]
-
-**CRITICAL**: Agents MUST read module documentation BEFORE making changes.
-
-## Important Notes for Agents
-
-### Before Starting Work
-- **MUST READ** both requirements.md and tasks.md
-- **MUST VERIFY** completion status by searching codebase
-- **MUST UPDATE** tasks.md to reflect actual status
-- **MUST ADD** new tasks BEFORE starting work
-
-### Verification Requirements
-Agents **MUST**:
-1. Search codebase for relevant implementations
-2. Verify code exists and works as specified
-3. Update task status based on findings
-4. Mark completed only when fully verified
-
----
-*Created: [Date]*
-*Last Updated: [Date]*
-```
-
-### tasks.md Template
-
-```markdown
----
-completed: 0
-uncompleted: 8
-created: YYYY-MM-DD
-author: "Main Agent"
-metadata:
-  version: "1.0"
-  last_updated: YYYY-MM-DD
-  total_tasks: 8
-  completion_percentage: 0
-tools:
-  - TypeScript
-  - Jest
-skills: []
----
-
-# [Specification Name] - Tasks
-
-## Task List
-
-### Implementation Tasks
-- [ ] Task 1
-- [ ] Task 2
-- [ ] Task 3
-
-### Testing Tasks
-- [ ] Write unit tests
-- [ ] Write integration tests
-
-### Documentation Tasks
-- [ ] Write API documentation
-- [ ] Add usage examples
-
-## Notes
-- [Any important notes about tasks]
-
----
-*Last Updated: YYYY-MM-DD*
-```
-
-## Mandatory Documentation Files
-
-Every specification **MUST** have these 6 files:
-
-### 1. requirements.md (Created at Start)
-Documents requirements and conversation summary. See template above.
-
-### 2. tasks.md (Created at Start)
-Task list with checkboxes. See template above.
-
-### 3. PROGRESS.md (Created at ~50% Completion)
-
-**When to Create**: At 40-60% completion or major phase transitions.
-
-**Template:**
-```markdown
-# [Specification Name] - Progress Report
-
-## Overall Status: [X%] Complete
-
-### Completed Work
-- ✅ [Completed task/feature]
-- ✅ [Another completed item]
-
-### Current Status
-[What you're currently working on]
-
-### Remaining Work
-- [ ] [Task to be done]
-- [ ] [Another pending task]
-
-### Blockers/Issues
-[Any problems or blockers, or "None"]
-
-### Statistics
-- Files modified: [N]
-- Lines changed: [N]
-- Tests added: [N]
-
-### Next Steps
-1. [Immediate next action]
-2. [Following action]
-
----
-*Progress Report Created: [Date and Time]*
-```
-
-### 4. FINAL_REPORT.md (Created When Work Complete)
-
-**When to Create**: When all tasks are 100% complete.
-
-**Template:**
-```markdown
-# [Specification Name] - Final Report
-
-## Mission Accomplished! 🎉
-
-All work for this specification has been completed successfully.
-
-## Work Completed ([X]/[Y] tasks)
-
-**Status**: ✅ All tasks complete
-**Completion**: 100%
-
-### Task Breakdown
-- Implementation: [X]/[Y] tasks
-- Testing: [X]/[Y] tasks
-- Documentation: [X]/[Y] tasks
-
-## Detailed Accomplishments
-
-### Implementation
-- [Accomplishment 1]
-- [Accomplishment 2]
-
-### Testing
-- [Test coverage details]
-
-### Documentation
-- [Documentation created]
-
-## Commits Created
-- [commit-hash]: [commit message]
-- [commit-hash]: [commit message]
-
-## Remaining Work
-[List any deferred items, or "None - all work complete"]
-
-## Statistics
-- Total files modified: [N]
-- Total lines changed: [+N -M]
-- Tests added: [N]
-- Test coverage: [X%]
-
-## Verification Results
-✅ [Verification check passed]
-✅ [Another check passed]
-
-## Impact
-**Before**: [State before this work]
-**After**: [State after this work]
-
-**Benefits**:
-- [Benefit 1]
-- [Benefit 2]
-
-## Recommendation
-✅ **Ready for merge/deployment**
-
-[Or if issues exist: ⚠️ Conditional approval with notes]
-
----
-*Final Report Created: [Date and Time]*
-```
-
-### 5. LEARNINGS.md (Created at Completion)
-
-**When to Create**: When work is substantially complete.
-
-**Template:**
-```markdown
-# [Specification Name] - Learnings
-
-## Overview
-[Brief summary of what was learned during this specification]
-
-## Key Insights
-1. **[Insight Category]**
-   - [Specific learning or discovery]
-   - [Why this matters]
-
-2. **[Another Insight]**
-   - [Details]
-
-## Challenges and Solutions
-
-### Challenge: [Challenge Description]
-**Problem**: [What the problem was]
-**Solution**: [How it was solved]
-**Outcome**: [Result]
-
-## Best Practices Discovered
-- [Best practice 1]
-- [Best practice 2]
-
-## Anti-Patterns to Avoid
-- [What not to do and why]
-
-## Recommendations for Future Work
-1. [Recommendation for next time]
-2. [Another recommendation]
-
-## Knowledge Gained
-
-### Technical Knowledge
-- [New technical knowledge acquired]
-
-### Process Knowledge
-- [Process improvements identified]
-
-## Documentation Improvements Needed
-- [Documentation gaps found]
-
-## Technical Debt Identified
-- [Technical debt discovered]
-
-## Success Factors
-[What made this specification successful]
-
----
-*Learnings Documented: [Date]*
-```
-
-### 6. VERIFICATION_SIGNOFF.md (Created After Verification)
-
-**When to Create**: After verification agent completes final verification.
-
-**Template:**
-```markdown
-# [Specification Name] - Verification Sign-Off
-
-## Executive Summary
-**Specification**: [NN]: [Specification Name]
-**Verification Date**: [YYYY-MM-DD]
-**Verification Agent**: [Agent Name]
-**Status**: ✅ APPROVED | ⚠️ APPROVED WITH NOTES | ❌ REJECTED
-**Confidence Level**: [High/Medium/Low]
-
-## ✅ Verification Results
-
-### Requirements Compliance
-- [X]/[Y] requirements fully met
-- [ ] [Any unmet requirements]
-
-**Compliance Rating**: [X%]
-
-### Code Quality
-✅ [Quality check passed]
-✅ [Another check passed]
-⚠️ [Warning or note if any]
-
-### Testing Coverage
-- Unit tests: [X%]
-- Integration tests: [X%]
-- Overall coverage: [X%]
-
-## 📊 Quality Assessment
-
-### Performance
-[Performance assessment results]
-
-### Security
-[Security assessment results]
-
-### Maintainability
-[Code maintainability assessment]
-
-## 🎯 Specification Compliance
-
-### Functional Requirements
-- ✅ [Requirement]: Fully implemented
-- ✅ [Requirement]: Fully implemented
-
-### Non-Functional Requirements
-- ✅ [Requirement]: Met
-- ✅ [Requirement]: Met
-
-## ⚠️ Issues Found
-
-[List any issues, or "None - all checks passed"]
-
-## 🏆 Final Verdict
-
-**Status**: ✅ APPROVED FOR PRODUCTION
-
-[Or if conditional: ⚠️ APPROVED WITH RECOMMENDATIONS]
-
-**Recommendation**: Ready for merge and deployment
-
-**Conditions** (if any):
-- [Condition 1]
-
-## 📝 Verification Checklist
-
-- [x] All requirements implemented
-- [x] All tests passing
-- [x] Code quality standards met
-- [x] Documentation complete
-- [x] No critical issues found
-
-## 🚀 Sign-Off
-
-**Verified By**: [Agent Name]
-**Date**: [YYYY-MM-DD]
-**Signature**: [Agent Identifier]
-
----
-*Official Verification Report*
-*This specification has been formally verified and approved*
-```
+All specification file templates are located in `.agents/templates/`. Reference these when creating files:
+
+### Mandatory Files for Every Specification
+
+1. **requirements.md** - Requirements and conversation summary
+   - Template: `.agents/templates/requirements-template.md`
+   - Contains: Overview, conversation summary, detailed requirements, success criteria, module documentation references, agent notes
+
+2. **tasks.md** - Task list with checkboxes
+   - Template: `.agents/templates/tasks-template.md`
+   - Contains: Task list organized by category, frontmatter with counts and tools
+
+3. **PROGRESS.md** - Mid-work progress report
+   - Template: `.agents/templates/PROGRESS-template.md`
+   - When: Created at 40-60% completion or major phase transitions
+   - Contains: Completion status, completed work, current status, remaining work, blockers, statistics, next steps
+
+4. **FINAL_REPORT.md** - Comprehensive completion summary
+   - Template: `.agents/templates/FINAL_REPORT-template.md`
+   - When: Created when all tasks are 100% complete
+   - Contains: Work completed, task breakdown, detailed accomplishments, commits, statistics, verification results, impact, recommendation
+
+5. **LEARNINGS.md** - Lessons learned and insights
+   - Template: `.agents/templates/LEARNINGS-template.md`
+   - When: Created at completion
+   - Contains: Key insights, challenges and solutions, best practices, anti-patterns, recommendations, knowledge gained, technical debt
+
+6. **VERIFICATION_SIGNOFF.md** - Official verification report
+   - Template: `.agents/templates/VERIFICATION_SIGNOFF-template.md`
+   - When: Created after verification agent completes final verification
+   - Contains: Executive summary, verification results, quality assessment, compliance check, issues found, final verdict, checklist, sign-off
 
 ## Module Documentation System (MANDATORY)
 
@@ -732,151 +369,36 @@ If documentation doesn't match actual code:
 
 ### doc.md File Structure
 
-Every `documentation/[module]/doc.md` **MUST** contain:
+Every `documentation/[module]/doc.md` **MUST** contain these sections with complete frontmatter:
 
-```markdown
----
-module: [Exact module name]
-language: [rust|javascript|typescript|python|go|etc]
-status: [active|deprecated|experimental|planning]
-last_updated: [YYYY-MM-DD]
-maintainer: [Primary agent/team]
-related_specs:
-  - specifications/NN-spec-name
----
+**Required Frontmatter:**
+- `module`: Exact module name
+- `language`: rust|javascript|typescript|python|go|etc
+- `status`: active|deprecated|experimental|planning
+- `last_updated`: YYYY-MM-DD
+- `maintainer`: Primary agent/team
+- `related_specs`: Array of specification references
 
-# [Module Name] - Documentation
+**Required Sections:**
+1. **Overview** - 2-3 sentence summary
+2. **Purpose and Responsibility** - Detailed explanation of module's purpose
+3. **Module Location** - Path, entry point, language
+4. **What It Implements** - Core functionality with line numbers
+5. **Public API** - Exported functions and types with line references
+6. **What It Imports** - External and internal dependencies
+7. **What It Calls** - External and internal function calls with line numbers
+8. **What It Does (Step-by-Step)** - Primary workflows and edge cases
+9. **Architecture** - Design patterns and module structure
+10. **Key Implementation Details** - Performance and security considerations
+11. **Tests** - Test coverage information
+12. **Dependencies and Relationships** - Module dependencies and usage
+13. **Configuration** - Environment variables
+14. **Known Issues and Limitations** - Current limitations, bugs, technical debt
+15. **Future Improvements** - Planned enhancements
+16. **Related Documentation** - Links to related specs
+17. **Version History** - Change log
 
-## Overview
-[2-3 sentence summary of what this module does]
-
-## Purpose and Responsibility
-[Detailed explanation of module's purpose and role]
-
-## Module Location
-- **Path**: `[exact file path]`
-- **Entry Point**: `[main file]`
-- **Language**: [language and version]
-
-## What It Implements
-
-### Core Functionality
-1. **[Feature Name]** (Line [NNN-MMM])
-   - What: [What this does]
-   - Why: [Why it exists]
-   - How: [How it works]
-   - Key Functions: `function_name()`
-
-### Public API
-**Exported Functions:**
-- `function_name(args) -> return` (Line NNN): [Purpose]
-
-**Exported Types/Classes:**
-- `TypeName` (Line NNN): [Purpose]
-
-## What It Imports
-
-### External Dependencies
-- `dependency-name` (v1.2.3): [Why used]
-
-### Internal Dependencies
-- `internal/module`: [What imported and why]
-
-## What It Calls
-
-### External Function Calls
-- **Database**: Calls `db.query()` (Lines NNN-MMM)
-  - Purpose: [Why]
-
-### Internal Function Calls
-- **Helpers**: `helper.validate()` (Lines NNN-MMM)
-
-## What It Does (Step-by-Step)
-
-### Primary Workflows
-
-#### Workflow 1: [Name]
-1. **Input**: [What triggers]
-2. **Processing**:
-   - Step 1: [Action] (Line NNN)
-   - Step 2: [Action] (Line MMM)
-3. **Output**: [What produces]
-4. **Error Handling**: [How errors handled]
-
-### Edge Cases
-- **Case 1**: [Description] (Lines NNN-MMM)
-  - Condition: [When]
-  - Handling: [How handled]
-
-## Architecture
-
-### Design Patterns
-- **Pattern Name**: [How/why used]
-
-### Module Structure
-```
-module-directory/
-├── main_file.ext         # [Purpose]
-├── submodule.ext         # [Purpose]
-└── tests/                # [Tests]
-```
-
-## Key Implementation Details
-
-### Performance Considerations
-- [Performance notes] (Lines NNN-MMM)
-
-### Security Considerations
-- [Security notes] (Lines NNN-MMM)
-
-## Tests
-
-### Test Coverage
-- **Unit Tests**: `[path]` - [XX%] coverage
-- **Integration Tests**: `[path]` - [XX%] coverage
-
-## Dependencies and Relationships
-
-### Depends On
-- **Module A**: [Why]
-
-### Used By
-- **Module C**: [How used]
-
-## Configuration
-
-### Environment Variables
-- `ENV_VAR`: [Purpose and default]
-
-## Known Issues and Limitations
-
-### Current Limitations
-1. **[Limitation]**: [Description]
-
-### Known Bugs
-- **[Bug]**: [Impact] (Issue #NNN)
-
-### Technical Debt
-- **[Debt]**: [Description]
-
-## Future Improvements
-
-### Planned Enhancements
-- **[Enhancement]**: [Description]
-
-## Related Documentation
-
-### Specifications
-- [Links to related specs]
-
-## Version History
-
-### [Version X.Y.Z] - YYYY-MM-DD
-- [Major changes]
-
----
-*Last Updated: [Date]*
-```
+**See example structure in project documentation templates.**
 
 ### Implementation Agent Workflow With Module Docs
 
@@ -916,30 +438,24 @@ This directory contains all project specifications. Each specification represent
 **Status:** ✅ Completed
 **Description:** RESTful HTTP client
 
-### [02: User Authentication](./02-user-authentication/)
-**Status:** 🔄 In Progress
-**Description:** JWT-based authentication
-
-### [03: Database Migrations](./03-database-migrations/)
-**Status:** ⏳ Pending
-**Description:** Migration system
+[... list all specifications ...]
 
 ## Status Dashboard
 
 ### Summary
-- **Total:** 3
-- **Completed:** 1 (33%)
-- **In Progress:** 1 (33%)
-- **Pending:** 1 (33%)
+- **Total:** N
+- **Completed:** X (XX%)
+- **In Progress:** Y (YY%)
+- **Pending:** Z (ZZ%)
 
 ### Completed ✅
-- 01: Build HTTP Client
+- [List completed specs]
 
 ### In Progress 🔄
-- 02: User Authentication
+- [List in-progress specs]
 
 ### Pending ⏳
-- 03: Database Migrations
+- [List pending specs]
 
 ---
 *Last updated: YYYY-MM-DD*
@@ -999,126 +515,52 @@ Review agent **MUST** report:
 ```
 1. User Requests Feature
    ↓
-2. Main Agent Conversation with User
-   ├─ Ask clarifying questions
-   ├─ Understand full requirements
-   ├─ Confirm technical approach
-   └─ Get user agreement
+2. Main Agent: Thorough Requirements Conversation (3-10+ Questions)
    ↓
-3. Create Specification Directory
-   ├─ Determine next number
-   ├─ Create specifications/NN-feature-name/
-   └─ Create requirements.md and tasks.md
+3. User Provides Answers + Main Agent Confirms Understanding
    ↓
-4. Document Requirements
-   ├─ Fill frontmatter completely
-   ├─ Write conversation summary
-   ├─ List detailed requirements
-   └─ Include agent notes
+4. Create Specification Directory (specifications/NN-feature-name/)
    ↓
-4.5 Create/Update Module Documentation (MANDATORY)
-   ├─ Identify affected modules
-   ├─ Spawn Documentation Agent(s)
-   ├─ Agents create/update documentation/[module]/doc.md
-   ├─ Agents verify accuracy against code
-   ├─ If mismatch: STOP, fix docs first
-   ├─ Main Agent updates requirements.md with references
-   └─ Main Agent commits module documentation
+5. Create requirements.md (with conversation summary)
    ↓
-5. Create Task List
-   ├─ Fill frontmatter completely
-   ├─ Break down work into tasks
-   ├─ List all tools needed
-   └─ All tasks start as [ ]
+6. Create tasks.md (with complete frontmatter)
    ↓
-6. Update Spec.md Master Index
-   ├─ Add new specification
-   ├─ Update status dashboard
-   └─ Link to specification
+7. Create/Update Module Documentation (MANDATORY)
+   - Identify affected modules
+   - Spawn Documentation Agent(s)
+   - Verify docs match code (STOP if mismatch)
+   - Reference in requirements.md
    ↓
-7. Commit Specification Files
-   ├─ git add specifications/
-   ├─ git commit (following Rule 03)
-   ├─ git push (following Rule 05)
-   └─ Verify success
+8. Update Spec.md Master Index
    ↓
-8. LAUNCH REVIEW AGENT (MANDATORY)
-   ├─ Review agent reads requirements.md and tasks.md
-   ├─ Review agent searches codebase
-   ├─ Review agent verifies task accuracy
-   ├─ Review agent identifies inconsistencies
-   ├─ Review agent reports: GO / STOP / CLARIFY
-   └─ Main agent evaluates report
-      ↓
-      IF GO: Continue to Step 9
-      IF STOP/CLARIFY: Address issues, re-review
+9. Commit Specification + Module Documentation
    ↓
-9. Launch Specialized Agents (Rule 04)
-   ├─ Agents MUST read requirements.md
-   ├─ Agents MUST read tasks.md
-   ├─ Agents MUST read review report
-   ├─ Agents MUST read module documentation
-   ├─ Agents MUST verify docs match reality
-   ├─ If mismatch: STOP, report to Main Agent
-   ├─ Agents work on verified tasks
-   └─ Agents update module docs if changes occur
+10. LAUNCH REVIEW AGENT (MANDATORY)
+    - Review reads specs, searches codebase
+    - Reports: GO / STOP / CLARIFY
+    - IF GO: Continue | IF STOP/CLARIFY: Fix issues first
    ↓
-10. Agent Updates During Work
-    ├─ Add new tasks BEFORE starting work
-    ├─ Update task checkboxes as complete
-    ├─ Update frontmatter counts
-    ├─ Update tools list
-    └─ Commit changes after updates
+11. Launch Implementation Agents
+    - Read specs, tasks, review report, module docs
+    - Verify docs match reality (STOP if mismatch)
+    - Implement verified tasks
+    - Update module docs if changes occur
    ↓
-11. Create PROGRESS.md (MANDATORY)
-    ├─ At ~40-60% completion checkpoint
-    ├─ Document completed, current, remaining work
-    ├─ Include statistics and blockers
-    └─ Commit PROGRESS.md
+12. Create PROGRESS.md (~40-60% completion)
    ↓
-12. Complete All Implementation Work
-    ├─ Finish all tasks
-    ├─ Update tasks.md to reflect completion
-    ├─ Search codebase to verify
-    └─ Ensure all works and tests pass
+13. Complete Implementation (all tasks done)
    ↓
-13. Create FINAL_REPORT.md (MANDATORY)
-    ├─ When 100% complete
-    ├─ Comprehensive summary
-    ├─ Statistics and achievements
-    ├─ List all commits
-    ├─ Document impact
-    └─ Commit FINAL_REPORT.md
+14. Create FINAL_REPORT.md
    ↓
-14. Create LEARNINGS.md (MANDATORY)
-    ├─ Document lessons learned
-    ├─ Capture challenges and solutions
-    ├─ Include best practices
-    ├─ Recommendations for future
-    ├─ Identify technical debt
-    └─ Commit LEARNINGS.md
+15. Create LEARNINGS.md
    ↓
-15. Run Final Verification (MANDATORY)
-    ├─ Launch verification agent
-    ├─ Check all requirements met
-    ├─ Validate code quality
-    ├─ Provide sign-off report
-    └─ Receive GO/STOP assessment
+16. Run Final Verification Agent
    ↓
-16. Create VERIFICATION_SIGNOFF.md (MANDATORY)
-    ├─ After verification completes
-    ├─ Official verification report
-    ├─ Compliance rating
-    ├─ All checks documented
-    ├─ APPROVED/REJECTED status
-    └─ Commit VERIFICATION_SIGNOFF.md
+17. Create VERIFICATION_SIGNOFF.md
    ↓
-17. Final Status Updates
-    ├─ Update requirements.md: status → completed
-    ├─ Update tasks.md: ensure accurate
-    ├─ Update Spec.md with completion
-    ├─ Commit all final updates
-    └─ Final push
+18. Update requirements.md status → completed
+   ↓
+19. Update Spec.md, commit, push
 ```
 
 ## Verification Requirements
@@ -1153,72 +595,33 @@ Agents **MUST NOT** trust status or checkboxes blindly. Instead:
 
 ### Good Practice ✅
 
-**Example 1: Starting with Review Agent**
+**Starting with Review Agent**
 - User requests caching layer
-- Main Agent asks clarifying questions (strategy, storage, invalidation)
-- User provides answers
-- Agent creates specification with full conversation
-- Agent commits specification
+- Main Agent asks 8 clarifying questions (strategy, storage, invalidation, TTL, etc.)
+- User provides detailed answers
+- Agent creates specification with full conversation documented
 - **Agent launches REVIEW AGENT FIRST** ✅
-- Review agent reads, searches codebase, verifies, reports "GO"
-- Agent launches implementation agents
-- Agents read specs, verify status, work efficiently
-
-**Example 2: Review Agent Finding Inconsistencies**
-- Main agent assigned to database migrations spec
-- **Main agent launches REVIEW AGENT FIRST** ✅
-- Review agent finds: 2 tasks marked [x] but code missing, 1 task marked [ ] but code exists
-- Review agent reports "STOP - Found inconsistencies"
-- Main agent corrects tasks.md based on findings
-- Main agent commits corrections
-- NOW launches implementation agents with accurate status
-
-**Example 3: Review Agent Requesting Clarification**
-- Main agent on payment integration spec
-- **Review agent runs first** ✅
-- Review finds unclear requirements (no provider specified, no retry strategy)
-- Review reports "CLARIFY - User input required"
-- Main agent asks user for clarifications
-- User provides details
-- Main agent updates specification
-- Review agent runs again, reports "GO"
-- Implementation proceeds with clear requirements
+- Review agent verifies, reports "GO"
+- Agent launches implementation agents with accurate context
 
 ### Bad Practice ❌
 
-**Example 1: Starting Without Review Agent**
+**Starting Without Review Agent**
 - User: "Implement authentication"
 - Main Agent creates spec, commits
 - **Immediately launches implementation WITHOUT review** ❌
 - Agents assume task statuses are accurate
 - Discover "completed" tasks aren't done
-- Waste 3 hours on wrong approach
+- Waste hours on wrong approach
 - **CRITICAL VIOLATION**: Skipped mandatory review agent
 
-**Example 2: Starting Without Requirements**
-- User: "Add authentication"
-- Main Agent launches agents immediately ❌
-- No requirements conversation
-- No specification created
-- No review agent (no spec to review!)
-- Agents don't know what to implement
+**Passive Acceptance Without Questions**
+- User: "Add user authentication"
+- Main Agent: "Ok, I'll create a specification"
+- **No clarifying questions asked** ❌
+- Missing: authentication method, storage, security requirements
+- Implements wrong solution
 - User expectations not met
-
-**Example 3: Ignoring Review Agent STOP**
-- Review agent reports "STOP - 5 tasks marked wrong"
-- Main agent IGNORES and launches implementation anyway ❌
-- Implementation agents work based on wrong status
-- Build features that break
-- Hours wasted debugging
-- User upset: "Why didn't you verify first?"
-- **CRITICAL VIOLATION**: Ignored STOP directive
-
-**Example 4: Not Verifying Status**
-- Agent reads spec: "[x] Implement Redis adapter"
-- Agent assumes it's done ❌
-- Actually no Redis code exists
-- Leaves incomplete work as "completed"
-- **VIOLATION**: Didn't search codebase to verify
 
 ## Rationale
 
@@ -1261,35 +664,35 @@ Saves hours by:
 
 ## Enforcement
 
-### Mandatory Compliance
+### Mandatory Compliance Checklist
 
 All agents **MUST**:
-- Never begin work without documented requirements
-- Create specification directory before implementation
-- **Engage in thorough requirements conversation** (3-10+ questions)
-- **Never passively accept user requests without clarification**
-- Document requirements conversation thoroughly
-- Create comprehensive task list
-- **Create/verify module documentation after requirements**
-- **Launch review agent BEFORE any implementation**
-- **Read review agent's report before proceeding**
-- **Stop work if review reports STOP or CLARIFY**
-- Read requirements.md, tasks.md, and module docs before working
-- Verify status by searching codebase
-- Update tasks.md as work progresses
-- **Create all 6 mandatory documentation files**
-- Commit specification changes following Rule 03 and Rule 05
+- ✅ Engage in thorough requirements conversation (3-10+ questions)
+- ✅ Never passively accept user requests without clarification
+- ✅ Never make assumptions about unspecified requirements
+- ✅ Confirm understanding before documenting
+- ✅ Create specification directory before implementation
+- ✅ Document complete conversation in requirements.md
+- ✅ Create comprehensive task list in tasks.md
+- ✅ Create/verify module documentation after requirements
+- ✅ Launch review agent BEFORE any implementation
+- ✅ Read review agent's report before proceeding
+- ✅ Stop work if review reports STOP or CLARIFY
+- ✅ Read requirements.md, tasks.md, and module docs before working
+- ✅ Verify module docs match actual code
+- ✅ Verify status by searching codebase
+- ✅ Update tasks.md as work progresses
+- ✅ Create all 6 mandatory documentation files
+- ✅ Commit specification changes following Rule 03 and Rule 05
 
-### Violations
+### Critical Violations
 
-**CRITICAL Violations:**
+**ZERO TOLERANCE for these violations:**
 - ❌ Passively accepting user request without questions
-- ❌ Making assumptions about unspecified requirements
-- ❌ Documenting requirements without user confirmation
 - ❌ Asking fewer than minimum required questions
+- ❌ Making assumptions about unspecified requirements
 - ❌ Starting implementation without running review agent first
 - ❌ Ignoring review agent's STOP or CLARIFY directive
-- ❌ Proceeding when review identifies blockers
 - ❌ Starting implementation without module documentation
 - ❌ Not verifying module documentation accuracy
 - ❌ Proceeding when module docs don't match code
@@ -1299,18 +702,6 @@ All agents **MUST**:
 - ❌ Completing spec without VERIFICATION_SIGNOFF.md
 - ❌ Marking complete without running verification
 
-**Standard Violations:**
-- Starting work without documented requirements
-- Not creating specification directory
-- Skipping requirements conversation
-- Incomplete conversation summary
-- Trusting task status without verifying
-- Not updating tasks.md during work
-- Not updating frontmatter counts
-- Starting work on tasks not yet added
-- Incomplete requirements documentation
-- Not updating Spec.md master index
-
 ### User Impact
 
 Violations cause:
@@ -1318,15 +709,12 @@ Violations cause:
 - **Wasted effort**: Wrong or unnecessary implementation
 - **Lost context**: Future agents don't understand requirements
 - **False progress**: Status shows completion when incomplete
-- **Confusion**: User can't understand what's been done
-- **Rework**: Need to redo due to misunderstanding
 - **Time waste**: Hours wasted on false assumptions
 - **Trust erosion**: User loses confidence in agents
 - **Breaking changes**: Bugs from misunderstanding modules
-- **Documentation drift**: Docs become useless
 
 **THE USER WILL BE UPSET** if work proceeds without:
-- Proper requirements documentation and conversation
+- Proper requirements conversation with clarifying questions
 - Status verification
 - Mandatory review agent execution
 - Accurate module documentation
@@ -1335,22 +723,20 @@ Violations cause:
 ### Corrective Action
 
 When violation occurs:
-1. **Stop immediately** if work started without requirements/review
+1. **Stop immediately**
 2. **Launch review agent** if skipped (CRITICAL)
 3. **Read and act on review report** (MANDATORY)
 4. **Do not proceed** if review reports STOP/CLARIFY
 5. **Create/verify module documentation** if missing (CRITICAL)
-6. **Spawn documentation agent** to verify/update if needed
-7. **Do not proceed** if module docs don't match reality
-8. **Create specification** if missing
-9. **Document requirements** via conversation with user
-10. **Create task list** before proceeding
-11. **Verify status** by searching codebase
-12. **Update files** to reflect accurate status
-13. **Commit changes** following proper workflow
-14. **Re-run review agent** if specs updated
-15. **Re-verify module docs** if code changed
-16. **Only proceed** when review reports GO and module docs accurate
+6. **Do not proceed** if module docs don't match reality
+7. **Create specification** if missing
+8. **Document requirements** via conversation with user
+9. **Create task list** before proceeding
+10. **Verify status** by searching codebase
+11. **Update files** to reflect accurate status
+12. **Commit changes** following proper workflow
+13. **Re-run review agent** if specs updated
+14. **Only proceed** when review reports GO and module docs accurate
 
 ## Special Cases
 
@@ -1398,47 +784,24 @@ For pure documentation updates:
 
 ## Summary
 
-**Core Principle**: Never start significant work without documented requirements and clear task list. **Always engage in thorough requirements conversation with clarifying questions first.** Always launch review agent to verify specifications before implementation. Never trust checkboxes blindly. Always create all mandatory documentation files. **Always create/verify module documentation before implementation.**
+**Core Principle**: Never start significant work without documented requirements and clear task list. **Always engage in thorough requirements conversation with clarifying questions first (3-10+ questions).** Always launch review agent to verify specifications before implementation. Never trust checkboxes blindly. Always create all 6 mandatory documentation files. **Always create/verify module documentation before implementation.**
 
-**Key Points**:
-- ✅ **Requirements conversation with clarifying questions FIRST** (3-10+ questions)
-- ✅ **Main Agent MUST ask clarifying questions proactively**
-- ✅ **Main Agent MUST NOT passively accept requests**
-- ✅ **Main Agent MUST confirm understanding before documenting**
-- ✅ Document complete conversation in requirements.md
-- ✅ Create comprehensive task list before work
-- ✅ **Create/verify module documentation after requirements** (MANDATORY)
-- ✅ **Spawn documentation agents to create/update module docs**
-- ✅ **Never assume module documentation is accurate**
-- ✅ **Verify module docs match actual code**
-- ✅ **Reference module docs in requirements.md**
-- ✅ **Launch review agent BEFORE implementation** (MANDATORY)
-- ✅ **Act on review agent's report** (GO/STOP/CLARIFY)
-- ✅ Agents read specifications and module docs before working
-- ✅ **Agents verify module docs match reality** (spot check)
-- ✅ **Agents STOP if module docs don't match code**
-- ✅ Verify status by searching codebase
-- ✅ Update tasks.md as work progresses
-- ✅ **Update module docs if structure changes**
-- ✅ **Create PROGRESS.md at ~50% completion** (MANDATORY)
-- ✅ **Create FINAL_REPORT.md when complete** (MANDATORY)
-- ✅ **Create LEARNINGS.md to capture insights** (MANDATORY)
-- ✅ **Run final verification before completion** (MANDATORY)
-- ✅ **Create VERIFICATION_SIGNOFF.md with report** (MANDATORY)
-- ✅ Keep Spec.md master index current
-- ❌ **Never skip clarifying questions** (CRITICAL)
-- ❌ **Never make assumptions** (CRITICAL)
-- ❌ **Never document without confirmation** (CRITICAL)
-- ❌ **Never skip module documentation** (CRITICAL)
-- ❌ **Never assume module docs accurate** (CRITICAL)
-- ❌ **Never proceed when module docs don't match** (CRITICAL)
-- ❌ **Never skip review agent** (CRITICAL)
-- ❌ **Never ignore review STOP/CLARIFY** (CRITICAL)
-- ❌ **Never skip mandatory documentation files**
-- ❌ Never start work without requirements
-- ❌ Never trust status without verification
-- ❌ Never add tasks retroactively
-- ❌ Never skip updating frontmatter
+**Key Requirements:**
+- ✅ **Requirements conversation FIRST** (3-10+ clarifying questions mandatory)
+- ✅ **Main Agent MUST ask proactively, never assume**
+- ✅ **Confirm understanding before documenting**
+- ✅ **Create/verify module documentation** (after requirements, before implementation)
+- ✅ **Launch review agent BEFORE implementation** (zero tolerance)
+- ✅ **Act on review report** (GO/STOP/CLARIFY)
+- ✅ **Verify module docs match code** (STOP if mismatch)
+- ✅ **Create all 6 mandatory files** (requirements, tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF)
+- ✅ **Verify status by searching codebase**
+- ✅ **Update tasks.md and module docs as work progresses**
+- ❌ **Never skip clarifying questions**
+- ❌ **Never skip review agent**
+- ❌ **Never ignore review STOP/CLARIFY**
+- ❌ **Never skip module documentation**
+- ❌ **Never assume specs or module docs are accurate**
 
 **Mandatory Files for Every Specification:**
 1. **requirements.md** - Requirements and conversation (created at start)
@@ -1449,29 +812,16 @@ For pure documentation updates:
 6. **VERIFICATION_SIGNOFF.md** - Official verification report (after verification)
 
 **Module Documentation System:**
-Every affected module **MUST** have accurate documentation:
-1. **documentation/[module]/doc.md** - Detailed module documentation with:
-   - What it implements (all features/functions)
-   - What it imports (dependencies)
-   - What it calls (function calls)
-   - What it does (step-by-step workflows)
-   - Line number references
-2. **Created/verified after requirements.md, before implementation**
-3. **Updated when module structure changes**
-4. **Referenced in requirements.md** so agents know to read it
-5. **Verified to match actual code** (never assume accurate)
-
-**Review Agent Is Mandatory:**
-Saves hours by:
-- Verifying task status accuracy before implementation
-- Identifying unclear requirements needing clarification
-- Catching inconsistencies between docs and code
-- Preventing work based on false assumptions
-- Ensuring specifications are actionable
+Every affected module **MUST** have accurate documentation at `documentation/[module]/doc.md`:
+- Created/verified after requirements.md, before implementation
+- Contains: what it implements, imports, calls, does (with line numbers)
+- Referenced in requirements.md so agents know to read it
+- Verified to match actual code (never assume accurate)
+- Updated when module structure changes
 
 **Remember**: The user will be upset if work proceeds without proper requirements conversation, status verification, mandatory review agent, accurate module documentation, or all mandatory documentation files!
 
 ---
 *Created: 2026-01-11*
 *Last Updated: 2026-01-18*
-*Version: 3.0 (Optimized - Reduced from 3,153 to 2,277 lines)*
+*Version: 4.0 (Optimized - Reduced from 1,477 to 806 lines)*

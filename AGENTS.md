@@ -1,7 +1,7 @@
 ---
 purpose: Central entry point for AI agent configuration
 description: Minimal configuration file that directs agents to detailed rules and standards
-version: 3.2.0
+version: 3.3.0
 last_updated: 2026-01-18
 ---
 
@@ -75,15 +75,26 @@ All agents **MUST** follow this sequence at the start of every session:
 
 specifications/         # Feature specifications (PROJECT ROOT LEVEL)
 ├── Spec.md             # Master index
-├── NN-spec-name/
+├── NN-spec-name/       # Simple specification
 │   ├── requirements.md
 │   ├── tasks.md
+│   ├── templates/      # (optional) Code templates
 │   ├── PROGRESS.md     # Mid-work progress report
 │   ├── FINAL_REPORT.md # Completion summary
 │   ├── LEARNINGS.md    # Lessons learned
-│   ├── VERIFICATION_SIGNOFF.md # Official verification
-│   ├── verification.md # (transient, created on verification failure)
-│   └── learnings.md    # (optional, specification-specific insights)
+│   └── VERIFICATION_SIGNOFF.md # Official verification
+├── NN-complex-spec/    # Complex specification with features
+│   ├── requirements.md # High-level + feature references
+│   ├── tasks.md        # Feature priority list
+│   ├── features/       # Feature breakdown
+│   │   └── [feature-name]/
+│   │       ├── feature.md
+│   │       ├── tasks.md
+│   │       └── templates/
+│   ├── PROGRESS.md
+│   ├── FINAL_REPORT.md
+│   ├── LEARNINGS.md
+│   └── VERIFICATION_SIGNOFF.md
 └── ...
 
 documentation/          # Module documentation (PROJECT ROOT LEVEL)
@@ -149,20 +160,22 @@ CLAUDE.md              # Backward compatibility redirect
 
 **Purpose**: Feature requirements, task tracking, progress reports, verification.
 
-**Contains**:
+**Structure Types**:
+- **Simple**: `requirements.md` + `tasks.md` (small focused work)
+- **Complex**: `features/` subdirectory with separate `feature.md` and `tasks.md` per feature
 
-- `requirements.md`: What to build and why
-- `tasks.md`: Task list with checkboxes and progress tracking
+**Contains**:
+- `requirements.md`: What to build and why (high-level for complex specs)
+- `tasks.md`: Task list or feature priority list
+- `features/[name]/`: (Optional) Feature breakdown for large specs
 - `PROGRESS.md`: Mid-work progress report (~50% completion)
 - `FINAL_REPORT.md`: Comprehensive completion summary
 - `LEARNINGS.md`: Lessons learned and insights
 - `VERIFICATION_SIGNOFF.md`: Official verification report
-- `verification.md`: Detailed verification failure reports (transient)
-- `learnings.md`: Specification-specific practical insights (optional)
 
 **⚠️ MANDATORY**: Read specification files when working on a feature.
 
-→ **For full details**: Read files in `specifications/NN-spec-name/`
+→ **For full details**: Read `.agents/rules/06-specifications-and-requirements.md`
 
 ### `documentation/` - Module Documentation
 
@@ -208,10 +221,9 @@ CLAUDE.md              # Backward compatibility redirect
 **Purpose**: Reusable templates for creating specifications, skills, and agent documentation.
 
 **Contains**:
-
-- Specification templates: requirements, tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF
-- Skill templates: skill.md, learnings.md
-- Agent documentation template
+- **Specification templates**: requirements, tasks, feature, feature-tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF
+- **Skill templates**: skill.md, learnings.md
+- **Agent documentation template**
 
 **Usage**: Reference these templates when creating new specifications, skills, or agents.
 
@@ -278,4 +290,4 @@ Before starting ANY work:
 ---
 
 _Last updated: 2026-01-18_
-_Version: 3.2.0 - Added templates/ directory, optimized Rules 05, 06, 09, 10 (2,616 lines saved - 40% reduction)_
+_Version: 3.3.0 - Added feature-based specification support_

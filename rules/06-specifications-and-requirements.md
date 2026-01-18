@@ -472,6 +472,18 @@ All specification file templates are located in `.agents/templates/`. Reference 
    - When: Created after verification agent completes final verification
    - Contains: Executive summary, verification results, quality assessment, compliance check, issues found, final verdict, checklist, sign-off
 
+### Feature Files (For Complex Specifications)
+
+7. **feature.md** - Feature-specific requirements
+   - Template: `.agents/templates/feature-template.md`
+   - When: Created for each feature in `features/[feature-name]/`
+   - Contains: Feature overview, dependencies, requirements, implementation details, success criteria
+
+8. **feature tasks.md** - Feature-specific tasks
+   - Template: `.agents/templates/feature-tasks-template.md`
+   - When: Created alongside feature.md
+   - Contains: Feature-specific task checkboxes, implementation order
+
 ## Module Documentation System (MANDATORY)
 
 ### Purpose
@@ -977,6 +989,14 @@ For pure documentation updates:
 5. **LEARNINGS.md** - Lessons learned and insights (at completion)
 6. **VERIFICATION_SIGNOFF.md** - Official verification report (after verification)
 
+**Feature-Based Specifications (For Complex Work):**
+- Use when spec is large (>15KB) or has multiple distinct components
+- Create `features/[feature-name]/` with `feature.md` and `tasks.md` per feature
+- Main `requirements.md` contains high-level overview + feature references
+- Main `tasks.md` tracks feature priority order (not individual tasks)
+- Verification files (PROGRESS, FINAL_REPORT, etc.) remain at main level ONLY
+- Templates: `.agents/templates/feature-template.md` and `feature-tasks-template.md`
+
 **Module Documentation System:**
 Every affected module **MUST** have accurate documentation at `documentation/[module]/doc.md`:
 - Created/verified after requirements.md, before implementation
@@ -990,4 +1010,4 @@ Every affected module **MUST** have accurate documentation at `documentation/[mo
 ---
 *Created: 2026-01-11*
 *Last Updated: 2026-01-18*
-*Version: 4.0 (Optimized - Reduced from 1,477 to 806 lines)*
+*Version: 4.1 (Added feature-based specification support)*

@@ -1,8 +1,8 @@
 ---
 purpose: Central entry point for AI agent configuration
 description: Minimal configuration file that directs agents to detailed rules and standards
-version: 3.0.0
-last_updated: 2026-01-11
+version: 3.1.0
+last_updated: 2026-01-18
 ---
 
 # Agent Configuration
@@ -38,12 +38,14 @@ All agents **MUST** follow this sequence at the start of every session:
 ├── rules/              # Detailed project rules (READ ALL OF THESE)
 │   ├── 01-rule-naming-and-structure.md
 │   ├── 02-rules-directory-policy.md
-│   ├── 03-work-commit-rules.md
-│   ├── 04-coding-practice-agent-orchestration.md
-│   ├── 05-git-auto-approval-and-push.md
+│   ├── 03-dangerous-operations-safety.md
+│   ├── 04-work-commit-and-push-rules.md
+│   ├── 05-coding-practice-agent-orchestration.md
 │   ├── 06-specifications-and-requirements.md
 │   ├── 07-language-conventions-and-standards.md
 │   ├── 08-verification-workflow-complete-guide.md
+│   ├── 09-skills-identification-and-creation.md
+│   ├── 10-agent-documentation-and-registry.md
 │   └── ...
 │
 ├── stacks/             # Language-specific standards (READ ONLY WHAT YOU USE)
@@ -52,13 +54,31 @@ All agents **MUST** follow this sequence at the start of every session:
 │   ├── python.md       # Python standards
 │   └── ...
 │
-└── specifications/     # Feature specifications and requirements
-    ├── Spec.md         # Master index
-    ├── NN-spec-name/
-    │   ├── requirements.md
-    │   ├── tasks.md
-    │   └── verification.md  # (transient, created on verification failure)
-    └── ...
+├── skills/             # Documented know-how for specific tasks
+│   └── [skill-name]/
+│       ├── skill.md    # Canonical skill documentation
+│       └── learnings.md # Practical insights from usage
+│
+└── agents/             # Agent documentation and registry
+    └── [agent-name].md # Agent capabilities and responsibilities
+
+specifications/         # Feature specifications (PROJECT ROOT LEVEL)
+├── Spec.md             # Master index
+├── NN-spec-name/
+│   ├── requirements.md
+│   ├── tasks.md
+│   ├── PROGRESS.md     # Mid-work progress report
+│   ├── FINAL_REPORT.md # Completion summary
+│   ├── LEARNINGS.md    # Lessons learned
+│   ├── VERIFICATION_SIGNOFF.md # Official verification
+│   ├── verification.md # (transient, created on verification failure)
+│   └── learnings.md    # (optional, specification-specific insights)
+└── ...
+
+documentation/          # Module documentation (PROJECT ROOT LEVEL)
+└── [module]/
+    ├── doc.md          # Detailed module documentation
+    └── assets/         # Supplementary documentation
 
 CLAUDE.md              # Backward compatibility redirect
 ```
@@ -75,12 +95,14 @@ CLAUDE.md              # Backward compatibility redirect
 
 - **Rule 01**: File naming conventions
 - **Rule 02**: Directory policies
-- **Rule 03**: Commit requirements (with verification status)
-- **Rule 04**: Agent orchestration and mandatory verification (IRON-CLAD)
-- **Rule 05**: Auto-push workflow (after verification)
-- **Rule 06**: Specification management
-- **Rule 07**: Language standards enforcement
-- **Rule 08**: Verification workflow complete guide (comprehensive integration summary)
+- **Rule 03**: Dangerous operations safety (Git Safety Checkpoint required)
+- **Rule 04**: Work commit and push rules (immediate commit + auto-push)
+- **Rule 05**: Coding practice and agent orchestration (IRON-CLAD verification)
+- **Rule 06**: Specifications and requirements management
+- **Rule 07**: Language conventions and standards
+- **Rule 08**: Verification workflow complete guide
+- **Rule 09**: Skills identification and creation
+- **Rule 10**: Agent documentation and registry
 
 **⚠️ MANDATORY**: Read ALL rule files before starting any work.
 
@@ -110,19 +132,65 @@ CLAUDE.md              # Backward compatibility redirect
 
 → **For full details**: Read `.agents/stacks/[language].md` for your language(s) ONLY
 
-### `.agents/specifications/` - WHAT to Build
+### `specifications/` - WHAT to Build
 
-**Purpose**: Feature requirements, task tracking, verification reports.
+**Location**: Project root level (parallel to `.agents/` directory)
+
+**Purpose**: Feature requirements, task tracking, progress reports, verification.
 
 **Contains**:
 
 - `requirements.md`: What to build and why
 - `tasks.md`: Task list with checkboxes and progress tracking
+- `PROGRESS.md`: Mid-work progress report (~50% completion)
+- `FINAL_REPORT.md`: Comprehensive completion summary
+- `LEARNINGS.md`: Lessons learned and insights
+- `VERIFICATION_SIGNOFF.md`: Official verification report
 - `verification.md`: Detailed verification failure reports (transient)
+- `learnings.md`: Specification-specific practical insights (optional)
 
 **⚠️ MANDATORY**: Read specification files when working on a feature.
 
-→ **For full details**: Read files in `.agents/specifications/NN-spec-name/`
+→ **For full details**: Read files in `specifications/NN-spec-name/`
+
+### `documentation/` - Module Documentation
+
+**Location**: Project root level (parallel to `.agents/` and `specifications/`)
+
+**Purpose**: Living documentation of individual code modules.
+
+**Contains**:
+
+- `doc.md`: Detailed module documentation (what implements, imports, calls, does)
+- `assets/`: Supplementary documentation (diagrams, schemas, examples)
+
+### `.agents/skills/` - Specialized Knowledge
+
+**Purpose**: Documented know-how for accomplishing specific technical tasks.
+
+**Contains**:
+
+- `skill.md`: Canonical skill documentation
+- `learnings.md`: Practical insights from actual usage
+- Supporting code files (templates, executables, examples)
+
+**Usage Types**: TEMPLATE (copy all files), EXECUTABLE (run as tool), EDUCATIONAL (learn & implement)
+
+→ **For full details**: Read `.agents/skills/[skill-name]/skill.md`
+
+### `.agents/agents/` - Agent Registry
+
+**Purpose**: Documentation of all available agents and their capabilities.
+
+**Contains**:
+
+- Agent documentation files (`[agent-name].md`)
+- Frontmatter for quick scanning and selection
+- Detailed capabilities, responsibilities, and boundaries
+
+**⚠️ MANDATORY**: All agents must be documented before spawning.
+
+→ **For full details**: Read `.agents/agents/[agent-name].md`
 
 ---
 
@@ -160,12 +228,15 @@ Before starting ANY work:
 
 | Topic                       | Location                                                   |
 | --------------------------- | ---------------------------------------------------------- |
-| Workflow and orchestration  | `.agents/rules/04-coding-practice-agent-orchestration.md`  |
-| Verification process        | `.agents/rules/04-*` + `.agents/stacks/[language].md`      |
+| Dangerous operations safety | `.agents/rules/03-dangerous-operations-safety.md`          |
+| Work commit and push rules  | `.agents/rules/04-work-commit-and-push-rules.md`           |
+| Workflow and orchestration  | `.agents/rules/05-coding-practice-agent-orchestration.md`  |
+| Verification process        | `.agents/rules/05-*` + `.agents/stacks/[language].md`      |
 | Complete verification guide | `.agents/rules/08-verification-workflow-complete-guide.md` |
-| Commit requirements         | `.agents/rules/03-work-commit-rules.md`                    |
-| Language standards          | `.agents/stacks/[language].md`                             |
 | Specification format        | `.agents/rules/06-specifications-and-requirements.md`      |
+| Language standards          | `.agents/stacks/[language].md`                             |
+| Skills system               | `.agents/rules/09-skills-identification-and-creation.md`   |
+| Agent registry              | `.agents/rules/10-agent-documentation-and-registry.md`     |
 
 ---
 
@@ -173,11 +244,14 @@ Before starting ANY work:
 
 - `.agents/rules/*` (HOW agents work)
 - `.agents/stacks/*` (HOW to write code)
-- `.agents/specifications/*` (WHAT to build)
+- `.agents/skills/*` (WHAT specialized knowledge to use)
+- `.agents/agents/*` (WHO does the work - agent registry)
+- `specifications/*` (WHAT to build - project root)
+- `documentation/*` (WHERE code lives - module docs, project root)
 
 **MANDATORY**: Load and read all relevant files before starting work.
 
 ---
 
-_Last updated: 2026-01-11_
-_Version: 3.0.0 - Streamlined entry point, full details in referenced files_
+_Last updated: 2026-01-18_
+_Version: 3.1.0 - Added Rules 09-10, corrected specifications/documentation locations to project root, added skills and agents directories_

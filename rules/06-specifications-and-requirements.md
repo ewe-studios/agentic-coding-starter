@@ -245,21 +245,36 @@ Each feature directory contains:
 
 #### Main Specification Files (With Features)
 
-When using features, the main specification files change:
+When using features, the main specification files change **significantly**:
 
-**requirements.md** contains:
-- High-level overview and goals
-- Requirements conversation summary
-- Feature list with descriptions and dependencies
-- Links to each feature's `feature.md`
-- Overall success criteria
+**CRITICAL**: Main files should be **concise high-level overviews**, NOT detailed documents.
+
+**requirements.md** (CONCISE - should be 2-4KB, NOT 15KB+):
+- High-level overview and goals (2-3 paragraphs)
+- Requirements conversation summary (brief)
+- Feature table with descriptions, dependencies, and links
+- Overall success criteria (high-level checklist)
+- File structure overview
 - Module documentation references
+- **NO detailed code samples** - those go in feature.md files
+- **NO implementation details** - those go in feature.md files
 
-**tasks.md** contains:
-- Feature priority order (not individual tasks)
-- Feature status (pending, in-progress, completed)
+**tasks.md** (CONCISE - should be 1-2KB):
+- Feature priority order with status
+- Feature task counts (e.g., "Tasks: 12")
 - Dependencies between features
-- Overall progress percentage
+- Total task summary table
+- **NO individual task checkboxes** - those go in feature tasks.md files
+- **NO implementation notes** - those go in feature tasks.md files
+
+**Feature files contain ALL the details:**
+- `feature.md` - Detailed requirements, code samples, API examples, implementation patterns
+- `tasks.md` - Individual task checkboxes, implementation order, code snippets
+
+**Rationale**: This structure keeps context size manageable and ensures:
+1. Main Agent can quickly understand scope without loading 15KB+ files
+2. Implementation Agents load only the feature(s) they're working on
+3. Clear separation between high-level planning and detailed implementation
 
 Example main tasks.md with features:
 ```markdown
@@ -483,6 +498,88 @@ All specification file templates are located in `.agents/templates/`. Reference 
    - Template: `.agents/templates/feature-tasks-template.md`
    - When: Created alongside feature.md
    - Contains: Feature-specific task checkboxes, implementation order
+
+## Self-Contained Specification Requirement (MANDATORY)
+
+### Purpose
+Every `requirements.md` file MUST be **self-contained**, meaning an agent can receive ONLY the specification file and understand exactly which rules to load for their role. This eliminates the need for agents to guess or search for applicable rules.
+
+### Why Self-Contained Specifications Matter
+
+**Without Agent Rules Reference:**
+- Agents don't know which rules apply to them
+- Agents may miss critical rules (verification, safety, etc.)
+- Users must manually specify rules when passing specs to agents
+- Inconsistent rule loading across different agent invocations
+
+**With Agent Rules Reference:**
+- Agents read the spec and immediately know their required rules
+- Users can pass `requirements.md` directly to any agent
+- Consistent rule loading guaranteed
+- Specification is the single source of truth
+
+### Agent Rules Reference Section (MANDATORY)
+
+Every `requirements.md` **MUST** include an "Agent Rules Reference" section containing:
+
+#### Location Headers
+The section MUST clearly specify file locations:
+- **Rules Location**: `.agents/rules/`
+- **Stacks Location**: `.agents/stacks/`
+- **Skills Location**: `.agents/skills/`
+
+#### 1. Mandatory Rules for All Agents
+All agents working on the specification MUST load Rules 01-04 from `.agents/rules/`:
+
+| Rule | File | Purpose |
+|------|------|---------|
+| 01 | `.agents/rules/01-rule-naming-and-structure.md` | File naming conventions |
+| 02 | `.agents/rules/02-rules-directory-policy.md` | Directory policies |
+| 03 | `.agents/rules/03-dangerous-operations-safety.md` | Dangerous operations safety |
+| 04 | `.agents/rules/04-work-commit-and-push-rules.md` | Work commit and push rules |
+
+#### 2. Role-Specific Rules
+A table mapping agent types to their additional required rules (all from `.agents/rules/`):
+
+| Agent Type | Additional Rules to Load |
+|------------|--------------------------|
+| **Review Agent** | `.agents/rules/06-specifications-and-requirements.md` |
+| **Implementation Agent** | `.agents/rules/13-implementation-agent-guide.md`, `.agents/rules/11-skills-usage.md` if skills used |
+| **Verification Agent** | `.agents/rules/08-verification-workflow-complete-guide.md`, stack file |
+| **Documentation Agent** | `.agents/rules/06-specifications-and-requirements.md` |
+
+#### 3. Stack Files
+Specify which language stack file(s) agents should load from `.agents/stacks/`:
+- Format: `**Language**: [language] → .agents/stacks/[language].md`
+- Example: `**Language**: Rust → .agents/stacks/rust.md`
+
+#### 4. Skills Referenced
+List any skills from `.agents/skills/` that agents should use:
+- If skills are needed: List skill names with full paths (e.g., `.agents/skills/skill-name.md`)
+- If no skills needed: Write "None"
+
+### Main Agent Responsibilities
+
+When creating `requirements.md`, Main Agent **MUST**:
+
+1. ✅ **Include Agent Rules Reference section** (see template)
+2. ✅ **Identify the primary language** and specify stack file
+3. ✅ **List any skills** that will be used
+4. ✅ **Ensure all rule file paths are correct** (verify files exist)
+5. ✅ **Use the requirements template** which includes this section
+
+### Validation
+
+Before committing `requirements.md`, Main Agent **MUST** verify:
+- ✅ Agent Rules Reference section exists
+- ✅ All 4 mandatory rules are listed
+- ✅ Role-specific rules table is complete
+- ✅ Stack file is specified (or "N/A" for non-code specs)
+- ✅ Skills are listed (or "None")
+
+**Template Location**: `.agents/templates/requirements-template.md`
+
+---
 
 ## Module Documentation System (MANDATORY)
 
@@ -851,6 +948,7 @@ All agents **MUST**:
 - ✅ Confirm understanding before documenting
 - ✅ Create specification directory before implementation
 - ✅ Document complete conversation in requirements.md
+- ✅ **Include Agent Rules Reference section** in requirements.md (self-contained specs)
 - ✅ Create comprehensive task list in tasks.md
 - ✅ Create/verify module documentation after requirements
 - ✅ Launch review agent BEFORE any implementation
@@ -869,6 +967,7 @@ All agents **MUST**:
 - ❌ Passively accepting user request without questions
 - ❌ Asking fewer than minimum required questions
 - ❌ Making assumptions about unspecified requirements
+- ❌ **Missing Agent Rules Reference section in requirements.md**
 - ❌ Starting implementation without running review agent first
 - ❌ Ignoring review agent's STOP or CLARIFY directive
 - ❌ Starting implementation without module documentation
@@ -890,12 +989,14 @@ Violations cause:
 - **Time waste**: Hours wasted on false assumptions
 - **Trust erosion**: User loses confidence in agents
 - **Breaking changes**: Bugs from misunderstanding modules
+- **Rule confusion**: Agents don't know which rules to load
 
 **THE USER WILL BE UPSET** if work proceeds without:
 - Proper requirements conversation with clarifying questions
 - Status verification
 - Mandatory review agent execution
 - Accurate module documentation
+- Agent Rules Reference section (for self-contained specs)
 - All mandatory documentation files
 
 ### Corrective Action
@@ -962,12 +1063,13 @@ For pure documentation updates:
 
 ## Summary
 
-**Core Principle**: Never start significant work without documented requirements and clear task list. **Always engage in thorough requirements conversation with clarifying questions first (3-10+ questions).** Always launch review agent to verify specifications before implementation. Never trust checkboxes blindly. Always create all 6 mandatory documentation files. **Always create/verify module documentation before implementation.**
+**Core Principle**: Never start significant work without documented requirements and clear task list. **Always engage in thorough requirements conversation with clarifying questions first (3-10+ questions).** Always launch review agent to verify specifications before implementation. Never trust checkboxes blindly. Always create all 6 mandatory documentation files. **Always create/verify module documentation before implementation.** **Always include Agent Rules Reference for self-contained specifications.**
 
 **Key Requirements:**
 - ✅ **Requirements conversation FIRST** (3-10+ clarifying questions mandatory)
 - ✅ **Main Agent MUST ask proactively, never assume**
 - ✅ **Confirm understanding before documenting**
+- ✅ **Include Agent Rules Reference section** (self-contained specs)
 - ✅ **Create/verify module documentation** (after requirements, before implementation)
 - ✅ **Launch review agent BEFORE implementation** (zero tolerance)
 - ✅ **Act on review report** (GO/STOP/CLARIFY)
@@ -976,6 +1078,7 @@ For pure documentation updates:
 - ✅ **Verify status by searching codebase**
 - ✅ **Update tasks.md and module docs as work progresses**
 - ❌ **Never skip clarifying questions**
+- ❌ **Never skip Agent Rules Reference section**
 - ❌ **Never skip review agent**
 - ❌ **Never ignore review STOP/CLARIFY**
 - ❌ **Never skip module documentation**
@@ -983,17 +1086,29 @@ For pure documentation updates:
 
 **Mandatory Files for Every Specification:**
 1. **requirements.md** - Requirements and conversation (created at start)
+   - **MUST include Agent Rules Reference section** for self-contained specs
 2. **tasks.md** - Task list with checkboxes (created at start)
 3. **PROGRESS.md** - Mid-work progress report (~50% completion)
 4. **FINAL_REPORT.md** - Comprehensive completion summary (at completion)
 5. **LEARNINGS.md** - Lessons learned and insights (at completion)
 6. **VERIFICATION_SIGNOFF.md** - Official verification report (after verification)
 
+**Self-Contained Specification Requirement:**
+Every `requirements.md` MUST include an "Agent Rules Reference" section containing:
+- **Location headers**: `.agents/rules/`, `.agents/stacks/`, `.agents/skills/`
+- Mandatory rules (01-04) for all agents with full paths
+- Role-specific rules table (Review, Implementation, Verification, Documentation agents)
+- Stack file(s) for the language(s) used (from `.agents/stacks/`)
+- Skills referenced with full paths (or "None")
+
+This allows users to pass `requirements.md` directly to any agent, and the agent will know exactly which rules to load and where to find them.
+
 **Feature-Based Specifications (For Complex Work):**
 - Use when spec is large (>15KB) or has multiple distinct components
 - Create `features/[feature-name]/` with `feature.md` and `tasks.md` per feature
-- Main `requirements.md` contains high-level overview + feature references
-- Main `tasks.md` tracks feature priority order (not individual tasks)
+- **Main `requirements.md` is CONCISE** (2-4KB): high-level overview, feature table, NO code samples
+- **Main `tasks.md` is CONCISE** (1-2KB): feature priority order with task counts, NOT individual tasks
+- **Feature files contain ALL details**: code samples, implementation patterns, individual task checkboxes
 - Verification files (PROGRESS, FINAL_REPORT, etc.) remain at main level ONLY
 - Templates: `.agents/templates/feature-template.md` and `feature-tasks-template.md`
 
@@ -1005,9 +1120,9 @@ Every affected module **MUST** have accurate documentation at `documentation/[mo
 - Verified to match actual code (never assume accurate)
 - Updated when module structure changes
 
-**Remember**: The user will be upset if work proceeds without proper requirements conversation, status verification, mandatory review agent, accurate module documentation, or all mandatory documentation files!
+**Remember**: The user will be upset if work proceeds without proper requirements conversation, status verification, mandatory review agent, accurate module documentation, Agent Rules Reference section, or all mandatory documentation files!
 
 ---
 *Created: 2026-01-11*
-*Last Updated: 2026-01-18*
-*Version: 4.1 (Added feature-based specification support)*
+*Last Updated: 2026-01-19*
+*Version: 4.3 (Added Self-Contained Specification Requirement with Agent Rules Reference)*

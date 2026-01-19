@@ -21,20 +21,20 @@ Agents load rules **selectively** based on role and task to optimize context win
 
 | Rule | Topic |
 |------|-------|
-| [01](rules/01-rule-naming-and-structure.md) | File naming conventions |
-| [02](rules/02-rules-directory-policy.md) | Directory policies |
-| [03](rules/03-dangerous-operations-safety.md) | Dangerous operations safety |
-| [04](rules/04-work-commit-and-push-rules.md) | Work commit and push rules |
+| [01](./rules/01-rule-naming-and-structure.md) | File naming conventions |
+| [02](./rules/02-rules-directory-policy.md) | Directory policies |
+| [03](./rules/03-dangerous-operations-safety.md) | Dangerous operations safety |
+| [04](./rules/04-work-commit-and-push-rules.md) | Work commit and push rules |
 
 ### By Role
 
 | Agent Type | Load These Rules |
 |------------|------------------|
-| **Main Agent** | 01-04, [05](rules/05-coding-practice-agent-orchestration.md), [06](rules/06-specifications-and-requirements.md) (+ [09](rules/09-skills-identification-and-creation.md), [10](rules/10-agent-documentation-and-registry.md) when creating skills/agents) |
-| **Implementation Agent** | 01-04, [13](rules/13-implementation-agent-guide.md), [11](rules/11-skills-usage.md) (if skills), stack file, spec |
-| **Verification Agent** | 01-04, [08](rules/08-verification-workflow-complete-guide.md), stack file |
-| **Specification Agent** | 01-04, [06](rules/06-specifications-and-requirements.md) |
-| **Any Sub-Agent** | 01-04, [12](rules/12-agent-registry-usage.md), own agent doc, relevant stack |
+| **Main Agent** | 01-04, [05](./rules/05-coding-practice-agent-orchestration.md), [06](./rules/06-specifications-and-requirements.md) (+ [09](./rules/09-skills-identification-and-creation.md), [10](./rules/10-agent-documentation-and-registry.md) when creating skills/agents) |
+| **Implementation Agent** | 01-04, [13](./rules/13-implementation-agent-guide.md), [11](./rules/11-skills-usage.md) (if skills), stack file, spec |
+| **Verification Agent** | 01-04, [08](./rules/08-verification-workflow-complete-guide.md), stack file |
+| **Specification Agent** | 01-04, [06](./rules/06-specifications-and-requirements.md) |
+| **Any Sub-Agent** | 01-04, [12](./rules/12-agent-registry-usage.md), own agent doc, relevant stack |
 
 ---
 

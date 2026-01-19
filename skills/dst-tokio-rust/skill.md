@@ -1,5 +1,5 @@
 ---
-name: "Deterministic Simulation Testing (Rust)"
+name: "Deterministic Simulation Testing (Tokio/Rust)"
 description: "Implement DST for distributed systems in Rust - controlling time, entropy, network, and execution for reproducible testing"
 approved: No
 created: 2026-01-19
@@ -10,6 +10,7 @@ metadata:
   last_updated: "2026-01-19"
   tags:
     - rust
+    - tokio
     - testing
     - distributed-systems
     - simulation

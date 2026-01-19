@@ -35,7 +35,7 @@ For reproducible distributed system tests, control these sources of non-determin
 
 ## Related Skill
 
-See the corresponding skill file for agent usage: [.agents/skills/dst-rust/skill.md](../../skills/dst-rust/skill.md)
+See the corresponding skill file for agent usage: [.agents/skills/dst-tokio-rust/skill.md](../../skills/dst-tokio-rust/skill.md)
 
 ---
 

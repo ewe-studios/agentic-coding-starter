@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This is a **concise guide for sub-agents** who need to use existing skills from `.agents/skills/`. For skill creation and review, Main Agent should load Rule 09 instead.
+This is a **concise guide for sub-agents** who need to use existing skills. For skill creation and review, Main Agent should load Rule 09 instead.
 
 ---
 
@@ -11,9 +11,9 @@ This is a **concise guide for sub-agents** who need to use existing skills from 
 ### Finding Skills
 
 1. **Scan `.agents/skills/` directory**
-2. **Read only frontmatter** of `skill.md` files (first 15-20 lines)
-3. **Check `approved: Yes`** before using any skill
-4. **Match by name/description** to your task needs
+2. **Read only frontmatter** of `skill.md` files (first 20 lines)
+3. **Check `approved: Yes`** before using
+4. **Match by name/description** to task needs
 
 ```bash
 # Efficient scan - frontmatter only
@@ -28,7 +28,23 @@ done
 2. ✅ Read complete `skill.md`
 3. ✅ Read `learnings.md` if it exists
 4. ✅ Check **Usage Type** (TEMPLATE/EXECUTABLE/EDUCATIONAL)
-5. ✅ Perform clarity check - do you understand all instructions?
+5. ✅ Read relevant files from `templates/`, `scripts/`, or `examples/`
+6. ✅ Perform clarity check - do you understand all instructions?
+
+---
+
+## Skill Directory Structure
+
+```
+.agents/skills/[skill-name]/
+├── skill.md        # Required - main doc (always read)
+├── learnings.md    # Optional - practical insights (read when using)
+├── assets/         # Optional - diagrams, configs, sample data
+├── docs/           # Optional - extended user documentation
+├── templates/      # Optional - for TEMPLATE skills
+├── scripts/        # Optional - for EXECUTABLE skills
+└── examples/       # Optional - for EDUCATIONAL skills
+```
 
 ---
 
@@ -40,15 +56,15 @@ done
 
 **What to do**:
 ```bash
-# Copy ALL files to project
-cp .agents/skills/[skill-name]/*.ts ./src/[destination]/
+# Copy ALL files from templates/ to project
+cp .agents/skills/[skill-name]/templates/*.ts ./src/[destination]/
 
 # Customize the COPIED files
 # Import from PROJECT location, NOT .agents/skills/
 ```
 
 **Rules**:
-- ✅ Copy ALL files (templates + helpers)
+- ✅ Copy ALL files from `templates/`
 - ✅ Customize copied files in project
 - ✅ Import from project location
 - ❌ **NEVER import from `.agents/skills/` in project code**
@@ -59,16 +75,16 @@ cp .agents/skills/[skill-name]/*.ts ./src/[destination]/
 
 **What to do**:
 ```bash
-# Run script from .agents/skills/ location
-node .agents/skills/[skill-name]/script.js --arg value
+# Run script from scripts/ directory
+node .agents/skills/[skill-name]/scripts/run.js --arg value
 
 # Consume output in your project
 ```
 
 **Rules**:
-- ✅ Execute scripts from `.agents/skills/` location
+- ✅ Execute scripts from `scripts/` location
 - ✅ Capture and use output
-- ❌ Never copy or modify executable scripts
+- ❌ Never copy or modify scripts
 - ❌ Never import from `.agents/skills/`
 
 ### 3. EDUCATIONAL Skills (Learn and Implement)
@@ -80,7 +96,7 @@ node .agents/skills/[skill-name]/script.js --arg value
 # Install external dependencies listed in skill
 npm install [package-name]
 
-# Study examples in skill, then write FRESH code
+# Study examples in examples/, then write FRESH code
 ```
 
 **Rules**:
@@ -99,9 +115,9 @@ npm install [package-name]
    require('.agents/skills/...')
 
 ✅ ALWAYS do this:
-   - TEMPLATE: Copy files, import from project location
-   - EXECUTABLE: Run as external tool, use output
-   - EDUCATIONAL: Install external lib, write fresh code
+   - TEMPLATE: Copy from templates/, import from project
+   - EXECUTABLE: Run from scripts/, use output
+   - EDUCATIONAL: Install lib, write fresh code
 ```
 
 ---
@@ -156,33 +172,36 @@ If you discover useful insights while using the skill:
 ## Sub-Agent Checklist
 
 Before using a skill:
-- [ ] Skill exists in `.agents/skills/`
+- [ ] Skill exists in `.agents/skills/[skill-name]/`
 - [ ] Frontmatter has `approved: Yes`
 - [ ] Read complete `skill.md`
 - [ ] Read `learnings.md` if exists
 - [ ] Understand Usage Type (TEMPLATE/EXECUTABLE/EDUCATIONAL)
+- [ ] Read relevant subdirectory files (`templates/`, `scripts/`, `examples/`)
 - [ ] Instructions are clear (if not, report to Main Agent)
 
 During skill usage:
 - [ ] Follow Usage Type rules exactly
 - [ ] Never import from `.agents/skills/` in project code
-- [ ] Copy ALL files for TEMPLATE skills
-- [ ] Run as external tool for EXECUTABLE skills
+- [ ] Copy ALL files from `templates/` for TEMPLATE skills
+- [ ] Run from `scripts/` for EXECUTABLE skills
 - [ ] Install external libs for EDUCATIONAL skills
 
 ---
 
 ## Summary
 
-| Usage Type | Action | Import From |
-|------------|--------|-------------|
-| TEMPLATE | Copy ALL files, customize | Project location |
-| EXECUTABLE | Run script, use output | N/A (external tool) |
-| EDUCATIONAL | Install lib, write fresh | External package |
+| Usage Type | Source Directory | Action | Import From |
+|------------|------------------|--------|-------------|
+| TEMPLATE | `templates/` | Copy ALL files, customize | Project location |
+| EXECUTABLE | `scripts/` | Run script, use output | N/A (external tool) |
+| EDUCATIONAL | `examples/` | Install lib, write fresh | External package |
 
 **Golden Rule**: `.agents/skills/` is a knowledge base, NOT a code library. Never import from it in project code.
+
+**See**: `.agents/templates/skill-usage-examples.md` for detailed code examples.
 
 ---
 
 *Created: 2026-01-19*
-*Purpose: Concise skill usage guide for sub-agents (reduces context vs full Rule 09)*
+*Last Updated: 2026-01-20 (Updated for new directory structure)*

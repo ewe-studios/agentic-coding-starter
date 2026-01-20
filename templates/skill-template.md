@@ -16,139 +16,173 @@ tools:
   - Tool 1
   - Tool 2
 files:
-  - file1.ext: "Brief description"
-  - file2.ext: "Brief description"
+  - templates/file1.ext: "Brief description"
+  - scripts/run.sh: "Brief description"
+  - examples/example1.ext: "Brief description"
+assets:
+  - docs/deep-dive.md: "Extended documentation for users"
+  - assets/diagrams/flow.png: "Architecture diagram"
 ---
 
 # [Skill Name]
 
 ## Overview
+
 Brief overview of what this skill is about (2-3 paragraphs).
 
 ## When to Use This Skill
+
 - List specific scenarios where this skill applies
 - Be clear about scope and limitations
 - Include use cases
 
 ## Prerequisites
+
 - Knowledge required before using this skill
 - Dependencies that must be installed
 - Environment setup needed
 
-## Attached Scripts and Code
+## Skill Usage Type
 
-**IMPORTANT**: Clearly specify the skill's usage type and how agents should use the files.
+**Choose ONE**: TEMPLATE | EXECUTABLE | EDUCATIONAL
 
-### Skill Usage Type
+---
 
-Choose ONE of the following:
+### For TEMPLATE Skills:
 
-**TEMPLATE** - Copy all files to project and customize
-**EXECUTABLE** - Run scripts as external tools
-**EDUCATIONAL** - Learn pattern and implement fresh
+**Skill Usage Type**: TEMPLATE - Copy all files to project and customize
 
-### File Documentation
+**Files to Copy** (from `templates/` directory):
+| File | Purpose | Copy To |
+|------|---------|---------|
+| `templates/client.ts` | Main implementation | `src/clients/your-client.ts` |
+| `templates/helpers.ts` | Helper functions | `src/clients/helpers.ts` |
 
-For each file, document:
-- **Purpose**: What the file does
-- **Language**: Programming language
-- **Usage**: How agents should use it
+**Instructions**:
+1. Copy ALL files from `templates/` to your project
+2. Customize copied files for your use case
+3. Import from PROJECT location, NOT from `.agents/skills/`
 
-**Example for TEMPLATE**:
+---
+
+### For EXECUTABLE Skills:
+
+**Skill Usage Type**: EXECUTABLE - Run scripts as external tools
+
+**Available Scripts** (in `scripts/` directory):
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `scripts/run.sh` | Main execution | `./run.sh --arg value` |
+
+**Arguments**:
+- `--arg1`: Description (required)
+- `--arg2`: Description (optional, default: X)
+
+**Output**: Description of output format
+
+---
+
+### For EDUCATIONAL Skills:
+
+**Skill Usage Type**: EDUCATIONAL - Learn pattern and implement fresh
+
+**External Dependencies**:
+```bash
+npm install package-name
+# or
+cargo add package-name
 ```
-### Template: api-client.ts
-**Purpose**: Main API client implementation template
-**Language**: TypeScript
-**Usage**: COPY to your project and customize
 
-Instructions:
-1. Copy to project: `cp api-client.ts src/clients/your-api-client.ts`
-2. Customize for your specific API
-3. Import from project location (NOT from .agents/skills/)
-```
+**Examples to Study** (in `examples/` directory):
+| File | What It Demonstrates |
+|------|---------------------|
+| `examples/basic.rs` | Core pattern implementation |
+| `examples/advanced.rs` | Extended patterns |
 
-**Example for EXECUTABLE**:
-```
-### Script: scraper.js
-**Purpose**: Web scraping utility
-**Language**: JavaScript
-**Usage**: EXECUTE as external command
+**Instructions**:
+1. Study the examples to understand the pattern
+2. Install the external dependencies
+3. Implement FRESH code in your project
+4. NEVER import from `.agents/skills/`
 
-Usage: `node scraper.js --url <URL> --selector <SELECTOR>`
-
-Arguments:
-- --url: Target URL (required)
-- --selector: CSS selector (required)
-```
-
-**Example for EDUCATIONAL**:
-```
-### Example: jwt-example.ts
-**Purpose**: Demonstrates JWT authentication pattern
-**Language**: TypeScript
-**Usage**: STUDY this example, implement fresh in project
-
-External Dependencies:
-- npm install jsonwebtoken
-- npm install @types/jsonwebtoken --save-dev
-```
+---
 
 ## Core Concepts
+
 Key concepts needed to understand this skill:
-- Concept 1: Explanation
-- Concept 2: Explanation
-- Concept 3: Explanation
+
+- **Concept 1**: Explanation
+- **Concept 2**: Explanation
+- **Concept 3**: Explanation
 
 ## Step-by-Step Guide
 
 ### Step 1: [First Step Name]
+
 Detailed explanation with code examples.
 
 ### Step 2: [Second Step Name]
+
 Detailed explanation with code examples.
 
 [Continue for all steps...]
 
 ## Common Patterns
+
 Frequently used patterns when applying this skill:
-- Pattern 1: When and how to use
-- Pattern 2: When and how to use
+
+- **Pattern 1**: When and how to use
+- **Pattern 2**: When and how to use
 
 ## Pitfalls to Avoid
+
 Common mistakes and how to avoid them:
-- Pitfall 1: What to avoid and why
-- Pitfall 2: What to avoid and why
+
+- **Pitfall 1**: What to avoid and why
+- **Pitfall 2**: What to avoid and why
 
 ## Examples
 
 ### Example 1: [Scenario Name]
+
 ```[language]
 // Code example
 ```
-
-**How agents use this**:
-1. Understand the pattern
-2. Apply to specific use case
-3. Do NOT modify examples without approval
 
 ### Example 2: [Another Scenario]
+
 ```[language]
 // Code example
 ```
 
-## Script Reference
+## File Reference
 
-| Script | Language | Usage Type | Purpose | How to Use |
-|--------|----------|------------|---------|------------|
-| file1.ext | Lang | TYPE | Purpose | Brief instructions |
-| file2.ext | Lang | TYPE | Purpose | Brief instructions |
+| File | Location | Type | Purpose |
+|------|----------|------|---------|
+| file1.ext | `templates/` | TEMPLATE | Purpose |
+| run.sh | `scripts/` | EXECUTABLE | Purpose |
+| example1.ext | `examples/` | EDUCATIONAL | Purpose |
+
+## Additional Resources
+
+**In `docs/` directory** (optional - for user reference):
+- `deep-dive.md` - Extended explanation
+- `troubleshooting.md` - Common issues
+- `faq.md` - Frequently asked questions
+
+**In `assets/` directory** (optional - supporting files):
+- `diagrams/` - Architecture diagrams
+- `configs/` - Configuration templates
+- `data/` - Sample data files
 
 ## References
+
 - Official documentation links
 - Tutorials used
 - Stack Overflow discussions
 - Blog posts or guides
 
 ---
+
 *Created: [Date]*
 *Last Updated: [Date]*

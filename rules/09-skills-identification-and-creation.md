@@ -11,6 +11,7 @@ This rule is for **Main Agent only** when creating new skills or reviewing skill
 ## Overview
 
 Skills are documented know-how for complex technical tasks. They capture:
+
 - Tool/library usage (Playwright, Docker, Kubernetes)
 - Pattern implementations (auth flows, caching strategies)
 - Operations (migrations, API integration)
@@ -19,10 +20,13 @@ Skills are documented know-how for complex technical tasks. They capture:
 ## Core Principles
 
 ### 1. User Approval Required
+
 No skill can be used until user approves. This ensures user control over methodologies.
 
 ### 2. Last Resort Only
+
 Skills are created ONLY when:
+
 - ✅ Fundamental understanding is missing
 - ✅ No existing skill covers the need
 - ✅ No alternative approach possible
@@ -60,24 +64,26 @@ Skills are created ONLY when:
 
 ### Directory Contents
 
-| Directory | Purpose | When to Include |
-|-----------|---------|-----------------|
-| `skill.md` | Main documentation (REQUIRED) | Always |
-| `learnings.md` | Practical insights from usage | After skill is used |
-| `assets/` | Diagrams, configs, sample data | When visual/config aids helpful |
-| `docs/` | Extended documentation, FAQ, troubleshooting | For complex skills |
-| `templates/` | Code templates (TEMPLATE skills) | When copying files to project |
-| `scripts/` | Executable tools (EXECUTABLE skills) | When running as external tools |
-| `examples/` | Reference implementations (EDUCATIONAL) | For learning patterns |
+| Directory      | Purpose                                      | When to Include                 |
+| -------------- | -------------------------------------------- | ------------------------------- |
+| `skill.md`     | Main documentation (REQUIRED)                | Always                          |
+| `learnings.md` | Practical insights from usage                | After skill is used             |
+| `assets/`      | Diagrams, configs, sample data               | When visual/config aids helpful |
+| `docs/`        | Extended documentation, FAQ, troubleshooting | For complex skills              |
+| `templates/`   | Code templates (TEMPLATE skills)             | When copying files to project   |
+| `scripts/`     | Executable tools (EXECUTABLE skills)         | When running as external tools  |
+| `examples/`    | Reference implementations (EDUCATIONAL)      | For learning patterns           |
 
 ### What Goes Where
 
 **User-facing documentation** → `docs/`
+
 - Deep dives the user might read for context
 - FAQ for common questions
 - Troubleshooting guides
 
 **Agent-facing assets** → `assets/`, `templates/`, `scripts/`, `examples/`
+
 - Items agents use during implementation
 - Referenced by `skill.md`
 
@@ -94,16 +100,19 @@ Skills are created ONLY when:
 ## Three Usage Types
 
 ### 1. TEMPLATE (Copy and Customize)
+
 - Files in `templates/` are copied to project
 - Agent customizes copied files
 - ❌ **NEVER import from `.agents/skills/` in project code**
 
 ### 2. EXECUTABLE (Run as Tools)
+
 - Scripts in `scripts/` run as external commands
 - Consume output in project
 - Never modify scripts
 
 ### 3. EDUCATIONAL (Learn and Implement)
+
 - Examples in `examples/` teach patterns
 - Install external dependencies listed
 - Write fresh implementation
@@ -147,6 +156,7 @@ assets:
 **Template Location**: `.agents/templates/skill-template.md`
 
 Key sections:
+
 - Overview (2-3 paragraphs)
 - When to Use (scope and limitations)
 - Prerequisites (knowledge, dependencies)
@@ -161,9 +171,9 @@ Key sections:
 
 ### skill.md vs learnings.md
 
-| File | Purpose | When Read |
-|------|---------|-----------|
-| `skill.md` | Canonical truth - BEFORE using | During discovery + usage |
+| File           | Purpose                          | When Read                      |
+| -------------- | -------------------------------- | ------------------------------ |
+| `skill.md`     | Canonical truth - BEFORE using   | During discovery + usage       |
 | `learnings.md` | Practical insights - AFTER using | Only when actively using skill |
 
 **Template**: `.agents/templates/learnings-template.md`
@@ -175,6 +185,7 @@ Key sections:
 ### Phase 1: Identification (Sub-Agent)
 
 Decision tree:
+
 ```
 Do I understand how to accomplish this?
 ├─ YES → Proceed
@@ -225,13 +236,16 @@ Do I understand how to accomplish this?
 **When**: After requirements.md created with skills listed
 
 Main Agent MUST:
+
 1. Review each skill's `skill.md` completely
 2. Verify Usage Type is clear
 3. Confirm instructions are unambiguous
 4. **Document in requirements.md**:
    ```markdown
    ## Skills Clarity Verification
+
    **Verified by Main Agent**: [Date]
+
    - [skill-name]: TEMPLATE - Clear
    - [skill-name]: EXECUTABLE - Clear
    ```
@@ -242,6 +256,7 @@ Main Agent MUST:
 **When**: About to use skill for implementation
 
 Sub-Agent MUST:
+
 1. Read complete `skill.md` and `learnings.md`
 2. Verify understanding of Usage Type
 3. **If unclear**: STOP, report to Main Agent (see template in `.agents/templates/skill-usage-examples.md`)
@@ -325,6 +340,7 @@ done
 - ✅ Block requirements with unclear skills
 - ✅ Report to user for approval
 - ✅ Validate accuracy via search
+- ✅ Ensure correctness of all assets: scripts, templates, documentations
 
 ### Main Agent MUST NOT
 
@@ -356,6 +372,7 @@ done
 ## Summary
 
 **Core Workflow**:
+
 ```
 Need → Research → Check existing → Create if necessary →
 Main Agent review → User approval → Checkpoint 1 (requirements) →
@@ -363,6 +380,7 @@ Checkpoint 2 (usage) → Implementation → Update learnings
 ```
 
 **Directory Structure**:
+
 ```
 .agents/skills/[skill-name]/
 ├── skill.md        # Required - main doc
@@ -375,24 +393,27 @@ Checkpoint 2 (usage) → Implementation → Update learnings
 ```
 
 **Three Usage Types**:
+
 1. **TEMPLATE**: Copy `templates/` → project, customize
 2. **EXECUTABLE**: Run `scripts/` as external tools
 3. **EDUCATIONAL**: Study `examples/`, install libs, implement fresh
 
 **Critical Rules**:
+
 - ❌ **NEVER import from `.agents/skills/` in project code**
 - ✅ User approval required for creation AND updates
 - ✅ Two mandatory clarity checkpoints
 
 **Templates**:
+
 - Skill structure: `.agents/templates/skill-template.md`
 - Learnings format: `.agents/templates/learnings-template.md`
 - Usage examples: `.agents/templates/skill-usage-examples.md`
 
 ---
 
-*Created: 2026-01-13*
-*Last Updated: 2026-01-20 (Added asset/documentation directories, moved examples to templates)*
+_Created: 2026-01-13_
+_Last Updated: 2026-01-20 (Added asset/documentation directories, moved examples to templates)_
 
 ---
 

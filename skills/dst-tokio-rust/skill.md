@@ -6,8 +6,8 @@ created: 2026-01-19
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "1.0"
-  last_updated: "2026-01-19"
+  version: "1.1"
+  last_updated: "2026-01-20"
   tags:
     - rust
     - tokio
@@ -22,9 +22,11 @@ tools:
   - madsim
   - proptest
 files:
-  - dst-rust-guide.md: "Main tutorial on DST concepts and using existing libraries"
-  - dst-internals-guide.md: "Deep dive on building your own DST framework from scratch"
   - examples/basic-dst-setup.rs: "Complete working example of DST test setup"
+assets:
+  - docs/README.md: "Overview and navigation"
+  - docs/dst-rust-guide.md: "Main tutorial on DST concepts and using existing libraries"
+  - docs/dst-internals-guide.md: "Deep dive on building your own DST framework from scratch"
 ---
 
 # Deterministic Simulation Testing (Rust)
@@ -59,12 +61,12 @@ This skill covers both using existing DST libraries (turmoil, madsim) and buildi
 
 ### File Documentation
 
-#### Guide: dst-rust-guide.md
+#### Guide: docs/dst-rust-guide.md
 **Purpose**: Main tutorial covering DST concepts, four pillars of determinism, and using existing libraries
 **Language**: Markdown with Rust examples
 **Usage**: STUDY for understanding, apply patterns to your project
 
-#### Guide: dst-internals-guide.md
+#### Guide: docs/dst-internals-guide.md
 **Purpose**: Deep dive into building your own DST framework from scratch
 **Language**: Markdown with complete Rust implementations
 **Usage**: STUDY to understand internals, copy patterns when building custom infrastructure
@@ -343,11 +345,11 @@ fn run_and_capture(seed: u64) -> Vec<Event> {
 
 ## Script Reference
 
-| File | Language | Usage Type | Purpose |
+| File | Location | Usage Type | Purpose |
 |------|----------|------------|---------|
-| dst-rust-guide.md | Markdown | EDUCATIONAL | Main DST concepts and library usage |
-| dst-internals-guide.md | Markdown | EDUCATIONAL | Building custom DST infrastructure |
-| examples/basic-dst-setup.rs | Rust | EDUCATIONAL | Working reference implementation |
+| dst-rust-guide.md | `docs/` | EDUCATIONAL | Main DST concepts and library usage |
+| dst-internals-guide.md | `docs/` | EDUCATIONAL | Building custom DST infrastructure |
+| basic-dst-setup.rs | `examples/` | EDUCATIONAL | Working reference implementation |
 
 ## References
 

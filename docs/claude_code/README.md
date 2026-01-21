@@ -7,6 +7,7 @@ This directory contains documentation about the Claude Code CLI system that powe
 1. **[system-prompt.md](./system-prompt.md)** - The system prompt that defines Claude's behavior and capabilities
 2. **[system-tools.md](./system-tools.md)** - Complete reference of all available tools Claude can use
 3. **[memory-files.md](./memory-files.md)** - Memory files currently loaded in the context window
+4. **[autocompact-buffer.md](./autocompact-buffer.md)** - Explanation of the autocompact buffer and context window management
 
 ## Purpose
 
@@ -14,6 +15,7 @@ This documentation serves as a reference for:
 - Understanding what instructions Claude receives by default
 - Knowing what tools are available for automation
 - Tracking which memory files (project context) are loaded
+- Understanding context window management and autocompact buffer
 - Debugging agent behavior and tool usage
 
 ## Usage

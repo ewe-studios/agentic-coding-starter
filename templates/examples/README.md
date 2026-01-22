@@ -126,16 +126,47 @@ Comprehensive test documentation guide (WHY/WHAT/IMPORTANCE):
 - Quick reference card
 - Referenced in Rule 05, section "Test Documentation Requirements"
 
+### 8. Agent Documentation (Rule 10)
+
+#### [agent-frontmatter-reference.md](./agent-frontmatter-reference.md)
+Complete frontmatter field reference for agent documentation:
+- All required and optional fields with descriptions
+- Validation rules and format requirements
+- Field-by-field explanations
+- Update guidelines and versioning
+- Common mistakes and corrections
+- Referenced in Rule 10, section "Frontmatter Fields Reference"
+
+### 9. Commit Messages (Rule 04)
+
+#### [commit-message-templates.md](./commit-message-templates.md)
+Comprehensive commit message guide with templates and examples:
+- Mandatory format requirements
+- Two standard templates (code and non-code)
+- 8+ real-world examples (feature, bug fix, refactor, docs, config)
+- Language-specific examples (Rust, TypeScript, JavaScript)
+- Common mistakes and corrections
+- HEREDOC usage guide
+- Referenced in Rule 04, section "Commit Message Format"
+
 ## Usage
 
-These examples are referenced throughout Rules 05, 06, and 08 to:
-- ✅ Reduce the main rule files size (saved 600+ lines across all rules)
+These examples are referenced throughout Rules 04, 05, 06, 08, and 10 to:
+- ✅ Reduce the main rule files size (saved 700+ lines across all rules)
 - ✅ Make examples reusable across documentation
 - ✅ Allow independent updates to examples
 - ✅ Improve searchability and organization
 - ✅ Follow DRY (Don't Repeat Yourself) principle
 - ✅ Provide copy-paste templates for common needs
 - ✅ Consolidate related concepts in single files
+
+## Summary Statistics
+
+**Total Templates/Examples**: 11 files
+**Total Lines Extracted**: 5,000+ lines
+**Rules Consolidated**: 5 major rules (04, 05, 06, 08, 10)
+**Total Reduction**: 400+ lines from rules (~13% average)
+**Context Optimization**: Significant improvement for agent loading
 
 ## Maintenance
 

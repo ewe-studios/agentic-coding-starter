@@ -167,25 +167,17 @@ status: [active|deprecated|experimental]
 
 ### Frontmatter Fields Reference
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | ✅ | Clear, descriptive agent name (title case) |
-| `type` | enum | ✅ | verification\|implementation\|review\|utility\|specialized |
-| `language` | string | ✅ | rust\|javascript\|python\|language-agnostic\|multiple |
-| `purpose` | string | ✅ | One sentence (10-15 words max), crystal clear |
-| `created` | date | ✅ | YYYY-MM-DD format |
-| `author` | string | ✅ | "Main Agent", "Team Name", etc. |
-| `license` | string | ✅ | "MIT", "Apache-2.0", etc. |
-| `metadata.version` | string | ✅ | Semantic version (e.g., "1.0") |
-| `metadata.last_updated` | date | ✅ | YYYY-MM-DD format |
-| `metadata.complexity` | enum | ✅ | simple\|moderate\|complex |
-| `metadata.tags` | array | ✅ | Minimum 2 tags, lowercase-with-hyphens |
-| `tools_required` | array | ✅ | List of required tools |
-| `spawned_by` | string | ✅ | main-agent\|sub-agent-name\|both |
-| `related_rules` | array | ✅ | Rule numbers (e.g., ["Rule 03", "Rule 07"]) |
-| `status` | enum | ✅ | active\|deprecated\|experimental |
-| `skills_required` | array | ⚪ | Optional: skills from `.agents/skills/` |
-| `spawns` | array | ⚪ | Optional: agents this can spawn |
+**Complete Reference**: See `.agents/templates/examples/agent-frontmatter-reference.md` for comprehensive field documentation, validation rules, examples, and update guidelines.
+
+**Quick Summary of Required Fields**:
+- `name`, `type`, `language`, `purpose` (10-15 words, crystal clear)
+- `created`, `author`, `license`
+- `metadata`: `version`, `last_updated`, `complexity`, `tags` (min 2)
+- `tools_required`, `spawned_by`, `related_rules`, `status`
+
+**Optional Fields**: `skills_required`, `spawns`
+
+**Critical for Selection**: Main Agent uses `purpose` field to select agents - must be immediately understandable and specific.
 
 ### Main Agent Frontmatter Enforcement (CRITICAL)
 

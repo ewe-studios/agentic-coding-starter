@@ -71,56 +71,21 @@ IF ANY FAIL: Main Agent creates urgent task, does NOT commit
 
 ## Commit Message Format (MANDATORY)
 
+**Complete Templates and Examples**: See `.agents/templates/examples/commit-message-templates.md` for detailed templates, real-world examples, and formatting guidelines.
+
 Every commit message **MUST** include:
+1. Brief summary line (50 characters or less)
+2. Blank line
+3. Detailed explanation of what and why
+4. Bullet-point summary of changes
+5. Blank line
+6. Verification status (if code changes)
+7. Blank line (if verification included)
+8. Co-authorship: `Co-Authored-By: Claude <noreply@anthropic.com>`
 
-1. **Brief summary line** (50 characters or less)
-2. **Blank line**
-3. **Detailed explanation** of what was changed and why
-4. **Bullet-point summary** of specific changes
-5. **Blank line**
-6. **Verification status** (if code changes were made)
-7. **Blank line** (if verification section included)
-8. **Co-authorship attribution**: `Co-Authored-By: Claude <noreply@anthropic.com>`
-
-### Template for Non-Code Changes
-```
-Brief summary of change
-
-Detailed explanation of what was changed and why this change
-was necessary. Explain the context and reasoning behind the
-modification.
-
-Changes made:
-- Specific change 1
-- Specific change 2
-- Specific change 3
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
-
-### Template for Code Changes (with Verification)
-```
-Brief summary of change
-
-Detailed explanation of what was changed and why this change
-was necessary. Explain the context and reasoning behind the
-modification.
-
-Changes made:
-- Specific change 1
-- Specific change 2
-- Specific change 3
-
-Verified by [Language] Verification Agent: All checks passed
-- Format: PASS
-- Lint: PASS
-- Type Check: PASS (if applicable)
-- Tests: [N]/[N] PASS
-- Build: PASS
-- Coverage: [N]%
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-```
+**Quick Templates**:
+- **Non-code changes**: Summary + explanation + changes list + co-author
+- **Code changes**: Summary + explanation + changes list + verification status + co-author
 
 ## Code Verification Before Commit (MANDATORY)
 
@@ -184,11 +149,19 @@ This automatic system is safe because:
 
 ## Examples
 
-### Good Practice ✅
+**Complete Examples**: See `.agents/templates/examples/commit-message-templates.md` for 8+ real-world examples including:
+- Adding features with verification
+- Bug fixes
+- Documentation updates
+- Rust/TypeScript/JavaScript code changes
+- Refactoring
+- Configuration changes
+- Specification updates
+- Multiple file changes
 
-**Example 1: Adding a new feature with verification**
+### Quick Example: Feature Addition with Verification
+
 ```bash
-# After implementation and successful verification
 git add src/middleware/auth.js
 git commit -m "$(cat <<'EOF'
 Add authentication middleware for API routes
@@ -201,99 +174,18 @@ Changes made:
 - Created auth.js middleware with token validation
 - Added JWT verification using jsonwebtoken library
 - Implemented error handling for invalid/expired tokens
-- Added user object attachment to req.user
 - Wrote comprehensive test suite
 
 Verified by JavaScript Verification Agent: All checks passed
 - Format: PASS (prettier)
 - Lint: PASS (eslint, 0 warnings)
-- Type Check: PASS (tsc)
 - Tests: 12/12 PASS
 - Build: PASS
-- Coverage: 94%
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
-git status  # Verify commit succeeded
-git push    # Automatic push - no approval needed
-```
-
-**Example 2: Fixing a bug**
-```bash
-# After fixing validation error
-git add src/validators/user-validator.js
-git commit -m "$(cat <<'EOF'
-Fix email validation regex to support plus addressing
-
-Fixed bug where email addresses with plus signs (user+tag@domain.com)
-were incorrectly rejected by the validation logic.
-
-Changes made:
-- Updated email regex pattern to include plus sign
-- Added test cases for plus addressing
-- Updated validation error messages
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-git status  # Verify commit succeeded
-git push    # Automatic push - no approval needed
-```
-
-**Example 3: Updating documentation**
-```bash
-# After updating README
-git add README.md
-git commit -m "$(cat <<'EOF'
-Update installation instructions for Node 18+
-
-Updated documentation to reflect new Node.js version requirement
-and simplified installation steps based on user feedback.
-
-Changes made:
-- Changed minimum Node.js version to 18.0.0
-- Removed deprecated npm install flags
-- Added troubleshooting section for common issues
-- Fixed formatting in code examples
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-git status  # Verify commit succeeded
-git push    # Automatic push - no approval needed
-```
-
-**Example 4: Rust code change with verification**
-```bash
-# After implementing Rust module and successful verification
-git add src/auth/token.rs tests/token_tests.rs
-git commit -m "$(cat <<'EOF'
-Implement JWT token generation and validation
-
-Created robust JWT token handling module with generation,
-validation, and refresh token support.
-
-Changes made:
-- Implemented TokenManager struct with key management
-- Added generate_token() with configurable expiration
-- Added validate_token() with signature verification
-- Implemented refresh token rotation
-- Added comprehensive test suite with edge cases
-
-Verified by Rust Verification Agent: All checks passed
-- Format: PASS (rustfmt)
-- Lint: PASS (clippy, 0 warnings)
-- Tests: 23/23 PASS
-- Build: PASS (debug and release)
-- Doc: PASS (cargo doc)
-- Security: PASS (cargo audit)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-git status  # Verify commit succeeded
-git push    # Automatic push - no approval needed
+git push
 ```
 
 ### Bad Practice ❌

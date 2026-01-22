@@ -47,14 +47,59 @@ Complete examples of proper git commit and push practices:
 - Safety rules and best practices
 - Referenced in Rule 06, line 1307
 
+### 5. Self-Containment Requirements
+
+#### [cross-reference-links-example.md](./cross-reference-links-example.md)
+Example of mandatory cross-reference links for requirements.md:
+- Top link after frontmatter (to tasks.md and learnings.md)
+- Bottom link at end (to verification.md)
+- Why these links matter
+- Validation checklist
+- Referenced in Rule 06, section "Requirements.md Self-Containment"
+
+#### [enhanced-frontmatter-example.md](./enhanced-frontmatter-example.md)
+Example of enhanced frontmatter for requirements.md (Rule 06 v6.0):
+- `metadata.stack_files` array
+- `metadata.skills` array
+- `has_features` boolean
+- `has_fundamentals` boolean
+- Migration from old format
+- Validation checklist
+- Referenced in Rule 06, section "Requirements.md Self-Containment"
+
+### 6. Completion and Verification
+
+#### [completion-verification-section-example.md](./completion-verification-section-example.md)
+Complete "MANDATORY Completion and Verification Requirements" section:
+- Task completion verification (100% required)
+- Code/implementation verification
+- Documentation verification
+- Quality verification (zero tolerance)
+- Specification tracking verification
+- Verification issue resolution
+- Validation script example
+- Referenced in Rule 06, section "Mandatory 100% Completion Verification"
+
+#### [validation-commands-example.md](./validation-commands-example.md)
+Exact bash commands for specification completion validation:
+- Task validation commands
+- File existence checks
+- Quality validation (build, test, lint)
+- Frontmatter validation
+- Documentation quality checks
+- Complete validation script
+- Common validation failures
+- Referenced in Rule 06, section "Validation Before Marking Complete"
+
 ## Usage
 
 These examples are referenced throughout Rule 06 to:
-- ✅ Reduce the main rule file size (saved 129 lines)
+- ✅ Reduce the main rule file size (saved 480+ lines)
 - ✅ Make examples reusable across documentation
 - ✅ Allow independent updates to examples
 - ✅ Improve searchability and organization
 - ✅ Follow DRY (Don't Repeat Yourself) principle
+- ✅ Provide copy-paste templates for common needs
 
 ## Maintenance
 

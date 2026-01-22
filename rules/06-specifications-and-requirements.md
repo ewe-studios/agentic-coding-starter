@@ -276,58 +276,11 @@ When using features, the main specification files change **significantly**:
 2. Implementation Agents load only the feature(s) they're working on
 3. Clear separation between high-level planning and detailed implementation
 
-Example main tasks.md with features:
-```markdown
----
-completed: 1
-uncompleted: 4
-created: 2026-01-18
-features:
-  - foundation
-  - connection
-  - request-response
-  - task-iterator
-  - public-api
----
-
-# HTTP Client - Feature Progress
-
-## Feature Priority Order
-
-1. [x] **foundation** - Error types and DNS resolution
-2. [ ] **connection** - URL parsing, TCP, TLS (depends on: foundation)
-3. [ ] **request-response** - Request builder, response types (depends on: connection)
-4. [ ] **task-iterator** - TaskIterator, executors (depends on: request-response)
-5. [ ] **public-api** - User-facing API, integration (depends on: task-iterator)
-
-## Notes
-- Complete features in order due to dependencies
-- Each feature has its own tasks.md with detailed checkboxes
-```
+**Example**: See `.agents/templates/examples/feature-based-tasks-example.md` for a complete example of feature-based tasks.md structure.
 
 #### Feature Frontmatter
 
-**feature.md frontmatter:**
-```yaml
----
-feature: feature-name
-description: Brief one-sentence description
-status: pending | in-progress | completed
-depends_on:
-  - other-feature-name
-estimated_effort: small | medium | large
----
-```
-
-**feature tasks.md frontmatter:**
-```yaml
----
-feature: feature-name
-completed: 0
-uncompleted: 5
-last_updated: 2026-01-18
----
-```
+See `.agents/templates/examples/feature-frontmatter-examples.md` for complete examples of feature.md and feature tasks.md frontmatter.
 
 #### Verification Files Remain at Main Level
 
@@ -392,18 +345,7 @@ When user requests new work related to a completed specification:
 3. **New specification explains how it builds upon the old one**
 4. **Old specification remains untouched** (historical record)
 
-**requirements.md frontmatter MUST include `builds_on` field:**
-
-```markdown
----
-description: [New enhancement description]
-status: in-progress
-builds_on:
-  - specifications/NN-original-spec-name
-related_specs:
-  - specifications/PP-related-spec
----
-```
+**Example**: See `.agents/templates/examples/builds-on-example.md` for complete frontmatter example with `builds_on` field.
 
 #### Exception: In-Progress Specifications
 
@@ -1182,35 +1124,11 @@ Set `has_fundamentals: true` in frontmatter when:
 
 When creating a specification with `has_fundamentals: true`:
 
-1. **Add "User-Facing Documentation Requirements" section** to requirements.md:
-   ```markdown
-   ## User-Facing Documentation Requirements (MANDATORY)
+**See `.agents/templates/examples/fundamentals-section-example.md` for complete example of how to structure the "User-Facing Documentation Requirements" section and corresponding tasks.**
 
-   **CRITICAL**: Create `fundamentals/` directory with comprehensive user documentation.
-
-   ### Fundamentals Documentation (REQUIRED)
-
-   Create in `specifications/[NN-spec-name]/fundamentals/`:
-   1. **00-overview.md** - Introduction, quick start, decision trees
-   2. **01-[topic].md** - [Description]
-   3. **02-[topic].md** - [Description]
-   [... list ALL fundamentals docs needed ...]
-
-   **Documentation Principles**:
-   - **Explain WHY** - Design decisions and trade-offs
-   - **Show internals** - Implementation details with commentary
-   - **Provide examples** - Compilable, real-world usage
-   - **Discuss trade-offs** - When to use, when NOT to use
-   - **Be self-contained** - No external resources needed
-   ```
-
-2. **Add fundamentals tasks to tasks.md as FIRST PRIORITY**:
-   ```markdown
-   ### Fundamentals Documentation (HIGHEST PRIORITY - DO FIRST)
-   - [ ] Write `00-overview.md` - Introduction and selection guide
-   - [ ] Write `01-[topic].md` - [Description]
-   [... one task per fundamental doc ...]
-   ```
+Key points:
+1. **Add "User-Facing Documentation Requirements" section** to requirements.md
+2. **Add fundamentals tasks to tasks.md as FIRST PRIORITY**
 
 #### Implementation Agent Responsibilities
 
@@ -1384,69 +1302,23 @@ The updated requirements template at `.agents/templates/requirements-template.md
 
 ### 7. Mandatory Git Commit and Push Requirements (CRITICAL)
 
-**CRITICAL**: To ensure no work is lost and maintain safety, follow these git practices:
+**CRITICAL**: To ensure no work is lost and maintain safety, follow these git practices.
 
-#### During Implementation (Atomic Commits)
+**See `.agents/templates/examples/git-workflow-examples.md` for complete examples of atomic commits and final commit workflows.**
 
-**MUST commit and push frequently** during work:
-- ✅ After completing each major task or primitive
-- ✅ After each logical unit of work (file, module, feature)
+#### Key Requirements
+
+**During Implementation (Atomic Commits)**:
+- ✅ Commit and push frequently (after each logical unit of work)
 - ✅ After tests pass for that unit
 - ✅ Every 30-60 minutes of active work
 - ✅ Before taking breaks or ending sessions
 
-**Atomic Commit Guidelines**:
-- Each commit should be self-contained and buildable
-- Commit message explains what was added/changed
-- Include "WIP:" prefix if work is incomplete
-- Push immediately after each commit
-
-**Example**:
-```bash
-git add src/primitives/spin_mutex.rs
-git commit -m "feat(primitives): add SpinMutex with poisoning support"
-git push origin [branch-name]
-```
-
-#### After Completion and Verification (MANDATORY PUSH)
-
-**AFTER 100% completion and verification PASS**:
-
+**After Completion and Verification (MANDATORY PUSH)**:
 1. ✅ **Verify all checks pass** (tasks 100%, tests 100%, clippy 0 warnings)
 2. ✅ **Create final commit** with all remaining changes
 3. ✅ **Push to remote IMMEDIATELY** - DO NOT DELAY
 4. ✅ **Verify push succeeded**
-
-**Final Commit Requirements**:
-```bash
-# 1. Verify everything is complete
-grep -c "^- \[ \]" tasks.md  # Must return 0
-cargo test  # Must show 100% passing
-cargo clippy -- -D warnings  # Must show 0 warnings
-
-# 2. Stage all specification files
-git add specifications/[NN-spec-name]/
-git add [implementation-files]
-
-# 3. Commit with comprehensive message
-git commit -m "feat: complete [specification-name]
-
-[Summary of what was completed]
-
-Verification:
-- Tasks: 100% (X/X)
-- Tests: 100% passing
-- Quality: 0 warnings
-- Documentation: Complete
-
-Status: VERIFIED - PRODUCTION READY"
-
-# 4. Push IMMEDIATELY
-git push origin [branch-name]
-
-# 5. Verify push succeeded
-git log origin/[branch-name] --oneline -1
-```
 
 #### Safety Rules
 

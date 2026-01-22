@@ -30,60 +30,37 @@ Implementation → Report → Verify → Pass? → Commit → Push
 
 ### Agent Hierarchy and Verification Authority
 
+**Complete Reference**: See `.agents/templates/examples/agent-identity-reference.md` for detailed agent identity guide, authority hierarchy, and violation examples.
+
 **Main Agent** (Top of hierarchy):
 - ✅ Directly interacting with user
-- ✅ Orchestrator of all workflows
 - ✅ **ONLY agent with authority to spawn verification agents**
 - ✅ Spawns: Implementation agents, Specification agents, Verification agents
 
-**Sub-Agents** (Implementation, Specification, etc.):
+**Sub-Agents**:
 - ❌ **NEVER spawn verification agents**
-- ❌ Do NOT have verification authority
 - ✅ Report completion to Main Agent
 - ✅ Wait for Main Agent to orchestrate verification
 
-**Identity Rule**:
-```
-If you were spawned by another agent → You are a SUB-AGENT
-If you are directly interacting with user → You are the MAIN AGENT
-
-SUB-AGENTS: NEVER spawn verification agents, report to Main Agent
-MAIN AGENT: Spawn verification agents, orchestrate verification
-```
+**Identity Rule**: If you were spawned by another agent → You are a SUB-AGENT (no verification authority)
 
 ### Specification Versioning Requirements
 
 **From Rule 06**: Completed specifications are **IMMUTABLE** and must not be modified.
 
-**Before updating any specification, Main Agent MUST check:**
+**Complete Details**: See Rule 06, section "Specification Versioning and Evolution" for full requirements.
+
+**Before updating any specification, Main Agent MUST check**:
 1. Read `specifications/NN-spec-name/requirements.md` frontmatter
 2. Check status field: is it "completed"?
-3. Check for FINAL_REPORT.md existence
-4. Check for VERIFICATION_SIGNOFF.md existence
+3. Check for FINAL_REPORT.md and VERIFICATION_SIGNOFF.md existence
 
-**If specification is COMPLETED:**
+**If specification is COMPLETED**:
 - ❌ DO NOT update the completed specification
-- ❌ DO NOT modify its tasks.md
-- ✅ CREATE a new specification that references the old one
-- ✅ New spec uses `builds_on` field in frontmatter
+- ✅ CREATE a new specification that references the old one (using `builds_on` field)
 
-**If specification is IN-PROGRESS:**
+**If specification is IN-PROGRESS**:
 - ✅ Can update tasks.md as normal
-- ✅ Can mark tasks complete
-- ✅ Can add verification.md on failure
-
-**Example Check:**
-```
-Main Agent about to update specifications/01-http-client/tasks.md
-Checks: specifications/01-http-client/requirements.md
-Finds: status: completed
-Finds: FINAL_REPORT.md exists
-Finds: VERIFICATION_SIGNOFF.md exists
-Action: STOP - Do not update completed specification
-        Create new specification instead
-```
-
-See **Rule 06: Specification Versioning and Evolution** for complete details.
 
 ---
 

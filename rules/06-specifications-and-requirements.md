@@ -428,6 +428,10 @@ Specifications that are **NOT completed** can be modified:
   - **`last_updated`**: Date of last update (YYYY-MM-DD)
   - **`estimated_effort`**: Size estimate (small | medium | large | xl)
   - **`tags`**: Array of tags (lowercase with hyphens, minimum 1)
+  - **`stack_files`**: Array of stack files from `.agents/stacks/` (e.g., `[".agents/stacks/rust.md"]`)
+  - **`skills`**: Array of skill names from `.agents/skills/` (e.g., `["skill-name"]`, or `[]` if none)
+- **`has_features`**: Boolean - true if using features/ directory structure
+- **`has_fundamentals`**: Boolean - true if fundamentals/ documentation directory needed
 
 **OPTIONAL Fields:**
 

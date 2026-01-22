@@ -24,28 +24,26 @@ The Main Agent **MUST**:
 - Commit code ONLY after verification passes
 
 ### 2. Agent Identity and Verification Authority
+
 **CRITICAL DISTINCTION**: Only the Main Agent can spawn verification agents.
+
+**Complete Reference**: See `.agents/templates/examples/agent-identity-reference.md` for detailed identity guide, authority hierarchy, self-awareness requirements, and violation examples.
+
+**Quick Identity Check**:
+```
+Were you spawned by another agent? → SUB-AGENT (no verification authority)
+Directly interacting with user? → MAIN AGENT (can spawn verification)
+```
 
 **Main Agent**:
 - ✅ The agent directly interacting with the user
-- ✅ The orchestrator at the top of the agent hierarchy
 - ✅ **ONLY agent with authority to spawn verification agents**
 - ✅ Spawns implementation agents, specification agents, and verification agents
 
-**Sub-Agents** (Implementation, Specification, etc.):
+**Sub-Agents**:
 - ❌ **NEVER spawn verification agents**
-- ❌ **NOT the Main Agent** - they are delegated workers
 - ✅ Report completion to Main Agent
 - ✅ Wait for Main Agent to coordinate verification
-
-**Agent Identity Rule**:
-```
-If you were spawned by another agent → You are a SUB-AGENT
-If you are directly interacting with user → You are the MAIN AGENT
-
-SUB-AGENTS: Report to Main Agent, NEVER spawn verification agents
-MAIN AGENT: Spawn verification agents, orchestrate all workflows
-```
 
 ### 3. Verification-First Workflow
 **CRITICAL REQUIREMENT**: NO code is EVER committed without verification.
@@ -201,9 +199,9 @@ All tests MUST include a comment block explaining:
 2. **What**: What specific behavior is being tested
 3. **Importance**: Why this test matters (optional but recommended for critical tests)
 
-**Format Examples**:
+**Complete Examples**: See `.agents/templates/examples/test-documentation-examples.md` for comprehensive language-specific examples (Rust, TypeScript, Python, Go, Java, C#) and detailed documentation guidelines.
 
-**Rust**:
+**Quick Example (Rust)**:
 ```rust
 /// WHY: Validates token expiration at exactly midnight (edge case from bug #234)
 /// WHAT: Token with midnight expiry should be treated as expired
@@ -214,39 +212,6 @@ fn test_token_expiry_at_midnight() {
     assert!(is_expired(&token));
 }
 ```
-
-**TypeScript/JavaScript**:
-```typescript
-/**
- * WHY: Rate limiter must track per-IP, not per-user (security requirement)
- * WHAT: Same IP with different users should hit rate limit
- * IMPORTANCE: Prevents distributed brute-force attacks
- */
-test('rate limiter tracks by IP address', async () => {
-  const ip = '192.168.1.1';
-  for (let i = 0; i < 100; i++) {
-    await makeRequest({ ip, user: `user_${i}` });
-  }
-  await expect(makeRequest({ ip, user: 'another_user' }))
-    .rejects.toThrow('Rate limit exceeded');
-});
-```
-
-**Documentation Guidelines**:
-
-✅ **DO**:
-- Write concise comments (2-4 lines for WHY/WHAT, 1 line for IMPORTANCE)
-- Reference bug numbers, tickets, or production incidents when relevant
-- Explain business rules and edge cases
-- Document non-obvious test requirements
-- Use plain language (avoid jargon)
-
-❌ **DON'T**:
-- Write obvious comments ("tests that addition works")
-- Repeat what the code already says
-- Write essays (keep it brief and scannable)
-- Document in learnings.md what should be in test comments
-- Omit the "WHY" (this is the most important part!)
 
 **What Goes in Test Comments vs learnings.md**:
 
@@ -961,39 +926,41 @@ Bad ❌:
   → Inconsistent results
 ```
 
-## Complete Workflow Example
+## Complete Workflow Examples
 
-### Successful Workflow (Condensed) ✅
+**Detailed Examples**: See `.agents/templates/examples/` for comprehensive workflow examples:
+- `workflow-success-example.md` - Successful workflow with verification passing on first attempt
+- `workflow-failure-example.md` - Failed verification with fix cycle and re-verification
 
+### Quick Workflow Overview
+
+**Successful Path** ✅:
 ```
-1. User: "Implement user authentication in Rust"
-2. Main Agent: Spawns Rust Implementation Agent with spec context
-3. Implementation Agent: Implements (TDD), self-reviews, documents learnings, reports completion
-4. Main Agent: Spawns ONE Rust Verification Agent
-5. Verification Agent: Runs all checks → PASS ✅
-6. Main Agent: Spawns Specification Update Agent
-7. Specification Agent: Updates tasks.md (marks complete, updates frontmatter)
-8. Main Agent: Commits with verification status, pushes to remote
-9. Main Agent: Reports success to user
+User Request → Main Agent spawns Implementation Agent
+→ Implementation completes (TDD, self-review, document learnings) → Reports to Main
+→ Main spawns Verification Agent → All checks PASS ✅
+→ Main spawns Specification Agent → Updates tasks.md
+→ Main commits + pushes → Success!
 ```
 
-### Failed Verification Workflow (Condensed) ❌
+**Failure and Recovery Path** ❌ → ✅:
+```
+User Request → Main Agent spawns Implementation Agent
+→ Implementation completes → Reports to Main
+→ Main spawns Verification Agent → FAIL ❌ (tests/lint errors)
+→ Main does NOT commit → Spawns Spec Agent → Creates verification.md + urgent tasks
+→ Reports failure to user → Main spawns Implementation Agent with fix context
+→ Implementation fixes all issues → Reports to Main
+→ Main spawns Verification Agent → PASS ✅
+→ Main spawns Spec Agent → Updates tasks, deletes verification.md
+→ Main commits + pushes → Success!
+```
 
-```
-1. User: "Add data validation to API endpoints"
-2. Main Agent: Spawns Python Implementation Agent
-3. Implementation Agent: Implements, reports completion
-4. Main Agent: Spawns Python Verification Agent
-5. Verification Agent: Runs checks → FAIL ❌ (3 lint errors, 2 test failures)
-6. Main Agent: DOES NOT COMMIT, spawns Specification Update Agent
-7. Specification Agent: Creates verification.md with full report, adds urgent task to tasks.md
-8. Main Agent: Reports failure details to user
-9. Main Agent: Spawns Implementation Agent with fix context
-10. Implementation Agent: Reads verification.md, fixes all issues, marks urgent task complete
-11. Main Agent: Spawns Verification Agent again → PASS ✅
-12. Main Agent: Spawns Specification Agent → Updates tasks.md, deletes verification.md
-13. Main Agent: Commits, pushes, reports success
-```
+**Key Principles Demonstrated**:
+- Main Agent orchestrates, never implements directly
+- Sub-agents never spawn verification or commit
+- No code committed without verification PASS
+- Fix cycle continues until verification succeeds
 
 ## Integration with Other Rules
 

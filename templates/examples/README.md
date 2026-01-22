@@ -91,15 +91,51 @@ Exact bash commands for specification completion validation:
 - Common validation failures
 - Referenced in Rule 06, section "Validation Before Marking Complete"
 
+### 7. Agent Orchestration (Rule 05)
+
+#### [agent-identity-reference.md](./agent-identity-reference.md)
+Complete reference for MAIN AGENT vs SUB-AGENT distinction:
+- Quick identity check flowchart
+- Authority hierarchy and verification spawning rules
+- Self-awareness requirements
+- Common violations and corrections
+- Referenced in Rule 05 and Rule 08, section "Agent Identity and Verification Authority"
+
+#### [workflow-success-example.md](./workflow-success-example.md)
+Complete successful workflow from user request to commit:
+- Step-by-step breakdown of ideal path
+- Agent interactions and authority respect
+- Quality gates and success factors
+- Time savings from first-attempt pass
+- Referenced in Rule 05, section "Complete Workflow Examples"
+
+#### [workflow-failure-example.md](./workflow-failure-example.md)
+Failed verification with fix cycle and recovery:
+- Complete workflow with failures and fixes
+- Verification failure handling
+- Fix cycle process
+- Re-verification and commit
+- Comparison of with vs without verification
+- Referenced in Rule 05, section "Complete Workflow Examples"
+
+#### [test-documentation-examples.md](./test-documentation-examples.md)
+Comprehensive test documentation guide (WHY/WHAT/IMPORTANCE):
+- Language-specific examples (Rust, TypeScript, Python, Go, Java, C#)
+- Format requirements and validation checklist
+- DO and DON'T guidelines
+- Quick reference card
+- Referenced in Rule 05, section "Test Documentation Requirements"
+
 ## Usage
 
-These examples are referenced throughout Rule 06 to:
-- ✅ Reduce the main rule file size (saved 480+ lines)
+These examples are referenced throughout Rules 05, 06, and 08 to:
+- ✅ Reduce the main rule files size (saved 600+ lines across all rules)
 - ✅ Make examples reusable across documentation
 - ✅ Allow independent updates to examples
 - ✅ Improve searchability and organization
 - ✅ Follow DRY (Don't Repeat Yourself) principle
 - ✅ Provide copy-paste templates for common needs
+- ✅ Consolidate related concepts in single files
 
 ## Maintenance
 

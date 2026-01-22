@@ -193,3 +193,215 @@ Wait for result, then make second call:
 
 *Created: 2026-01-22*
 *Reference: Complete working examples of Claude tool calling*
+
+## Claude Code-Specific Behaviors
+
+### Behavior 1: Tool Results Format
+
+When Claude calls tools, it expects results in this format:
+
+```xml
+<function_results>
+<result>
+<name>tool_name</name>
+<output>Tool output here</output>
+</result>
+</function_results>
+```
+
+For multiple tool results (parallel calls):
+
+```xml
+<function_results>
+<result>
+<name>get_weather</name>
+<output>{"temperature": 72, "condition": "sunny"}</output>
+</result>
+<result>
+<name>get_weather</name>
+<output>{"temperature": 45, "condition": "rainy"}</output>
+</result>
+<result>
+<name>get_weather</name>
+<output>{"temperature": 18, "condition": "cloudy"}</output>
+</result>
+</function_calls>
+
+### Behavior 2: Error Handling in Results
+
+When a tool fails, return error in the output:
+
+```xml
+<function_results>
+<result>
+<name>Read</name>
+<output><tool_use_error>File does not exist.</tool_use_error></output>
+</result>
+</function_results>
+```
+
+### Behavior 3: Conversation Flow
+
+Complete request-response cycle:
+
+**User Message**: "Read the config file and show me the database settings"
+
+**Claude Response** (includes tool call):
+```
+I'll read the config file for you.
+
+<function_calls>
+<invoke name="Read">
+<parameter name="file_path">/config/database.json</parameter>
+</invoke>
+</function_calls>
+```
+
+**System Returns** (tool results):
+```xml
+<function_results>
+<result>
+<name>Read</name>
+<output>{"host": "localhost", "port": 5432, "database": "myapp"}</output>
+</result>
+</function_results>
+```
+
+**Claude Response** (after receiving results):
+```
+Based on the config file, here are your database settings:
+- Host: localhost
+- Port: 5432
+- Database: myapp
+```
+
+### Behavior 4: Tool Schema Definition
+
+When calling Claude API, define tools using JSON Schema:
+
+```json
+{
+  "name": "get_weather",
+  "description": "Get the current weather in a given location",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "type": "string",
+        "description": "The city and state, e.g. San Francisco, CA"
+      },
+      "unit": {
+        "type": "string",
+        "enum": ["celsius", "fahrenheit"],
+        "description": "The unit of temperature"
+      }
+    },
+    "required": ["location"]
+  }
+}
+```
+
+### Behavior 5: Stop Reasons
+
+Claude API returns `stop_reason` to indicate why generation stopped:
+
+- `"end_turn"` - Normal completion
+- `"tool_use"` - Claude wants to call tools
+- `"max_tokens"` - Hit token limit
+- `"stop_sequence"` - Hit custom stop sequence
+
+Check for `"tool_use"` to know when to execute tools.
+
+### Behavior 6: Thinking Tags (Claude 3.5+)
+
+Claude may use thinking tags for reasoning:
+
+```xml
+<thinking>
+I need to read the file first to see its contents before editing.
+</thinking>
+
+<function_calls>
+<invoke name="Read">
+<parameter name="file_path">/config.json</parameter>
+</invoke>
+</function_calls>
+```
+
+These are Claude's internal thoughts - don't execute as tool calls.
+
+### Behavior 7: Text Before and After Tool Calls
+
+Claude can include explanatory text:
+
+```
+Let me check those files for you.
+
+<function_calls>
+<invoke name="Read">
+<parameter name="file_path">/file1.txt</parameter>
+</invoke>
+<invoke name="Read">
+<parameter name="file_path">/file2.txt</parameter>
+</invoke>
+</function_calls>
+
+I'll analyze the contents once I receive them.
+```
+
+Parse the function_calls block, but preserve surrounding text for context.
+
+### Behavior 8: Tool Use Continuation
+
+After receiving tool results, Claude automatically continues:
+
+1. You send message with tool results
+2. Claude processes results
+3. Claude may call more tools OR respond to user
+4. Continue loop until Claude responds without tool calls
+
+### Behavior 9: Parallel vs Sequential Detection
+
+**Parallel** - Claude puts multiple invoke tags in ONE function_calls block:
+```xml
+<function_calls>
+<invoke name="tool1">...</invoke>
+<invoke name="tool2">...</invoke>
+</function_calls>
+```
+Execute all tools simultaneously, return all results together.
+
+**Sequential** - Claude makes second call after receiving first results:
+```xml
+<!-- First turn -->
+<function_calls>
+<invoke name="Read">...</invoke>
+</function_calls>
+
+<!-- System returns results -->
+
+<!-- Second turn (after processing results) -->
+<function_calls>
+<invoke name="Edit">...</invoke>
+</function_calls>
+```
+
+### Behavior 10: Empty Parameters
+
+Some tools may have optional parameters. Omit the parameter tag entirely:
+
+```xml
+<function_calls>
+<invoke name="list_files">
+<parameter name="directory">/home</parameter>
+<!-- No 'recursive' parameter means use default -->
+</invoke>
+</function_calls>
+```
+
+Don't use empty tags: `<parameter name="recursive"></parameter>`
+
+---
+
+*Updated: 2026-01-22*
+*Added: Claude Code-specific behaviors and API integration patterns*

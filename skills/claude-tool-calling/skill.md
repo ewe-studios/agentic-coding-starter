@@ -1,12 +1,12 @@
 ---
 name: "Claude Tool Calling Patterns"
 description: "Comprehensive guide for AI agents on proper Claude-style tool calling with correct syntax, patterns, and examples"
-approved: No
+approved: Yes
 created: 2026-01-22
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "1.0"
+  version: "1.1"
   last_updated: "2026-01-22"
   tags:
     - claude
@@ -179,11 +179,55 @@ Format tool results consistently for Claude to parse.
 
 Handle tool execution errors and return useful messages.
 
+## Claude Code-Specific Behaviors
+
+### API Integration Points
+
+When integrating Claude tool calling:
+
+1. **Define tools in API request** using JSON Schema
+2. **Parse function_calls blocks** from Claude's response
+3. **Execute requested tools** in your system
+4. **Format results** as function_results XML blocks
+5. **Continue conversation** by sending results back
+6. **Loop until completion** (Claude stops making tool calls)
+
+### Tool Results Format
+
+Return results to Claude in this format:
+
+```
+<function_results>
+<result>
+<name>tool_name</name>
+<output>Tool output or error message</output>
+</result>
+</function_results>
+```
+
+For errors, use `<tool_use_error>` tags within output.
+
+### Stop Reason Detection
+
+Claude API returns `stop_reason` field:
+- `"tool_use"` → Execute tools and continue
+- `"end_turn"` → Normal completion, no more tools needed
+- `"max_tokens"` → Hit token limit
+- `"stop_sequence"` → Custom stop sequence hit
+
+### Thinking Tags
+
+Claude may include `<thinking>` tags for internal reasoning - these are NOT tool calls. Parse and ignore them when extracting tool calls.
+
+### Text Around Tool Calls
+
+Claude can include explanatory text before/after tool calls. Preserve this text for user experience, but only execute the function_calls blocks.
+
 ## Examples Directory
 
 Complete working examples are in the examples/ subdirectory:
 
-- `tool-calling-examples.md` - Full examples of all patterns
+- `tool-calling-examples.md` - Full examples of all patterns + Claude Code-specific behaviors
 - `common-mistakes.md` - Detailed mistake examples with fixes
 
 These examples show the actual XML syntax that would be interpreted if included directly in this file.
@@ -194,14 +238,19 @@ When implementing Claude tool calling:
 
 - [ ] Define tool schemas with proper JSON Schema
 - [ ] Parse function_calls blocks from Claude responses
+- [ ] Filter out thinking tags (don't execute as tools)
 - [ ] Extract invoke tags and parameter tags
-- [ ] Execute requested tools
-- [ ] Format results properly
-- [ ] Handle errors gracefully
+- [ ] Execute requested tools (parallel or sequential)
+- [ ] Format results as function_results XML blocks
+- [ ] Handle errors with tool_use_error tags
+- [ ] Check stop_reason to detect tool_use vs end_turn
+- [ ] Preserve explanatory text around tool calls
+- [ ] Continue conversation loop until completion
 - [ ] Validate all tool names and parameters
 - [ ] Test parallel tool calling
-- [ ] Test sequential tool calling
-- [ ] Test error cases
+- [ ] Test sequential tool calling (multi-turn)
+- [ ] Test error cases and recovery
+- [ ] Test mixed text and tool call responses
 
 ## References
 
@@ -215,4 +264,5 @@ When implementing Claude tool calling:
 
 ---
 *Created: 2026-01-22*
-*Last Updated: 2026-01-22*
+*Last Updated: 2026-01-22 v1.1*
+*Changes in v1.1: Added Claude Code-specific behaviors, API integration patterns, thinking tags, stop_reason handling, conversation flow*

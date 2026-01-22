@@ -290,3 +290,134 @@ When tool calls fail:
 
 *Created: 2026-01-22*
 *Reference: Common mistakes in Claude tool calling and how to fix them*
+
+## Mistake 11: Wrong Tool Results Format
+
+### ❌ WRONG
+```json
+{
+  "tool_results": [
+    {"tool": "get_weather", "result": "72 degrees"}
+  ]
+}
+```
+
+### ✅ CORRECT
+```xml
+<function_results>
+<result>
+<name>get_weather</name>
+<output>72 degrees</output>
+</result>
+</function_results>
+```
+
+**Why**: Claude expects XML format for tool results, not JSON.
+
+## Mistake 12: Not Handling thinking Tags
+
+### ❌ WRONG (treating thinking as tool call)
+```python
+# Parsing Claude response
+if "<thinking>" in response:
+    execute_tool("thinking", ...)  # Wrong!
+```
+
+### ✅ CORRECT
+```python
+# Parsing Claude response
+thinking_blocks = extract_tags(response, "thinking")
+# Log or ignore thinking blocks
+
+tool_blocks = extract_tags(response, "function_calls")
+# Execute only tool_blocks
+```
+
+**Why**: thinking tags are Claude's internal reasoning, not tool calls.
+
+## Mistake 13: Not Checking stop_reason
+
+### ❌ WRONG
+```python
+response = call_claude_api(messages)
+# Immediately try to parse tools
+tools = extract_function_calls(response.content)
+```
+
+### ✅ CORRECT
+```python
+response = call_claude_api(messages)
+
+if response.stop_reason == "tool_use":
+    tools = extract_function_calls(response.content)
+    execute_tools(tools)
+elif response.stop_reason == "end_turn":
+    # Normal completion, show response to user
+    return response.content
+```
+
+**Why**: Not every response contains tool calls. Check stop_reason first.
+
+## Mistake 14: Breaking Conversation Flow
+
+### ❌ WRONG
+```python
+# User asks question
+response1 = call_claude(user_message)
+tools = extract_tools(response1)
+results = execute_tools(tools)
+
+# MISTAKE: Starting new conversation with results
+response2 = call_claude("Here are the results: " + results)
+```
+
+### ✅ CORRECT
+```python
+# User asks question
+response1 = call_claude(user_message)
+tools = extract_tools(response1)
+results = execute_tools(tools)
+
+# Continue same conversation with tool results
+messages.append({"role": "assistant", "content": response1.content})
+messages.append({"role": "user", "content": results})
+response2 = call_claude(messages)
+```
+
+**Why**: Tool results must be part of the same conversation thread.
+
+## Mistake 15: Not Looping Until Completion
+
+### ❌ WRONG
+```python
+response = call_claude(user_message)
+if response.stop_reason == "tool_use":
+    tools = extract_tools(response)
+    results = execute_tools(tools)
+    # MISTAKE: Stopping here
+    return results
+```
+
+### ✅ CORRECT
+```python
+response = call_claude(user_message)
+
+while response.stop_reason == "tool_use":
+    tools = extract_tools(response)
+    results = execute_tools(tools)
+    
+    # Continue conversation
+    messages.append({"role": "assistant", "content": response.content})
+    messages.append({"role": "user", "content": results})
+    response = call_claude(messages)
+
+# Now Claude has finished - return final response
+return response.content
+```
+
+**Why**: Claude may need multiple tool call rounds to complete the task.
+
+---
+
+*Updated: 2026-01-22*
+*Added: Tool results format, API integration, and conversation flow mistakes*

@@ -1123,6 +1123,354 @@ Every affected module **MUST** have accurate documentation at `documentation/[mo
 **Remember**: The user will be upset if work proceeds without proper requirements conversation, status verification, mandatory review agent, accurate module documentation, Agent Rules Reference section, or all mandatory documentation files!
 
 ---
+
+## Self-Containment and Mandatory Verification Requirements (CRITICAL)
+
+**Added**: 2026-01-22
+**Purpose**: Ensure every requirements.md is self-contained with all necessary cross-references and mandatory 100% completion verification.
+
+### 1. Requirements.md Self-Containment (MANDATORY)
+
+Every `requirements.md` file MUST contain ALL of the following:
+
+#### A. Cross-Reference Links at Top and Bottom
+
+**At the top** (immediately after frontmatter, before Overview):
+```markdown
+> **Specification Tracking**: See [tasks.md](./tasks.md) for task progress and [learnings.md](./learnings.md) for implementation insights.
+```
+
+**At the bottom** (after Final Verification Checklist):
+```markdown
+> **Verification**: See [verification.md](./verification.md) or [VERIFICATION_SIGNOFF.md](./VERIFICATION_SIGNOFF.md) for complete verification results.
+```
+
+#### B. Enhanced Frontmatter (MANDATORY Additions)
+
+Add these fields to requirements.md frontmatter:
+```yaml
+metadata:
+  stack_files:  # NEW - moved from body
+    - .agents/stacks/rust.md
+  skills: []  # NEW - moved from body
+has_features: false  # NEW - true if using features/ directory
+has_fundamentals: false  # NEW - true if fundamentals/ directory needed
+```
+
+**Move from body to frontmatter**:
+- Stack file references → `metadata.stack_files`
+- Skill references → `metadata.skills`
+
+This makes specifications machine-readable and self-documenting.
+
+### 2. Fundamentals Documentation as First Priority (MANDATORY)
+
+#### When Fundamentals Are Required
+
+Set `has_fundamentals: true` in frontmatter when:
+- Implementing new user-facing libraries or APIs
+- Creating reusable components users need to understand deeply
+- Introducing complex patterns, algorithms, or abstractions
+- Building foundational primitives or developer tools
+- User needs to make architectural decisions using this code
+
+#### Main Agent Responsibilities
+
+When creating a specification with `has_fundamentals: true`:
+
+1. **Add "User-Facing Documentation Requirements" section** to requirements.md:
+   ```markdown
+   ## User-Facing Documentation Requirements (MANDATORY)
+
+   **CRITICAL**: Create `fundamentals/` directory with comprehensive user documentation.
+
+   ### Fundamentals Documentation (REQUIRED)
+
+   Create in `specifications/[NN-spec-name]/fundamentals/`:
+   1. **00-overview.md** - Introduction, quick start, decision trees
+   2. **01-[topic].md** - [Description]
+   3. **02-[topic].md** - [Description]
+   [... list ALL fundamentals docs needed ...]
+
+   **Documentation Principles**:
+   - **Explain WHY** - Design decisions and trade-offs
+   - **Show internals** - Implementation details with commentary
+   - **Provide examples** - Compilable, real-world usage
+   - **Discuss trade-offs** - When to use, when NOT to use
+   - **Be self-contained** - No external resources needed
+   ```
+
+2. **Add fundamentals tasks to tasks.md as FIRST PRIORITY**:
+   ```markdown
+   ### Fundamentals Documentation (HIGHEST PRIORITY - DO FIRST)
+   - [ ] Write `00-overview.md` - Introduction and selection guide
+   - [ ] Write `01-[topic].md` - [Description]
+   [... one task per fundamental doc ...]
+   ```
+
+#### Implementation Agent Responsibilities
+
+**CRITICAL ORDER**: Documentation BEFORE implementation.
+
+1. **Read fundamentals list** from requirements.md
+2. **Create fundamentals/ directory** first
+3. **Write ALL fundamental documents** listed
+4. **Mark fundamentals tasks complete**
+5. **ONLY THEN** start implementation coding
+
+**Why This Order**:
+- Thinking about user documentation clarifies the API design
+- Prevents building APIs that are hard to explain
+- Catches design flaws early
+- Ensures user-centric approach
+
+### 3. Mandatory 100% Completion Verification
+
+Every `requirements.md` MUST include this complete section (use updated template):
+
+```markdown
+## MANDATORY Completion and Verification Requirements
+
+**CRITICAL**: Before marking this specification as complete, ALL of the following MUST be verified:
+
+### 1. Task Completion Verification (100% REQUIRED)
+
+**NO EXCEPTIONS**: Every task in `tasks.md` MUST be completed.
+
+- [ ] Open `tasks.md` and verify ALL tasks are marked `[x]`
+- [ ] Verify `completed` count in frontmatter matches actual `[x]` count
+- [ ] Verify `uncompleted` count is `0`
+- [ ] Verify `completion_percentage` is `100`
+- [ ] NO tasks left as `[ ]` (incomplete)
+- [ ] NO optional tasks - everything is mandatory unless user explicitly says otherwise
+
+**Validation Command**:
+\`\`\`bash
+# Must return 0
+grep -c "^- \[ \]" tasks.md
+\`\`\`
+
+### 2. Code/Implementation Verification (100% REQUIRED)
+
+For each task in `tasks.md`:
+- [ ] Verify the code/file actually exists in the codebase
+- [ ] Verify the implementation matches the task description
+- [ ] Verify all tests for that component pass
+- [ ] NO placeholder implementations
+- [ ] NO commented-out code marked as "TODO"
+
+### 3. Documentation Verification (100% REQUIRED - NO OPTIONAL)
+
+**If has_fundamentals: true**:
+- [ ] ALL fundamental documents listed in tasks.md exist
+- [ ] Each fundamental doc is comprehensive (not stub/placeholder)
+- [ ] Code examples in docs compile and work
+- [ ] Cross-references between docs are valid
+
+**Always Required**:
+- [ ] `learnings.md` created with implementation insights
+- [ ] `progress.md` created with timeline and status
+- [ ] `verification.md` or `VERIFICATION_SIGNOFF.md` created
+
+### 4. Quality Verification (100% REQUIRED - ZERO TOLERANCE)
+
+**Build and Test**:
+- [ ] Build succeeds with 0 errors
+- [ ] Tests show 100% passing
+- [ ] NO ignored or skipped tests (unless user-approved)
+
+**Code Quality** (language-specific):
+- [ ] Linter shows 0 warnings (cargo clippy, eslint, etc.)
+- [ ] Code formatter applied and clean
+- [ ] NO warnings suppressed without justification
+
+**Documentation Quality**:
+- [ ] All public APIs documented
+- [ ] Documentation builds without errors
+- [ ] NO broken links
+
+### 5. Specification Tracking Verification (MANDATORY)
+
+- [ ] `tasks.md` shows 100% completion
+- [ ] `learnings.md` exists and is comprehensive
+- [ ] `progress.md` exists with timeline
+- [ ] `verification.md` exists with results
+- [ ] `requirements.md` frontmatter status correct
+
+### 6. Verification Issue Resolution (MANDATORY)
+
+**NO OPTIONAL FIXES**: All verification issues MUST be resolved.
+
+- [ ] Check `verification.md` for FAILED or WARNING items
+- [ ] ALL failed checks fixed (no exceptions)
+- [ ] ALL warnings addressed or user-accepted
+- [ ] Re-run verification to confirm PASS
+- [ ] Update `verification.md` with final PASS status
+
+**If ANY failures exist**:
+1. ❌ DO NOT mark specification complete
+2. ❌ DO NOT mark tasks done
+3. ✅ FIX all issues
+4. ✅ Re-run verification
+5. ✅ Only complete after 100% PASS
+\`\`\`
+
+### 4. Validation Before Marking Complete
+
+**Main Agent MUST** perform these checks before setting status to "completed":
+
+1. **Task Validation**:
+   ```bash
+   cd specifications/[NN-spec-name]/
+   # Must return 0 (no unchecked tasks)
+   grep -c "^- \[ \]" tasks.md
+   # Must return total task count
+   grep -c "^- \[x\]" tasks.md
+   ```
+
+2. **File Existence Validation**:
+   ```bash
+   # Must all exist
+   ls tasks.md learnings.md progress.md verification.md
+   # If has_fundamentals: true
+   ls fundamentals/*.md
+   ```
+
+3. **Quality Validation**:
+   ```bash
+   # Must show 0 warnings, 100% tests passing
+   cargo clippy -- -D warnings  # (or language equivalent)
+   cargo test
+   ```
+
+4. **Frontmatter Validation**:
+   - `tasks.md` frontmatter: `uncompleted: 0`, `completion_percentage: 100`
+   - `requirements.md` frontmatter: correct `has_fundamentals` value
+   - All cross-reference links present
+
+**ONLY after ALL validations pass** can status be set to "completed".
+
+### 5. Zero Tolerance Enforcement
+
+**Violations with ZERO TOLERANCE**:
+- ❌ Marking spec complete with tasks.md showing `[ ]` tasks
+- ❌ Marking spec complete with verification showing FAIL
+- ❌ Ignoring clippy/lint warnings as "optional"
+- ❌ Missing learnings.md, progress.md, or verification.md
+- ❌ Missing fundamentals/ when has_fundamentals: true
+- ❌ Creating fundamentals AFTER implementation (must be FIRST)
+- ❌ Missing cross-reference links in requirements.md
+
+**Consequences**:
+- Status MUST be reverted to "in-progress"
+- ALL incomplete items MUST be completed
+- Verification MUST be re-run from scratch
+- Specification CANNOT be marked complete until 100% PASS
+
+### 6. Template Updates
+
+The updated requirements template at `.agents/templates/requirements-template.md` now includes:
+- Enhanced frontmatter with stack_files, skills, has_features, has_fundamentals
+- Cross-reference links at top and bottom
+- User-Facing Documentation Requirements section
+- Complete MANDATORY Completion and Verification Requirements section
+- Final Verification Checklist
+
+**Main Agent MUST use this updated template** for all new specifications.
+
+### 7. Mandatory Git Commit and Push Requirements (CRITICAL)
+
+**CRITICAL**: To ensure no work is lost and maintain safety, follow these git practices:
+
+#### During Implementation (Atomic Commits)
+
+**MUST commit and push frequently** during work:
+- ✅ After completing each major task or primitive
+- ✅ After each logical unit of work (file, module, feature)
+- ✅ After tests pass for that unit
+- ✅ Every 30-60 minutes of active work
+- ✅ Before taking breaks or ending sessions
+
+**Atomic Commit Guidelines**:
+- Each commit should be self-contained and buildable
+- Commit message explains what was added/changed
+- Include "WIP:" prefix if work is incomplete
+- Push immediately after each commit
+
+**Example**:
+```bash
+git add src/primitives/spin_mutex.rs
+git commit -m "feat(primitives): add SpinMutex with poisoning support"
+git push origin [branch-name]
+```
+
+#### After Completion and Verification (MANDATORY PUSH)
+
+**AFTER 100% completion and verification PASS**:
+
+1. ✅ **Verify all checks pass** (tasks 100%, tests 100%, clippy 0 warnings)
+2. ✅ **Create final commit** with all remaining changes
+3. ✅ **Push to remote IMMEDIATELY** - DO NOT DELAY
+4. ✅ **Verify push succeeded**
+
+**Final Commit Requirements**:
+```bash
+# 1. Verify everything is complete
+grep -c "^- \[ \]" tasks.md  # Must return 0
+cargo test  # Must show 100% passing
+cargo clippy -- -D warnings  # Must show 0 warnings
+
+# 2. Stage all specification files
+git add specifications/[NN-spec-name]/
+git add [implementation-files]
+
+# 3. Commit with comprehensive message
+git commit -m "feat: complete [specification-name]
+
+[Summary of what was completed]
+
+Verification:
+- Tasks: 100% (X/X)
+- Tests: 100% passing
+- Quality: 0 warnings
+- Documentation: Complete
+
+Status: VERIFIED - PRODUCTION READY"
+
+# 4. Push IMMEDIATELY
+git push origin [branch-name]
+
+# 5. Verify push succeeded
+git log origin/[branch-name] --oneline -1
+```
+
+#### Safety Rules
+
+**MUST push immediately**:
+- ✅ After marking specification complete
+- ✅ After verification passes
+- ✅ After all tasks show 100%
+- ✅ After fixing all verification issues
+
+**WHY this is critical**:
+- Prevents work loss from system failures
+- Ensures remote backup of completed work
+- Allows team visibility into progress
+- Creates audit trail of when work completed
+
+**ZERO TOLERANCE**:
+- ❌ DO NOT delay pushing after completion
+- ❌ DO NOT "batch" pushes across specifications
+- ❌ DO NOT leave completed work unpushed
+- ❌ DO NOT forget to push after final commit
+
+**User will be upset if**:
+- Work is completed but not pushed (risk of loss)
+- Specification marked complete but changes not in remote
+- Hours of work lost due to unpushed commits
+
+---
+
 *Created: 2026-01-11*
-*Last Updated: 2026-01-19*
-*Version: 4.3 (Added Self-Contained Specification Requirement with Agent Rules Reference)*
+*Last Updated: 2026-01-22*
+*Version: 6.0 - Added self-containment, mandatory 100% verification, and git push requirements*

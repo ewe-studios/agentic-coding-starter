@@ -10,11 +10,18 @@ metadata:
   estimated_effort: "medium"
   tags:
     - feature
+  stack_files:
+    - .agents/stacks/[language].md
+  skills: []
 builds_on: []
 related_specs: []
+has_features: false
+has_fundamentals: false
 ---
 
 # [Specification Name] - Requirements
+
+> **Specification Tracking**: See [tasks.md](./tasks.md) for task progress and [learnings.md](./learnings.md) for implementation insights.
 
 ## Overview
 Brief summary of what this specification covers and why it's needed.
@@ -51,9 +58,45 @@ Based on the conversation, we agreed on:
 - **Dependencies:** [Required libraries/tools]
 - **Integration Points:** [How this integrates]
 
-### Success Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
+## User-Facing Documentation Requirements (MANDATORY)
+
+**CRITICAL**: If this specification introduces new user-facing features, libraries, or APIs, create a `fundamentals/` directory with comprehensive user documentation.
+
+### Fundamentals Documentation (REQUIRED when has_fundamentals: true)
+
+Create the following documents in `specifications/[NN-spec-name]/fundamentals/`:
+
+1. **00-overview.md** - Introduction, quick start, decision trees
+2. **[Additional fundamental docs as needed]** - Deep dives into concepts
+
+**Documentation Principles**:
+- **Explain WHY** - Design decisions and trade-offs, not just how
+- **Show internals** - Key implementation details with commentary
+- **Provide examples** - Compilable, real-world usage examples
+- **Discuss trade-offs** - When to use, when NOT to use
+- **Be self-contained** - Reader can understand without external resources
+
+**Add fundamentals documentation tasks to tasks.md as HIGH PRIORITY items.**
+
+## Success Criteria
+
+**Implementation Success**:
+- [ ] All functional requirements implemented
+- [ ] All non-functional requirements met
+- [ ] All tests passing
+
+**Documentation Success** (if has_fundamentals: true):
+- [ ] All fundamental documents created
+- [ ] User documentation comprehensive and accurate
+- [ ] Code examples compile and are correct
+- [ ] Trade-offs and design decisions explained
+
+**Quality Success** (MANDATORY - NO EXCEPTIONS):
+- [ ] All tests passing (100%)
+- [ ] Zero clippy warnings
+- [ ] Zero compiler warnings
+- [ ] Code properly formatted
+- [ ] All public items documented
 
 ## Module Documentation References
 
@@ -70,10 +113,6 @@ This specification modifies the following modules:
 
 **MANDATORY**: All agents working on this specification MUST load the rules listed below.
 
-**Rules Location**: `.agents/rules/`
-**Stacks Location**: `.agents/stacks/`
-**Skills Location**: `.agents/skills/`
-
 ### All Agents (Mandatory)
 
 Load these rules from `.agents/rules/`:
@@ -87,45 +126,126 @@ Load these rules from `.agents/rules/`:
 
 ### By Agent Role
 
-Load additional rules from `.agents/rules/` based on your role:
-
 | Agent Type | Additional Rules to Load |
 |------------|--------------------------|
 | **Review Agent** | `.agents/rules/06-specifications-and-requirements.md` |
-| **Implementation Agent** | `.agents/rules/13-implementation-agent-guide.md`, `.agents/rules/11-skills-usage.md` (if skills listed below), stack file |
-| **Verification Agent** | `.agents/rules/08-verification-workflow-complete-guide.md`, stack file |
+| **Implementation Agent** | `.agents/rules/13-implementation-agent-guide.md` |
+| **Verification Agent** | `.agents/rules/08-verification-workflow-complete-guide.md` |
 | **Documentation Agent** | `.agents/rules/06-specifications-and-requirements.md` |
 
-### Stack Files
+---
 
-Load from `.agents/stacks/`:
+## MANDATORY Completion and Verification Requirements
 
-- **Language**: [language] → `.agents/stacks/[language].md`
+**CRITICAL**: Before marking this specification as complete, ALL of the following MUST be verified:
 
-### Skills Referenced
+### 1. Task Completion Verification (100% REQUIRED)
 
-Load from `.agents/skills/` if applicable:
+**NO EXCEPTIONS**: Every task in `tasks.md` MUST be completed.
 
-[List any skills that agents should use, or "None" if not applicable]
+- [ ] Open `tasks.md` and verify ALL tasks are marked `[x]`
+- [ ] Verify `completed` count in frontmatter matches actual `[x]` count
+- [ ] Verify `uncompleted` count is `0`
+- [ ] Verify `completion_percentage` is `100`
+- [ ] NO tasks left as `[ ]` (incomplete)
+- [ ] NO optional tasks - everything is mandatory unless user explicitly says otherwise
+
+**Validation Command**:
+```bash
+# Must return 0
+grep -c "^- \[ \]" tasks.md
+```
+
+### 2. Code/Implementation Verification (100% REQUIRED)
+
+For each task in `tasks.md`:
+- [ ] Verify the code/file actually exists in the codebase
+- [ ] Verify the implementation matches the task description
+- [ ] Verify all tests for that component pass
+- [ ] NO placeholder implementations
+- [ ] NO commented-out code marked as "TODO"
+
+### 3. Documentation Verification (100% REQUIRED - NO OPTIONAL)
+
+**If has_fundamentals: true**:
+- [ ] ALL fundamental documents listed in tasks.md exist
+- [ ] Each fundamental doc is comprehensive (not stub/placeholder)
+- [ ] Code examples in docs compile and work
+- [ ] Cross-references between docs are valid
+
+**Always Required**:
+- [ ] `learnings.md` created with implementation insights
+- [ ] `progress.md` created with timeline and status
+- [ ] `verification.md` or `VERIFICATION_SIGNOFF.md` created
+
+### 4. Quality Verification (100% REQUIRED - ZERO TOLERANCE)
+
+**Build and Test**:
+- [ ] `cargo build` (or equivalent) succeeds with 0 errors
+- [ ] `cargo test` (or equivalent) shows 100% tests passing
+- [ ] NO ignored or skipped tests (unless explicitly user-approved)
+
+**Code Quality** (language-specific, see stack file):
+- [ ] `cargo clippy -- -D warnings` (Rust) shows 0 warnings
+- [ ] `npm run lint` (TypeScript/JavaScript) shows 0 errors
+- [ ] Code formatter applied and clean
+- [ ] NO code quality warnings ignored or suppressed without justification
+
+**Documentation Quality**:
+- [ ] All public APIs documented
+- [ ] All documentation builds without errors
+- [ ] NO broken links in documentation
+
+### 5. Specification Tracking Verification (MANDATORY)
+
+- [ ] `tasks.md` shows 100% completion
+- [ ] `learnings.md` exists and documents key insights
+- [ ] `progress.md` exists and shows timeline/achievements
+- [ ] `verification.md` or `VERIFICATION_SIGNOFF.md` exists with verification results
+- [ ] `requirements.md` frontmatter has correct `status` field
+
+### 6. Verification Issue Resolution (MANDATORY)
+
+**NO OPTIONAL FIXES**: All verification issues MUST be resolved.
+
+- [ ] Check `verification.md` for any FAILED or WARNING items
+- [ ] ALL failed checks must be fixed (no exceptions)
+- [ ] ALL warnings must be addressed or explicitly accepted by user
+- [ ] Re-run verification after fixes to confirm PASS status
+- [ ] Update `verification.md` with final PASS status
+
+**If verification shows ANY failures**:
+1. ❌ DO NOT mark specification as complete
+2. ❌ DO NOT mark tasks as done
+3. ✅ FIX all issues
+4. ✅ Re-run verification
+5. ✅ Only mark complete after 100% PASS
 
 ---
 
-## Important Notes for Agents
+## Final Verification Checklist
 
-### Before Starting Work
-- **MUST LOAD** rules listed in "Agent Rules Reference" section above
-- **MUST READ** both requirements.md and tasks.md
-- **MUST VERIFY** completion status by searching codebase
-- **MUST UPDATE** tasks.md to reflect actual status
-- **MUST ADD** new tasks BEFORE starting work
+Before marking this specification as **completed**:
 
-### Verification Requirements
-Agents **MUST**:
-1. Search codebase for relevant implementations
-2. Verify code exists and works as specified
-3. Update task status based on findings
-4. Mark completed only when fully verified
+- [ ] All tasks in tasks.md are checked `[x]` (100%)
+- [ ] All code exists and works (verified in codebase)
+- [ ] All tests pass (100%, no failures/skips)
+- [ ] All documentation complete (no stubs/placeholders)
+- [ ] All quality checks pass (0 warnings)
+- [ ] All verification issues resolved (100% PASS)
+- [ ] learnings.md exists and is comprehensive
+- [ ] progress.md exists with timeline
+- [ ] verification.md exists with PASS status
+- [ ] fundamentals/ directory exists (if has_fundamentals: true)
+- [ ] All fundamental docs listed are created
+
+**Status can only be set to "completed" when ALL items above are checked.**
 
 ---
+
+> **Verification**: See [verification.md](./verification.md) or [VERIFICATION_SIGNOFF.md](./VERIFICATION_SIGNOFF.md) for complete verification results.
+
+---
+
 *Created: [Date]*
 *Last Updated: [Date]*

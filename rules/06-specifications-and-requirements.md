@@ -860,7 +860,10 @@ All agents **MUST** (details in sections above):
 - ✅ Launch review agent BEFORE any implementation (read and act on report)
 - ✅ Read specifications, tasks, review report, and module docs before working
 - ✅ Verify documentation matches reality (STOP if mismatch)
-- ✅ Update tasks.md and module docs as work progresses
+- ✅ **Update requirements.md IMMEDIATELY when new requirements identified**
+- ✅ **Update tasks.md IMMEDIATELY after EACH task completion (no batching)**
+- ✅ **Assume ALL tasks/requirements are mandatory unless user explicitly states otherwise**
+- ✅ Update module docs as work progresses
 - ✅ Create all 6 mandatory files (requirements, tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF)
 - ✅ Commit specification changes following Rules 03 and 04
 
@@ -878,11 +881,15 @@ All agents **MUST** (details in sections above):
 - ❌ Not verifying module docs match code
 - ❌ Missing any of the 6 mandatory files
 - ❌ Missing cross-reference links in requirements.md
+- ❌ **Not updating requirements.md when new requirements discovered**
+- ❌ **Batching task updates instead of updating immediately after each task**
+- ❌ **Creating separate task tracking files instead of using tasks.md**
 
 **Completion Violations**:
 - ❌ Marking complete without 100% verification
 - ❌ Marking complete with unchecked tasks
 - ❌ Proceeding when docs don't match code
+- ❌ **Skipping tasks or requirements assuming they are optional without explicit user confirmation**
 
 **User Impact**: Violations cause user frustration, wasted effort, lost context, false progress, broken changes, and trust erosion.
 
@@ -893,8 +900,9 @@ When violation detected:
 2. **Launch review agent** if skipped
 3. **Create/verify module docs** if missing or inaccurate
 4. **Complete missing items** (specs, tasks, mandatory files)
-5. **Verify all checks pass** before resuming
-6. **Report violation** to user with corrective actions taken
+5. **Update specification files** if out of sync (requirements.md, tasks.md with correct counts)
+6. **Verify all checks pass** before resuming
+7. **Report violation** to user with corrective actions taken
 
 **Only proceed** when review reports GO and all documentation accurate.
 
@@ -943,6 +951,9 @@ For pure documentation updates:
 - ✅ Module documentation created/verified before implementation
 - ✅ Review agent launched before any implementation work
 - ✅ All 6 mandatory files created (requirements, tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF)
+- ✅ **IMMEDIATE updates to requirements.md when new requirements identified**
+- ✅ **IMMEDIATE updates to tasks.md after EACH task completion**
+- ✅ **ALL requirements and tasks are MANDATORY unless user explicitly states otherwise**
 - ✅ 100% completion verification before marking complete
 
 **ZERO TOLERANCE Violations** (comprehensive list in Enforcement section above):
@@ -950,10 +961,129 @@ For pure documentation updates:
 - Missing mandatory files or sections
 - Marking complete without 100% verification
 - Proceeding when review agent reports STOP/CLARIFY
+- **Batching task updates instead of updating immediately**
+- **Not updating requirements.md when new requirements discovered**
+- **Assuming tasks/requirements are optional without explicit user confirmation**
 
 **Templates**: All templates in `.agents/templates/` - use these for consistency.
 
 **Remember**: User will be upset if work proceeds without proper requirements conversation, review agent, accurate module docs, or complete verification!
+
+---
+
+## Agent Responsibilities During Implementation (CRITICAL)
+
+### Immediate Updates to Specification Files (MANDATORY)
+
+**ZERO TOLERANCE RULE**: Agents MUST update specification files IMMEDIATELY as work progresses. NO batching, NO waiting, NO exceptions.
+
+#### 1. Requirements.md Updates (IMMEDIATE)
+
+Agents working on requirements or implementation **MUST**:
+
+- ✅ **Update requirements.md IMMEDIATELY** when identifying new requirements
+- ✅ **Update IMMEDIATELY** when requirements changes are confirmed with user
+- ✅ **If user grants full rights**, auto-update requirements without seeking approval
+- ❌ **DO NOT wait** until task completion to update requirements
+- ❌ **DO NOT forget** to sync requirements with actual implementation
+
+**When to update requirements.md**:
+- New requirement discovered during implementation
+- User clarifies or changes a requirement
+- Technical constraint requires requirement adjustment
+- Integration reveals additional requirements
+- User explicitly approves a requirement change
+
+**Why immediate updates matter**:
+- Requirements accurately reflect current understanding
+- No discoveries are lost or forgotten
+- User has real-time visibility into scope changes
+- Future agents have accurate context
+- Prevents specification drift from reality
+
+#### 2. Tasks.md Updates (IMMEDIATE - EVERY TASK)
+
+Agents working on tasks **MUST**:
+
+- ✅ **Update tasks.md IMMEDIATELY** after completing EACH task
+- ✅ **Mark task as [x]** the MOMENT you finish it
+- ✅ **Update frontmatter counts** (completed/uncompleted/completion_percentage) immediately
+- ❌ **DO NOT wait** until you're done with multiple tasks to update
+- ❌ **DO NOT create** other task tracking files - tasks.md is THE task tracker
+- ❌ **DO NOT batch** updates - update after EACH task completion
+
+**When to update tasks.md**:
+- IMMEDIATELY after completing any task
+- IMMEDIATELY after marking any checkbox [x]
+- Before moving to the next task
+- Before taking breaks or ending work sessions
+- Before switching to a different specification
+
+**Why immediate task updates matter**:
+- Real-time visibility into task progress
+- No completed work is forgotten or lost
+- User can check status at any time and see current progress
+- System crashes won't lose your progress tracking
+- Other agents can pick up exactly where you left off
+- tasks.md remains the single source of truth
+
+**Frontmatter update requirements**:
+```yaml
+completed: [count of [x] tasks]
+uncompleted: [count of [ ] tasks]
+metadata:
+  total_tasks: [completed + uncompleted]
+  completion_percentage: [(completed / total_tasks) * 100]
+  last_updated: [YYYY-MM-DD - TODAY'S DATE]
+```
+
+#### 3. All Requirements and Tasks Are Mandatory (DEFAULT)
+
+**CRITICAL ASSUMPTION**: Unless user EXPLICITLY states otherwise, ALL requirements and tasks are MANDATORY.
+
+**For requirements.md**:
+- ✅ Assume ALL requirements must be implemented
+- ✅ Assume ALL items must be completed
+- ❌ DO NOT skip requirements thinking they are optional
+- ❌ DO NOT treat any requirement as "nice-to-have" without explicit user confirmation
+
+**For tasks.md**:
+- ✅ Assume ALL tasks must be completed
+- ✅ All tasks must be done before marking specification as complete
+- ❌ DO NOT skip tasks thinking they are optional
+- ❌ DO NOT leave tasks unchecked thinking "that can be done later"
+
+**How user indicates optional items**:
+- User explicitly says: "This requirement is optional"
+- User explicitly says: "This task can be skipped if needed"
+- Requirement/task is marked with "(OPTIONAL)" prefix
+- User provides priority levels and explicitly says lower priority items are optional
+
+**If in doubt**: ASK the user. Never assume something is optional.
+
+#### 4. Enforcement and Consequences
+
+**Violations with ZERO TOLERANCE**:
+- ❌ Completing 3+ tasks before updating tasks.md
+- ❌ Discovering new requirements but not updating requirements.md
+- ❌ Creating separate task tracking files instead of using tasks.md
+- ❌ Marking specification complete with unchecked tasks
+- ❌ Skipping requirements/tasks without explicit user approval
+
+**Consequences of violations**:
+- User frustration from inaccurate progress visibility
+- Lost work when system crashes without updates
+- Confusion for future agents who see incorrect status
+- Wasted effort redoing "completed" but unmarked work
+- Trust erosion when user checks and sees stale status
+
+**Corrective action when violation detected**:
+1. STOP immediately
+2. Update ALL specification files to reflect current reality
+3. Verify frontmatter counts match actual task status
+4. Report discrepancy to user with apology
+5. Commit updates immediately
+6. Resume work with commitment to immediate updates
 
 ---
 
@@ -1138,5 +1268,5 @@ The updated requirements template at `.agents/templates/requirements-template.md
 ---
 
 *Created: 2026-01-11*
-*Last Updated: 2026-01-22*
-*Version: 6.0 - Added self-containment, mandatory 100% verification, and git push requirements*
+*Last Updated: 2026-01-24*
+*Version: 6.1 - Added immediate update requirements, mandatory task/requirement clarifications, and agent reminder sections*

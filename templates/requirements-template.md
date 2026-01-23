@@ -247,5 +247,34 @@ Before marking this specification as **completed**:
 
 ---
 
+## 🤖 Agent Reminders
+
+**CRITICAL RULES - READ EVERY TIME**:
+
+1. **Requirement Updates (MANDATORY)**:
+   - ✅ Update this requirements.md file IMMEDIATELY when you identify new requirements
+   - ✅ Update IMMEDIATELY when requirements changes are confirmed with user
+   - ✅ If user grants full rights, auto-update requirements without seeking approval
+   - ❌ DO NOT wait until task completion to update requirements
+   - ❌ DO NOT forget to sync requirements with actual implementation
+
+2. **All Requirements Are Mandatory**:
+   - ✅ Unless user explicitly states a requirement is optional, ALL requirements are MANDATORY
+   - ✅ All items must be implemented and completed
+   - ❌ DO NOT skip requirements thinking they are optional
+   - ❌ DO NOT treat any requirement as "nice-to-have" without explicit user confirmation
+
+3. **Task Tracking**:
+   - ✅ Update tasks.md immediately after each task completion (see tasks.md for details)
+   - ✅ Keep requirements.md and tasks.md in sync at all times
+
+**These rules exist to ensure**:
+- Requirements accurately reflect current understanding
+- No work is lost or forgotten
+- User has real-time visibility into project state
+- Future agents have accurate context
+
+---
+
 *Created: [Date]*
 *Last Updated: [Date]*

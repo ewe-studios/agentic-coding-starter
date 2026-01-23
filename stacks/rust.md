@@ -1949,6 +1949,282 @@ pub fn safe_wrapper(input: &str) -> Result<i32, Error> {
 **Corrective Action**: None (initial creation).
 **New Standard**: All Rust code must follow these expert-level standards with zero tolerance for deviations.
 
+### 2026-01-23: no_std and std Feature Strategy (Specification 04 Learnings)
+**Issue**: Need clear guidelines for implementing libraries that support both `no_std` and `std` environments.
+**Learning**: Discovered effective patterns from CondVar primitives implementation:
+
+#### Pattern 1: Hybrid std/no_std with Feature Gates
+**Implementation Pattern**:
+```rust
+// Use feature flags for conditional compilation
+#[cfg(feature = "std")]
+use std::thread;
+
+// Different implementations based on environment
+#[cfg(feature = "std")]
+{
+    thread::park(); // Efficient OS-level blocking
+}
+
+#[cfg(not(feature = "std"))]
+{
+    let mut spin_wait = SpinWait::new();
+    spin_wait.spin(); // Exponential backoff fallback
+}
+```
+
+**Benefits**:
+- Single codebase supports both environments
+- Automatic optimization when `std` available
+- No external dependencies needed
+- Easy to test both paths with feature flags
+
+#### Pattern 2: Specialized Types Over Generic Modifications
+**When**: Need integration between primitives (e.g., CondVar with Mutex)
+
+**Wrong Approach**:
+```rust
+// DON'T: Try to modify existing types unsafely
+trait MutexGuardExt {
+    unsafe fn mutex_ptr(&self) -> *const Mutex<T>;
+}
+```
+
+**Right Approach**:
+```rust
+// DO: Create specialized variants with proper API
+pub struct CondVarMutex<T> {
+    // Mutex designed for CondVar integration
+}
+
+pub struct CondVarMutexGuard<'a, T> {
+    pub(crate) mutex: &'a CondVarMutex<T>,
+}
+
+impl<'a, T> CondVarMutexGuard<'a, T> {
+    pub fn mutex(&self) -> &'a CondVarMutex<T> {
+        self.mutex  // Safe, intentional exposure
+    }
+}
+```
+
+**Lesson**: When primitives need special integration, create dedicated types rather than complicating existing ones with unsafe workarounds.
+
+#### Pattern 3: Generation Counters for Lock-Free Notification
+**Use Case**: Spurious wakeup detection in synchronization primitives
+
+```rust
+pub struct CondVar {
+    state: AtomicU32,        // Waiter count
+    generation: AtomicUsize, // Incremented on notify
+}
+
+// Waiter captures generation before parking
+let gen = self.generation.load(Ordering::Acquire);
+park();
+if self.generation.load(Ordering::Acquire) != gen {
+    // Was notified
+}
+```
+
+**Benefits**:
+- Simple: Single atomic increment per notify
+- Lock-free: No mutex needed for notification
+- Scales with any number of waiters
+- Handles spurious wakeups automatically
+
+#### Pattern 4: Bit-Masking for Compact Atomic State
+**Use Case**: Multiple flags and counters in single atomic
+
+```rust
+// Layout in AtomicU32:
+// Bits 0-29: Waiter count (up to ~1 billion)
+// Bit 30:    Notify pending flag
+// Bit 31:    Poison flag (reserved)
+
+const WAITER_MASK: u32 = 0x3FFF_FFFF;
+const NOTIFY_FLAG: u32 = 0x4000_0000;
+const POISON_FLAG: u32 = 0x8000_0000;
+
+let state = self.state.load(Ordering::Acquire);
+let waiter_count = state & WAITER_MASK;
+let is_notifying = state & NOTIFY_FLAG != 0;
+```
+
+**Benefits**:
+- Single atomic read gets all state
+- Compact memory footprint
+- Cache-friendly
+- Easy to extend with more flags
+
+#### Pattern 5: Explicit Lock Parameters Over Wrapper Types
+**Use Case**: When guards don't expose parent lock reference
+
+**Complex Approach**:
+```rust
+// Creates extra types and complexity
+pub struct RwLockCondVarReadGuard<'a, T> {
+    guard: ReadGuard<'a, T>,
+    lock: &'a SpinRwLock<T>,
+}
+// Requires implementing Drop, Deref, DerefMut...
+```
+
+**Simple Approach**:
+```rust
+// Pass lock reference explicitly
+pub fn wait_read<'a, T>(
+    &self,
+    guard: ReadGuard<'a, T>,
+    lock: &'a SpinRwLock<T>,  // Explicit parameter
+) -> LockResult<ReadGuard<'a, T>>
+```
+
+**Benefits**:
+- No wrapper type needed
+- Explicit ownership is clear
+- Simpler implementation
+- User already has lock reference available
+
+**Lesson**: When guards don't expose parent, passing parent explicitly is simpler than creating wrapper types.
+
+#### Pattern 6: Type-Specific Methods Over Generic When Appropriate
+**Use Case**: Different semantics for read vs write guards
+
+**Don't Force Generic**:
+```rust
+// Problematic - read and write have different semantics
+pub fn wait<G: RwLockGuard>(&self, guard: G) -> LockResult<G>
+```
+
+**Use Separate Methods**:
+```rust
+// Type-safe and clear
+pub fn wait_read<'a, T>(...) -> LockResult<ReadGuard<'a, T>>
+pub fn wait_write<'a, T>(...) -> LockResult<WriteGuard<'a, T>>
+
+// Predicates match guard semantics
+wait_while_read(condition: F) where F: FnMut(&T) -> bool      // Immutable
+wait_while_write(condition: F) where F: FnMut(&mut T) -> bool // Mutable
+```
+
+**Benefits**:
+- Type safety: can't accidentally mix operations
+- Clear API: users know exactly what they're calling
+- Different signatures handled naturally
+- Better error messages
+
+**Lesson**: Don't force generic code when type-specific methods are clearer and safer.
+
+#### Standard: no_std/std Implementation Strategy (MANDATORY)
+
+**When implementing libraries that support both no_std and std**:
+
+1. **For no_std-specific features** (synchronization primitives, embedded utilities):
+   - ✅ **ALWAYS implement from scratch** using atomic operations and spin-based approaches
+   - ✅ Use `#[cfg(not(feature = "std"))]` for no_std implementations
+   - ✅ Provide fallback spin-based waiting with exponential backoff
+
+2. **For std-available features** (when std feature is enabled):
+   - ✅ **If std type is sufficient**: Re-export or expose it directly
+   - ✅ **If custom methods needed**: Wrap std type and add methods
+   - ❌ **DO NOT implement from scratch** unless:
+     - User explicitly requires it, OR
+     - std type lacks required functionality, OR
+     - Performance requirements demand custom implementation
+
+**Decision Tree**:
+```
+Need feature in library?
+├─ no_std mode:
+│  └─ Implement from scratch using atomics/spin-wait
+│
+└─ std mode:
+   ├─ std type does everything needed?
+   │  └─ YES: Re-export std type
+   │
+   └─ Need additional methods?
+      ├─ Few methods: Wrap std type, add methods
+      └─ Substantial changes: Implement custom (with justification)
+```
+
+**Examples**:
+
+```rust
+// GOOD: Re-export std type when sufficient
+#[cfg(feature = "std")]
+pub use std::sync::Mutex;
+
+#[cfg(not(feature = "std"))]
+pub struct Mutex<T> {
+    // Custom no_std implementation
+}
+
+// GOOD: Wrap std type to add methods
+#[cfg(feature = "std")]
+pub struct EnhancedMutex<T> {
+    inner: std::sync::Mutex<T>,
+}
+
+#[cfg(feature = "std")]
+impl<T> EnhancedMutex<T> {
+    pub fn try_lock_for(&self, duration: Duration) -> Option<MutexGuard<T>> {
+        // Custom method not in std
+    }
+}
+
+// BAD: Reimplementing std from scratch without reason
+#[cfg(feature = "std")]
+pub struct Mutex<T> {
+    // DON'T: Just use std::sync::Mutex unless you have specific requirements
+}
+```
+
+**Platform-Specific Implementation Pattern**:
+```rust
+// Cargo.toml
+[features]
+default = []
+std = []
+
+// In code
+#[cfg(feature = "std")]
+fn wait_impl(&self, gen: usize, dur: Duration) -> bool {
+    use std::time::Instant;
+    let deadline = Instant::now() + dur;
+    // Accurate timeout with park_timeout
+}
+
+#[cfg(not(feature = "std"))]
+fn wait_impl(&self, gen: usize, dur: Duration) -> bool {
+    let max_spins = (dur.as_micros() / 10) as usize;
+    // Approximate timeout with spin count
+}
+```
+
+**Documentation Requirements**:
+```rust
+/// # Platform-Specific Behavior
+///
+/// - **With std**: Uses `std::thread::park()` for efficient blocking
+/// - **no_std**: Uses spin-waiting with exponential backoff
+///
+/// # no_std Limitations
+///
+/// - `notify_one()` may wake multiple threads (no wait queue infrastructure)
+/// - Timeouts are approximate (based on spin count, not wall clock)
+```
+
+**Corrective Action**: Apply these patterns consistently when implementing no_std/std hybrid libraries.
+
+**New Standard**:
+- Use feature gates for platform-specific code paths
+- Only implement std functionality from scratch when wrapping/re-exporting is insufficient
+- Create specialized types when integration requires it
+- Document platform differences explicitly in API docs
+- Use bit-masking and generation counters for efficient lock-free state management
+- Prefer explicit parameters over complex wrapper types when appropriate
+
 ---
 *Created: 2026-01-11*
-*Last Updated: 2026-01-11*
+*Last Updated: 2026-01-23*

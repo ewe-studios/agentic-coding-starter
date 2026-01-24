@@ -1108,7 +1108,216 @@ fn large_rarely_called_function() {
 
 ### Testing Excellence
 
-#### Unit Testing
+#### Test Organization and Location (MANDATORY)
+
+**CRITICAL**: Rust has specific conventions for test location that MUST be followed:
+
+**1. Unit Tests** - Testing internal implementation details
+- **Location**: Within the same crate, in `#[cfg(test)]` modules
+- **Purpose**: Test private functions, methods, and implementation details
+- **File structure**: At the bottom of the module file or in `mod.rs`
+- **Access**: Can test private items
+
+```rust
+// In src/lib.rs or src/module.rs
+pub fn public_function() -> Result<()> {
+    private_helper()
+}
+
+fn private_helper() -> Result<()> {
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_private_helper() {
+        // Unit tests can access private functions
+        assert!(private_helper().is_ok());
+    }
+
+    #[test]
+    fn test_public_function() {
+        assert!(public_function().is_ok());
+    }
+}
+```
+
+**2. Integration Tests** - Testing public API from external perspective
+- **Location**: **Project root or workspace root** in `./tests/[crate_name]/` directory
+- **Purpose**: Test public API as external users would use it
+- **Access**: Only public API (tests as if external crate)
+- **Organization**: One file per integration test scenario
+
+```
+project_root/
+├── Cargo.toml
+├── src/
+│   └── lib.rs
+└── tests/                      # Integration tests at project root
+    ├── crate_name/             # Organize by crate name
+    │   ├── api_tests.rs        # One scenario per file
+    │   ├── authentication.rs
+    │   └── error_handling.rs
+    └── common/                 # Shared test utilities
+        └── mod.rs
+
+# OR for workspace:
+workspace_root/
+├── Cargo.toml (workspace)
+├── crates/
+│   ├── crate_a/
+│   │   ├── Cargo.toml
+│   │   └── src/
+│   └── crate_b/
+│       ├── Cargo.toml
+│       └── src/
+└── tests/                      # Integration tests at workspace root
+    ├── crate_a/                # One directory per crate
+    │   ├── feature_a.rs
+    │   └── feature_b.rs
+    └── crate_b/
+        └── integration.rs
+```
+
+**Integration Test Example**:
+```rust
+// tests/crate_name/api_tests.rs
+use crate_name::prelude::*;  // Only public API
+
+#[test]
+fn test_full_workflow() {
+    let service = Service::new();
+    let result = service.process("input");
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+async fn test_async_operation() {
+    let service = AsyncService::new().await.unwrap();
+    let result = service.fetch_data().await;
+    assert!(result.is_ok());
+}
+```
+
+**3. Documentation Tests** - Examples in doc comments
+- **Location**: In doc comments within source files
+- **Purpose**: Test code examples, ensure documentation stays accurate
+- **Access**: Public API
+
+```rust
+/// Processes user input.
+///
+/// # Examples
+///
+/// ```
+/// use mylib::process_input;
+///
+/// let result = process_input("test");
+/// assert_eq!(result, "PROCESSED: test");
+/// ```
+pub fn process_input(input: &str) -> String {
+    format!("PROCESSED: {}", input)
+}
+```
+
+**4. Benchmark Tests** - Performance measurement
+- **Location**: **Project root or workspace root** in `./benches/[crate_name]/` directory
+- **Purpose**: Measure and track performance over time
+- **Tool**: Use Criterion for benchmarks
+- **Organization**: One benchmark suite per file
+
+```
+project_root/
+├── Cargo.toml
+├── src/
+└── benches/                    # Benchmarks at project root
+    └── crate_name/             # Organize by crate name
+        ├── parsing.rs          # One benchmark suite per file
+        ├── serialization.rs
+        └── api_performance.rs
+
+# OR for workspace:
+workspace_root/
+├── Cargo.toml (workspace)
+├── crates/
+│   └── crate_name/
+└── benches/                    # Benchmarks at workspace root
+    └── crate_name/             # One directory per crate
+        ├── feature_a_bench.rs
+        └── feature_b_bench.rs
+```
+
+**Benchmark Configuration in Cargo.toml**:
+```toml
+# In crate's Cargo.toml or workspace Cargo.toml
+[[bench]]
+name = "crate_name_parsing"
+harness = false  # Required for Criterion
+path = "benches/crate_name/parsing.rs"
+
+[[bench]]
+name = "crate_name_serialization"
+harness = false
+path = "benches/crate_name/serialization.rs"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+```
+
+#### Why This Organization Matters
+
+**Unit Tests in Crate**:
+- ✅ Can test private implementation
+- ✅ Fast compilation (same compilation unit)
+- ✅ Easy to write alongside code
+- ❌ Can't test integration between crates
+
+**Integration Tests at Root**:
+- ✅ Tests public API from user perspective
+- ✅ Catches API usability issues
+- ✅ Each test is separate binary (isolated)
+- ✅ Organized by crate name for clarity
+- ❌ Slower compilation (separate compilation units)
+
+**Benchmarks at Root**:
+- ✅ Separate from main codebase (doesn't bloat library)
+- ✅ Easy to run independently
+- ✅ Organized by crate for multi-crate projects
+- ✅ Standard Rust convention
+
+#### Running Tests and Benchmarks
+
+```bash
+# Run all tests (unit + integration + doc tests)
+cargo test
+
+# Run only unit tests
+cargo test --lib
+
+# Run only integration tests
+cargo test --test '*'
+
+# Run specific integration test file
+cargo test --test api_tests
+
+# Run only doc tests
+cargo test --doc
+
+# Run benchmarks
+cargo bench
+
+# Run specific benchmark
+cargo bench --bench crate_name_parsing
+
+# Run with specific feature flags
+cargo test --features "std"
+cargo test --no-default-features
+```
+
+#### Unit Testing Best Practices
 ```rust
 #[cfg(test)]
 mod tests {
@@ -1160,8 +1369,9 @@ proptest! {
 
 #### Integration Testing
 ```rust
-// tests/integration_test.rs
-use myapp::prelude::*;
+// tests/crate_name/integration_test.rs
+// Located at project root or workspace root in ./tests/[crate_name]/
+use my_crate::prelude::*;
 
 #[tokio::test]
 async fn test_full_workflow() {
@@ -1181,12 +1391,20 @@ async fn test_full_workflow() {
 
     Ok::<(), Error>(())
 }
+
+// Shared test utilities in tests/common/mod.rs
+// tests/common/mod.rs
+pub fn setup_test_database() -> Database {
+    // Shared setup code
+}
 ```
 
 #### Benchmarking
 ```rust
-// benches/benchmarks.rs
+// benches/crate_name/benchmarks.rs
+// Located at project root or workspace root in ./benches/[crate_name]/
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use my_crate::*;
 
 fn benchmark_parse(c: &mut Criterion) {
     let input = "sample input string";
@@ -1196,8 +1414,32 @@ fn benchmark_parse(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, benchmark_parse);
+fn benchmark_with_setup(c: &mut Criterion) {
+    let mut group = c.benchmark_group("processing");
+
+    // Benchmark with different input sizes
+    for size in [100, 1000, 10000].iter() {
+        group.bench_with_input(
+            format!("process_{}", size),
+            size,
+            |b, &size| {
+                let data = vec![0u8; size];
+                b.iter(|| process_data(black_box(&data)))
+            },
+        );
+    }
+
+    group.finish();
+}
+
+criterion_group!(benches, benchmark_parse, benchmark_with_setup);
 criterion_main!(benches);
+
+// Configuration in Cargo.toml (at crate or workspace root):
+// [[bench]]
+// name = "crate_name_benchmarks"
+// harness = false
+// path = "benches/crate_name/benchmarks.rs"
 ```
 
 ### Security Best Practices
@@ -2155,4 +2397,4 @@ pub fn process<D: Data>(&self, data: D) -> Result<()> { }
 
 ---
 *Created: 2026-01-11*
-*Last Updated: 2026-01-23*
+*Last Updated: 2026-01-24*

@@ -2687,12 +2687,12 @@ use foundation_nostd::primitives::condvar::{CondVarMutex as Mutex, CondVar};
 
 // GOOD ✅ - Compatibility layer in foundation_nostd/src/comp/condvar_comp.rs
 #[cfg(feature = "std")]
-pub use std::sync::{Mutex as CondVarMutex, Condvar as CondVar};
+pub use std::sync::{Mutex, Condvar as CondVar};
 #[cfg(not(feature = "std"))]
-pub use crate::primitives::condvar::{CondVarMutex, CondVar};
+pub use crate::primitives::condvar::{CondVarMutex as Mutex, CondVar};
 
 // Consuming code - SIMPLE
-use foundation_nostd::comp::condvar_comp::{CondVarMutex, CondVar};
+use foundation_nostd::comp::condvar_comp::{Mutex, CondVar};
 ```
 
 **Benefits**:

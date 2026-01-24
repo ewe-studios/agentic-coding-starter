@@ -2658,3 +2658,56 @@ pub fn process<D: Data>(&self, data: D) -> Result<()> { }
 ---
 *Created: 2026-01-11*
 *Last Updated: 2026-01-24*
+
+### Feature-Gated Type Architecture Pattern (2026-01-24)
+
+**Context**: HTTP client work revealed complexity managing std/no_std type compatibility.
+
+**Problem**: Mixing std and no_std types directly in consuming modules creates complex feature gates everywhere.
+
+**Solution**: Create compatibility layers in higher-level dependencies (e.g., foundation_nostd).
+
+#### Pattern: Compatibility Module Approach
+
+1. Move types to higher-level dependency
+2. Implement std and no_std variants with **same API**
+3. Create compatibility module with feature-gated exports
+4. Lower modules use simple imports
+
+**Example - CondVar + Mutex Pairing**:
+
+Problem: `CondVar::wait()` requires specific guard types (std::MutexGuard vs CondVarMutexGuard).
+
+```rust
+// BAD ❌ - Feature gates in consuming code
+#[cfg(feature = "std")]
+use std::sync::{Mutex, Condvar};
+#[cfg(not(feature = "std"))]
+use foundation_nostd::primitives::condvar::{CondVarMutex as Mutex, CondVar};
+
+// GOOD ✅ - Compatibility layer in foundation_nostd/src/comp/condvar_comp.rs
+#[cfg(feature = "std")]
+pub use std::sync::{Mutex as CondVarMutex, Condvar as CondVar};
+#[cfg(not(feature = "std"))]
+pub use crate::primitives::condvar::{CondVarMutex, CondVar};
+
+// Consuming code - SIMPLE
+use foundation_nostd::comp::condvar_comp::{CondVarMutex, CondVar};
+```
+
+**Benefits**:
+- Simple consuming code (no feature gates in business logic)
+- Centralized feature complexity
+- Type safety (ensures compatible types paired)
+- API consistency across std/no_std
+- Single location for feature changes
+
+**When to Use**:
+- ✅ Types that must work together (Mutex + CondVar)
+- ✅ Complex feature combinations (ssl backends)
+- ✅ Platform-specific implementations (WASM vs native)
+- ❌ Simple single types (regular comp::Mutex fine)
+- ❌ Test-only code (feature gates acceptable)
+
+**Key Principle**: Move complexity up to dependency, keep consuming code simple and clear.
+

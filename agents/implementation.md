@@ -423,7 +423,7 @@ Ready for verification.
 - **Review Agent**: Reads review agent's report before starting work
 - **Documentation Agent**: Notifies Main Agent if module docs need updating
 - **Verification Agents**: Main Agent spawns these after you report completion
-- **Specification Update Agent**: Main Agent spawns this to update tasks.md
+- **Specification Update Agent**: Main Agent spawns this to update task status in requirements.md
 
 ### Does NOT Interact Directly With
 - Verification agents (Main Agent coordinates)
@@ -442,7 +442,7 @@ Implementation Agent Workflow:
 1. Read agent documentation (confirm SUB-AGENT)
 2. Read AGENTS.md, all rules
 3. Read specifications/04-add-caching-layer/requirements.md
-4. Read specifications/04-add-caching-layer/tasks.md
+4. Extract files_required.implementation_agent from frontmatter
 5. Read documentation/http-client/doc.md
 6. Spot check: verify makeRequest() at line 89 as documented ✅
 7. Read .agents/stacks/typescript.md
@@ -615,7 +615,7 @@ VIOLATIONS:
 - ❌ Committed directly (only Main Agent can commit)
 - ❌ Pushed directly (only Main Agent can push)
 - ❌ Bypassed verification (no verification agent was run)
-- ❌ Did NOT update specification (tasks.md not updated)
+- ❌ Did NOT update specification (requirements.md task status not updated)
 
 CONSEQUENCES:
 - Code may not pass verification checks
@@ -636,6 +636,11 @@ CORRECT WORKFLOW:
 ```
 
 ## Version History
+
+### Version 1.3 - 2026-01-24
+- Fixed remaining tasks.md references in "Works With" section, examples, and violation examples
+- Changed all references to use requirements.md task status instead of tasks.md
+- Ensured consistency across all examples and documentation
 
 ### Version 1.2 - 2026-01-24
 - Added explicit requirement to report completed tasks to Main Agent
@@ -661,4 +666,4 @@ CORRECT WORKFLOW:
 
 ---
 *Last Updated: 2026-01-24*
-*Documentation Version: 1.2*
+*Documentation Version: 1.3*

@@ -53,68 +53,28 @@ Before **ANY** work begins on new features, enhancements, or significant changes
 
 **The Main Agent MUST**:
 
-1. ✅ **Listen to the initial request carefully**
-   - Understand what the user is asking for
-   - Identify the high-level goal or problem to solve
+1. ✅ **Listen carefully and identify the high-level goal**
 
-2. ✅ **Ask clarifying questions proactively**
-   - **NEVER assume** details not explicitly stated
-   - **ALWAYS ask** when requirements are ambiguous
-   - **ALWAYS probe** for edge cases and constraints
-   - **ALWAYS confirm** technical approaches before documenting
+2. ✅ **Ask clarifying questions proactively** - NEVER assume details, ALWAYS ask when ambiguous, ALWAYS probe edge cases, ALWAYS confirm technical approaches
 
-3. ✅ **Ask questions in these critical areas**:
-   - **Scope**: What exactly should be included/excluded?
-   - **Technical Approach**: Which technologies, patterns, or architectures?
-   - **Constraints**: Performance requirements, limitations, dependencies?
-   - **Success Criteria**: How will we know when this is complete?
-   - **Edge Cases**: What unusual scenarios should be handled?
-   - **Integration**: How does this fit with existing systems?
-   - **Priority**: What's most important if trade-offs are needed?
-   - **Timeline**: Are there deadlines or milestones?
+3. ✅ **Ask questions in critical areas**: Scope, Technical Approach, Constraints, Success Criteria, Edge Cases, Integration, Priority, Timeline
 
-4. ✅ **Continue asking until all details are clear**
-   - Don't stop after one round of questions
-   - If answers reveal new ambiguities, ask more questions
-   - Ensure every requirement is specific and actionable
+4. ✅ **Continue asking until all details are clear** - iterate through multiple rounds if needed
 
-5. ✅ **Confirm understanding before documenting**
-   - Summarize what you understood
-   - Ask user to confirm your summary is correct
-   - Make corrections based on user feedback
+5. ✅ **Confirm understanding before documenting** - summarize and get user confirmation
 
 **The Main Agent MUST NOT**:
-- ❌ Accept vague requests without clarification
-- ❌ Make assumptions about unspecified requirements
-- ❌ Skip questioning to "save time"
-- ❌ Proceed with incomplete understanding
-- ❌ Document requirements without user confirmation
+- ❌ Accept vague requests, make assumptions, skip questioning, proceed with incomplete understanding, or document without confirmation
 
 #### Minimum Questions Required
 
-**Main Agent MUST ask AT LEAST**:
-- ✅ 3-5 clarifying questions for small features
-- ✅ 5-10 clarifying questions for medium features
-- ✅ 10+ clarifying questions for large/complex features
-
-**If fewer questions are needed**, it may indicate:
-- The user provided exceptionally detailed initial requirements (rare)
-- OR the Main Agent is not probing deeply enough (more likely - ASK MORE)
+**Main Agent MUST ask AT LEAST**: 3-5 for small features, 5-10 for medium features, 10+ for large/complex features. If fewer needed, user likely provided exceptional detail (rare) OR agent not probing enough (more likely - ASK MORE).
 
 #### Examples
 
-**❌ BAD - Passive Acceptance:**
-- User: "Add user authentication to the app"
-- Main Agent: "Ok, I'll create a specification for user authentication."
-- **VIOLATION**: No clarifying questions asked
+**❌ BAD**: User: "Add authentication" → Agent: "Ok, I'll create spec" (No questions)
 
-**✅ GOOD - Active Engagement:**
-- User: "Add user authentication to the app"
-- Main Agent asks about: authentication method, user data storage, security requirements, self-registration, password reset, session timeout, rate limiting, etc.
-- User provides detailed answers
-- Main Agent confirms understanding
-- Main Agent creates specification with comprehensive requirements
-- **CORRECT**: Thorough questioning, confirmation, then documentation
+**✅ GOOD**: User: "Add authentication" → Agent asks about: method, storage, security, registration, password reset, timeout, rate limiting → User answers → Agent confirms → Creates comprehensive spec
 
 ### Main Agent Frontmatter Enforcement (CRITICAL)
 
@@ -628,47 +588,31 @@ Every `requirements.md` file MUST contain:
 ### Purpose
 The `documentation/` directory provides living, detailed documentation of individual code modules. This ensures agents have clear understanding of what each module implements **BEFORE** making changes.
 
+**What to Read**: Load files per `files_required.[agent_type]` from requirements.md frontmatter.
+
 ### Context Window Management
 
 **CRITICAL OPTIMIZATION**: Large documentation (>8-10KB) wastes context.
 
-**Main Agent Responsibility:**
-- DOES NOT load large documentation into own context
-- Delegates to sub-agents who work with the module
-- References path, instructs sub-agents to read and update
+**Main Agent**: Does NOT load large documentation - delegates to sub-agents, references path only.
 
-**Sub-Agent Responsibility:**
-- Load documentation if reasonable size (<8-10KB)
-- If too large: Use Grep/Glob/Read tools instead
-- Update documentation when making structural changes
-- Report documentation status to Main Agent
+**Sub-Agent**: Load if <8-10KB; otherwise use Grep/Glob/Read tools. Update when making structural changes. Report status to Main Agent.
 
-**When Documentation Too Large for Sub-Agent:**
-- Skip loading, use tools exclusively
-- Complete implementation work
-- Report to Main Agent: "Documentation too large, requesting Documentation Agent"
-- Main Agent spawns Documentation Agent to update docs
+**When Too Large for Sub-Agent**: Skip loading, use tools, complete work, report "Documentation too large, requesting Documentation Agent" - Main Agent spawns Documentation Agent.
 
 ### When Module Documentation Is Created
 
 **After requirements.md Completed:**
 
-1. **Main Agent identifies affected modules** (existing or new)
-2. **Spawns Documentation Agent(s)** to create/update module docs
-3. **Documentation agents verify accuracy** against actual code
-4. **If mismatch found: STOP, fix docs first**
-5. **Main Agent references docs in requirements.md**
-6. **Main Agent commits module documentation**
+1. Main Agent identifies affected modules (existing or new)
+2. Spawns Documentation Agent(s) to create/update module docs
+3. Documentation agents verify accuracy against actual code
+4. **If mismatch: STOP, fix docs first**
+5. Main Agent references docs in requirements.md and commits
 
 ### Documentation Agent Must STOP If Mismatch Found
 
-If documentation doesn't match actual code:
-
-1. **STOP immediately**
-2. **Report to Main Agent** with detailed mismatch findings
-3. **Main Agent halts specification work**
-4. **Documentation updated FIRST**
-5. **Only then resume implementation**
+If documentation doesn't match code: **STOP immediately** → Report to Main Agent with mismatch details → Main Agent halts specification work → Documentation updated FIRST → Then resume implementation.
 
 ### doc.md File Structure
 
@@ -705,15 +649,16 @@ Every `documentation/[module]/doc.md` **MUST** contain these sections with compl
 
 ### Implementation Agent Workflow With Module Docs
 
+**What to Read**: Load files per `files_required.implementation_agent` from requirements.md frontmatter.
+
 When implementation agent spawned:
 
-1. **Read specification files** (requirements.md, tasks.md)
-2. **Read module documentation** (all referenced in requirements.md)
-3. **Verify docs match reality** (spot check key functions)
-4. **If mismatch: STOP, report to Main Agent**
-5. **Implement changes** with full context
-6. **Update module docs** if structure changes
-7. **Report completion** with documentation status
+1. Read specification files, module documentation (all from frontmatter)
+2. Verify docs match reality (spot check key functions)
+3. **If mismatch: STOP, report to Main Agent**
+4. Implement changes with full context
+5. Update module docs if structure changes
+6. Report completion with documentation status
 
 ## Spec.md Master Index
 
@@ -738,38 +683,29 @@ Before **ANY** agent starts work on tasks, a **review agent MUST be launched fir
 
 #### Review Agent Purpose
 
-1. **Read specification files thoroughly** (requirements.md, tasks.md)
+**What to Read**: Load files per `files_required.review_agent` from requirements.md frontmatter.
+
+1. **Read specification files thoroughly**
 2. **Analyze current codebase** (search for implementations)
-3. **Compare reality vs documentation** (verify accuracy)
+3. **Compare reality vs documentation**
 4. **Verify task status accuracy** (check each [x] and [ ])
-5. **Identify issues and blockers** (unclear requirements, inconsistencies)
+5. **Identify issues and blockers**
 6. **Assess work readiness** (GO/STOP/CLARIFY)
 
 #### STOP WORK IF
 
-Review agent **MUST STOP ALL WORK** if:
-- ❌ Inconsistencies found (tasks marked wrong)
-- ❌ Requirements unclear or incomplete
-- ❌ Tasks need refinement
-- ❌ User input required
-- ❌ Conflicting information
-- ❌ Technical blockers
+Review agent **MUST STOP ALL WORK** if: Inconsistencies found (tasks marked wrong), requirements unclear/incomplete, tasks need refinement, user input required, conflicting information, or technical blockers.
 
 #### Report to Main Agent
 
-Review agent **MUST** report:
-1. **Current implementation state** (what exists)
-2. **Verified task status** (accurate completion status)
-3. **Inconsistencies found** (specific tasks incorrectly marked)
-4. **Readiness assessment** (GO/STOP/CLARIFY)
-5. **Recommendations** (corrections needed)
+Review agent **MUST** report: Current implementation state, verified task status, inconsistencies found, readiness assessment (GO/STOP/CLARIFY), and recommendations.
 
 ### Complete Workflow
 
 ```
 1. User Requests Feature
    ↓
-2. Main Agent: Thorough Requirements Conversation (3-10+ Questions)
+2. Main Agent: Thorough Requirements Conversation (see Requirements Conversation section)
    ↓
 3. User Provides Answers + Main Agent Confirms Understanding
    ↓
@@ -779,26 +715,15 @@ Review agent **MUST** report:
    ↓
 6. Create tasks.md (with complete frontmatter)
    ↓
-7. Create/Update Module Documentation (MANDATORY)
-   - Identify affected modules
-   - Spawn Documentation Agent(s)
-   - Verify docs match code (STOP if mismatch)
-   - Reference in requirements.md
+7. Create/Update Module Documentation (see Module Documentation System section)
    ↓
 8. Update Spec.md Master Index
    ↓
 9. Commit Specification + Module Documentation
    ↓
-10. LAUNCH REVIEW AGENT (MANDATORY)
-    - Review reads specs, searches codebase
-    - Reports: GO / STOP / CLARIFY
-    - IF GO: Continue | IF STOP/CLARIFY: Fix issues first
+10. LAUNCH REVIEW AGENT (see Pre-Work Review Agent section)
    ↓
-11. Launch Implementation Agents
-    - Read specs, tasks, review report, module docs
-    - Verify docs match reality (STOP if mismatch)
-    - Implement verified tasks
-    - Update module docs if changes occur
+11. Launch Implementation Agents (see Implementation Agent Workflow section)
    ↓
 12. Create PROGRESS.md (~40-60% completion)
    ↓
@@ -823,53 +748,19 @@ Review agent **MUST** report:
 
 #### Requirements.md Updates (IMMEDIATE)
 
-Agents working on requirements or implementation **MUST**:
+Agents **MUST** update requirements.md IMMEDIATELY when: new requirement discovered, user clarifies/changes requirement, technical constraint requires adjustment, integration reveals additional requirements, or user approves a requirement change.
 
-- ✅ **Update requirements.md IMMEDIATELY** when identifying new requirements
-- ✅ **Update IMMEDIATELY** when requirements changes are confirmed with user
-- ✅ **If user grants full rights**, auto-update requirements without seeking approval
-- ❌ **DO NOT wait** until task completion to update requirements
-- ❌ **DO NOT forget** to sync requirements with actual implementation
+**If user grants full rights**: auto-update requirements without approval. **DO NOT wait** until task completion or forget to sync with actual implementation.
 
-**When to update requirements.md**:
-- New requirement discovered during implementation
-- User clarifies or changes a requirement
-- Technical constraint requires requirement adjustment
-- Integration reveals additional requirements
-- User explicitly approves a requirement change
-
-**Why immediate updates matter**:
-- Requirements accurately reflect current understanding
-- No discoveries are lost or forgotten
-- User has real-time visibility into scope changes
-- Future agents have accurate context
-- Prevents specification drift from reality
+**Why**: Requirements reflect current understanding, no discoveries lost, real-time user visibility, accurate context for future agents, prevents specification drift.
 
 #### Tasks.md Updates (IMMEDIATE - EVERY TASK)
 
-Agents working on tasks **MUST**:
+Agents **MUST**: Update tasks.md IMMEDIATELY after completing EACH task, mark [x] the MOMENT finished, update frontmatter counts immediately. **DO NOT wait**, batch updates, or create other tracking files - tasks.md is THE task tracker.
 
-- ✅ **Update tasks.md IMMEDIATELY** after completing EACH task
-- ✅ **Mark task as [x]** the MOMENT you finish it
-- ✅ **Update frontmatter counts** (completed/uncompleted/completion_percentage) immediately
-- ❌ **DO NOT wait** until you're done with multiple tasks to update
-- ❌ **DO NOT create** other task tracking files - tasks.md is THE task tracker
-- ❌ **DO NOT batch** updates - update after EACH task completion
+**When**: IMMEDIATELY after any task, before next task, before breaks/sessions end, before switching specifications.
 
-**When to update tasks.md**:
-- IMMEDIATELY after completing any task
-- IMMEDIATELY after marking any checkbox [x]
-- Before moving to the next task
-- Before taking breaks or ending work sessions
-- Before switching to a different specification
-
-**Why immediate task updates matter**:
-- Real-time visibility into task progress
-- No completed work is forgotten or lost
-- User can check status at any time and see current progress
-- System crashes won't lose your progress tracking
-- Other agents can pick up exactly where you left off
-- tasks.md remains the single source of truth
+**Why**: Real-time progress visibility, no completed work forgotten, user can check status anytime, system crashes won't lose tracking, other agents pick up exactly where left off, tasks.md remains single source of truth.
 
 **Frontmatter update requirements**:
 ```yaml
@@ -1156,4 +1047,4 @@ For pure documentation updates:
 
 *Created: 2026-01-11*
 *Last Updated: 2026-01-24*
-*Version: 6.3 - Added files_required frontmatter section for explicit agent file loading, simplified Agent Rules Reference to frontmatter-based approach*
+*Version: 6.4 - Consolidated content using frontmatter-based references, reduced verbosity while preserving all critical requirements and enforcement rules*

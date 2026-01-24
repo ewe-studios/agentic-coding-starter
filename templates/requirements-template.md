@@ -17,11 +17,74 @@ builds_on: []
 related_specs: []
 has_features: false
 has_fundamentals: false
+files_required:
+  main_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/05-coding-practice-agent-orchestration.md
+      - .agents/rules/06-specifications-and-requirements.md
+    files:
+      - ./tasks.md
+      - ./requirements.md
+      - ./LEARNINGS.md (if exists)
+      - ./PROGRESS.md (if exists)
+  review_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/06-specifications-and-requirements.md
+    files:
+      - ./tasks.md
+      - ./requirements.md
+      - [stack_file from metadata.stack_files]
+  implementation_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/13-implementation-agent-guide.md
+      - .agents/rules/11-skills-usage.md (if skills used)
+      - [stack_file from metadata.stack_files]
+    files:
+      - ./tasks.md
+      - ./requirements.md
+      - [feature.md and feature/tasks.md if has_features: true]
+      - [fundamentals/* if has_fundamentals: true]
+  verification_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/08-verification-workflow-complete-guide.md
+      - [stack_file from metadata.stack_files]
+    files:
+      - ./tasks.md
+      - ./requirements.md
+  documentation_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/06-specifications-and-requirements.md
+    files:
+      - ./requirements.md
+      - ./fundamentals/* (if has_fundamentals: true)
+      - [documentation/[module]/doc.md for modules being documented]
 ---
 
 # [Specification Name] - Requirements
 
 > **Specification Tracking**: See [tasks.md](./tasks.md) for task progress and [learnings.md](./learnings.md) for implementation insights.
+>
+> **Agent Instructions**: Review the `files_required` section in frontmatter above. Each agent type has explicit rules and files to load. Load YOUR agent type's requirements before starting work.
 
 ## Overview
 Brief summary of what this specification covers and why it's needed.
@@ -109,29 +172,7 @@ This specification modifies the following modules:
 
 **CRITICAL**: Agents MUST read module documentation BEFORE making changes.
 
-## Agent Rules Reference
-
-**MANDATORY**: All agents working on this specification MUST load the rules listed below.
-
-### All Agents (Mandatory)
-
-Load these rules from `.agents/rules/`:
-
-| Rule | File | Purpose |
-|------|------|---------|
-| 01 | `.agents/rules/01-rule-naming-and-structure.md` | File naming conventions |
-| 02 | `.agents/rules/02-rules-directory-policy.md` | Directory policies |
-| 03 | `.agents/rules/03-dangerous-operations-safety.md` | Dangerous operations safety |
-| 04 | `.agents/rules/04-work-commit-and-push-rules.md` | Work commit and push rules |
-
-### By Agent Role
-
-| Agent Type | Additional Rules to Load |
-|------------|--------------------------|
-| **Review Agent** | `.agents/rules/06-specifications-and-requirements.md` |
-| **Implementation Agent** | `.agents/rules/13-implementation-agent-guide.md` |
-| **Verification Agent** | `.agents/rules/08-verification-workflow-complete-guide.md` |
-| **Documentation Agent** | `.agents/rules/06-specifications-and-requirements.md` |
+**Agent File Loading**: All agent-specific rules and files to load are specified in the `files_required` section of the frontmatter above. Review your agent type's requirements there.
 
 ---
 

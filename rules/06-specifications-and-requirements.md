@@ -139,6 +139,7 @@ Main Agent **MUST** include ALL required frontmatter fields:
 - ✅ `has_fundamentals`: Boolean - true if fundamentals/ documentation needed
 - ✅ `builds_on`: (if applicable) Array of parent specs
 - ✅ `related_specs`: (if applicable) Array of related specs
+- ✅ `files_required`: Complete object with entries for each agent type (see Self-Contained Specification Requirements section)
 
 #### When Creating specifications/*/tasks.md:
 
@@ -473,64 +474,138 @@ Specifications that are **NOT completed** can be modified:
 
 ## Self-Contained Specification Requirements
 
-### Agent Rules Reference Section (MANDATORY)
+### files_required Frontmatter Section (MANDATORY)
 
-Every `requirements.md` **MUST** include an "Agent Rules Reference" section containing:
+Every `requirements.md` **MUST** include a `files_required` section in the frontmatter that explicitly lists rules and files for each agent type.
 
-#### Location Headers
-The section MUST clearly specify file locations:
-- **Rules Location**: `.agents/rules/`
-- **Stacks Location**: `.agents/stacks/`
-- **Skills Location**: `.agents/skills/`
+#### Purpose
 
-#### 1. Mandatory Rules for All Agents
-All agents working on the specification MUST load Rules 01-04 from `.agents/rules/`:
+This makes specifications truly self-contained - agents can read the frontmatter and know exactly what to load without searching or guessing.
 
-| Rule | File | Purpose |
-|------|------|---------|
-| 01 | `.agents/rules/01-rule-naming-and-structure.md` | File naming conventions |
-| 02 | `.agents/rules/02-rules-directory-policy.md` | Directory policies |
-| 03 | `.agents/rules/03-dangerous-operations-safety.md` | Dangerous operations safety |
-| 04 | `.agents/rules/04-work-commit-and-push-rules.md` | Work commit and push rules |
+#### Structure
 
-#### 2. Role-Specific Rules
-A table mapping agent types to their additional required rules (all from `.agents/rules/`):
+The `files_required` section contains entries for each agent type:
 
-| Agent Type | Additional Rules to Load |
-|------------|--------------------------|
-| **Review Agent** | `.agents/rules/06-specifications-and-requirements.md` |
-| **Implementation Agent** | `.agents/rules/13-implementation-agent-guide.md`, `.agents/rules/11-skills-usage.md` if skills used |
-| **Verification Agent** | `.agents/rules/08-verification-workflow-complete-guide.md`, stack file |
-| **Documentation Agent** | `.agents/rules/06-specifications-and-requirements.md` |
+```yaml
+files_required:
+  main_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/05-coding-practice-agent-orchestration.md
+      - .agents/rules/06-specifications-and-requirements.md
+    files:
+      - ./tasks.md
+      - ./requirements.md
+      - ./LEARNINGS.md (if exists)
+      - ./PROGRESS.md (if exists)
 
-#### 3. Stack Files
-Specify which language stack file(s) agents should load from `.agents/stacks/`:
-- Format: `**Language**: [language] → .agents/stacks/[language].md`
-- Example: `**Language**: Rust → .agents/stacks/rust.md`
+  review_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/06-specifications-and-requirements.md
+    files:
+      - ./tasks.md
+      - ./requirements.md
+      - [stack_file from metadata.stack_files]
 
-#### 4. Skills Referenced
-List any skills from `.agents/skills/` that agents should use:
-- If skills are needed: List skill names with full paths (e.g., `.agents/skills/skill-name.md`)
-- If no skills needed: Write "None"
+  implementation_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/13-implementation-agent-guide.md
+      - .agents/rules/11-skills-usage.md (if skills used)
+      - [stack_file from metadata.stack_files]
+    files:
+      - ./tasks.md
+      - ./requirements.md
+      - [feature.md and feature/tasks.md if has_features: true]
+      - [fundamentals/* if has_fundamentals: true]
 
-### Main Agent Responsibilities
+  verification_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/08-verification-workflow-complete-guide.md
+      - [stack_file from metadata.stack_files]
+    files:
+      - ./tasks.md
+      - ./requirements.md
 
-When creating `requirements.md`, Main Agent **MUST**:
+  documentation_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/06-specifications-and-requirements.md
+    files:
+      - ./requirements.md
+      - ./fundamentals/* (if has_fundamentals: true)
+      - [documentation/[module]/doc.md for modules being documented]
+```
 
-1. ✅ **Include Agent Rules Reference section** (see template)
-2. ✅ **Identify the primary language** and specify stack file
-3. ✅ **List any skills** that will be used
-4. ✅ **Ensure all rule file paths are correct** (verify files exist)
-5. ✅ **Use the requirements template** which includes this section
+#### Agent Responsibilities
+
+**Agents MUST**:
+1. ✅ Read the `files_required` section in requirements.md frontmatter
+2. ✅ Find their agent type (main_agent, review_agent, implementation_agent, etc.)
+3. ✅ Load ALL rules listed for their agent type
+4. ✅ Load ALL files listed for their agent type
+5. ✅ Resolve dynamic references (e.g., `[stack_file from metadata.stack_files]`)
+
+**Main Agent MUST**:
+1. ✅ Include complete `files_required` section in requirements.md frontmatter
+2. ✅ Use the requirements template (which includes this section)
+3. ✅ Verify all file paths are correct
+4. ✅ Update if specification structure changes (e.g., adding features)
+
+#### Dynamic References
+
+Some file references are dynamic and must be resolved from other frontmatter fields:
+
+- `[stack_file from metadata.stack_files]` → Load the stack file(s) listed in `metadata.stack_files`
+- `[feature.md and feature/tasks.md if has_features: true]` → Load feature files if `has_features: true`
+- `[fundamentals/* if has_fundamentals: true]` → Load fundamentals docs if `has_fundamentals: true`
+- `(if exists)` → Load file only if it exists (e.g., PROGRESS.md during active work)
+- `(if skills used)` → Load rule only if `metadata.skills` is not empty
+
+#### Benefits
+
+**For Agents**:
+- ✅ No guessing what to load
+- ✅ Self-contained specification
+- ✅ Consistent file loading across all agents
+- ✅ Clear requirements for each agent type
+
+**For Main Agent**:
+- ✅ Single source of truth in frontmatter
+- ✅ Easy to update when structure changes
+- ✅ Template handles most cases automatically
+
+**For Users**:
+- ✅ Can pass requirements.md to any agent
+- ✅ Agent knows exactly what to load
+- ✅ No confusion about missing context
 
 ### Validation
 
 Before committing `requirements.md`, Main Agent **MUST** verify:
-- ✅ Agent Rules Reference section exists
-- ✅ All 4 mandatory rules are listed
-- ✅ Role-specific rules table is complete
-- ✅ Stack file is specified (or "N/A" for non-code specs)
-- ✅ Skills are listed (or "None")
+- ✅ `files_required` section exists in frontmatter
+- ✅ All agent types have `rules` and `files` lists
+- ✅ All file paths are correct and exist
+- ✅ Dynamic references are properly formatted
+- ✅ Stack files match `metadata.stack_files`
+- ✅ Skills rule included if `metadata.skills` not empty
 
 **Template Location**: `.agents/templates/requirements-template.md`
 
@@ -541,6 +616,7 @@ Every `requirements.md` file MUST contain:
 **Top link** (after frontmatter, before Overview):
 - Links to `tasks.md` for task progress
 - Links to `learnings.md` for implementation insights
+- **Agent instruction**: "Review the `files_required` section in frontmatter above"
 
 **Bottom link** (after Final Verification Checklist):
 - Links to `verification.md` or `VERIFICATION_SIGNOFF.md` for verification results
@@ -1080,4 +1156,4 @@ For pure documentation updates:
 
 *Created: 2026-01-11*
 *Last Updated: 2026-01-24*
-*Version: 6.2 - Consolidated from 1272 to 881 lines, clarified PROGRESS.md as ephemeral, removed duplication*
+*Version: 6.3 - Added files_required frontmatter section for explicit agent file loading, simplified Agent Rules Reference to frontmatter-based approach*

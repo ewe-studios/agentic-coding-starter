@@ -223,6 +223,7 @@ Before reporting to Main Agent, perform thorough self-review:
 
 **Completeness Check:**
 - ✅ All tasks marked for implementation are done
+- ✅ Can clearly identify which specific tasks from requirements.md were completed
 - ✅ All tests pass locally
 - ✅ Code compiles/runs without errors
 - ✅ No TODO comments or placeholders left
@@ -262,16 +263,25 @@ After self-review, document learnings in `specifications/[NN-spec-name]/LEARNING
 #### Report to Main Agent
 
 Provide completion report with:
-1. ✅ List of changed files
-2. ✅ Description of what was implemented
-3. ✅ Language(s) used
-4. ✅ Specification reference
-5. ✅ Note if module documentation was updated
-6. ✅ **STOP and WAIT** for Main Agent
+1. ✅ **List of completed tasks** (specific task identifiers/numbers from requirements.md)
+2. ✅ List of changed files
+3. ✅ Description of what was implemented
+4. ✅ Language(s) used
+5. ✅ Specification reference
+6. ✅ Note if module documentation was updated
+7. ✅ **STOP and WAIT** for Main Agent
+
+**CRITICAL**: You MUST explicitly list which tasks from requirements.md were completed. The Main Agent needs this information to pass to the Specification Update Agent for marking tasks as complete.
 
 **Example Report:**
 ```
 Implementation completed for Specification 03-user-authentication.
+
+Completed Tasks:
+- Task 1: Implement JWT token generation
+- Task 2: Implement JWT token validation
+- Task 3: Create authentication middleware
+- Task 4: Add comprehensive test suite
 
 Files Changed:
 - src/auth/mod.rs (new file)
@@ -344,12 +354,17 @@ Ready for verification.
 11. Update Module Documentation (if structure changed)
    ↓
 12. Report to Main Agent
-   - Provide completion report
+   - Provide completion report with completed tasks list
    - STOP and WAIT
    ↓
 13. Main Agent Coordinates Verification
    - Main Agent spawns verification agent
    - You do NOT spawn verification
+   ↓
+14. After Verification Passes
+   - Main Agent spawns Specification Update Agent
+   - Specification Update Agent marks tasks complete in requirements.md
+   - Main Agent commits and pushes
 ```
 
 ## Boundaries
@@ -372,6 +387,8 @@ Ready for verification.
 4. ❌ **Update requirements.md Directly**
    - Specification Update Agent handles task status updates
    - Main Agent coordinates specification updates
+   - You ONLY report which tasks were completed
+   - Specification Update Agent marks them as complete after verification passes
 
 5. ❌ **Proceed Without Main Agent Approval**
    - After reporting, WAIT for Main Agent
@@ -473,6 +490,11 @@ Implementation Agent Workflow:
     ```
     Implementation completed for Specification 04-add-caching-layer.
 
+    Completed Tasks:
+    - Task 1: Implement Redis caching for GET requests
+    - Task 2: Add TTL-based cache expiration
+    - Task 3: Implement automatic cache invalidation
+
     Files Changed:
     - src/http-client.ts (added caching logic)
     - src/cache.ts (new file, cache manager)
@@ -500,7 +522,10 @@ Implementation Agent Workflow:
 15. WAIT for Main Agent
     - Main Agent spawns JavaScript Verification Agent
     - Verification agent runs all checks
-    - Main Agent coordinates commit/push
+    - If verification PASSES:
+      * Main Agent spawns Specification Update Agent
+      * Specification Update Agent marks tasks complete in requirements.md
+      * Main Agent coordinates commit/push
 
 ✅ Followed TDD
 ✅ Documented tests
@@ -612,6 +637,13 @@ CORRECT WORKFLOW:
 
 ## Version History
 
+### Version 1.2 - 2026-01-24
+- Added explicit requirement to report completed tasks to Main Agent
+- Updated completion report format to include "Completed Tasks" section
+- Added workflow steps showing Specification Update Agent marks tasks complete
+- Clarified that implementation agent only reports task completion, doesn't update requirements.md directly
+- Added note in self-review about identifying completed tasks
+
 ### Version 1.1 - 2026-01-24
 - Updated to use requirements.md as single source (tasks now integrated)
 - Changed references from tasks.md to requirements.md task status
@@ -629,4 +661,4 @@ CORRECT WORKFLOW:
 
 ---
 *Last Updated: 2026-01-24*
-*Documentation Version: 1.1*
+*Documentation Version: 1.2*

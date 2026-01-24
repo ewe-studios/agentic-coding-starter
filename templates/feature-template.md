@@ -6,6 +6,11 @@ depends_on: []
 estimated_effort: medium
 created: YYYY-MM-DD
 last_updated: YYYY-MM-DD
+tasks:
+  completed: 0
+  uncompleted: 0
+  total: 0
+  completion_percentage: 0
 ---
 
 # [Feature Name]
@@ -63,6 +68,28 @@ See `templates/` directory for:
 - `example-struct.rs` - Base structure template
 - `example-impl.rs` - Implementation template
 
+---
+
+## Tasks
+
+> **Task Tracking**: Mark tasks as `[x]` immediately upon completion. Update frontmatter counts (completed/uncompleted/total/completion_percentage) after each task.
+
+### Implementation Tasks
+- [ ] Task 1: Implement core structure
+- [ ] Task 2: Add key functions
+- [ ] Task 3: Integrate with dependencies
+
+### Testing Tasks
+- [ ] Write unit tests for [component]
+- [ ] Write integration tests
+- [ ] Run verification commands
+
+### Documentation Tasks
+- [ ] Document public APIs
+- [ ] Add usage examples
+
+---
+
 ## Success Criteria
 
 - [ ] Criterion 1 - specific and verifiable
@@ -89,7 +116,7 @@ cargo build --package [package]
 ### Implementation Guidelines
 - Follow existing patterns in codebase
 - Use types from dependent features
-- Update tasks.md as work progresses
+- Update Tasks section and frontmatter counts as work progresses
 
 ---
 *Created: YYYY-MM-DD*

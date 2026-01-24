@@ -28,7 +28,7 @@ As a sub-agent:
 3. ✅ Load Rule 11 (if using skills)
 4. ✅ Load your agent documentation (`.agents/agents/[name].md`)
 5. ✅ Load relevant stack file (`.agents/stacks/[language].md`)
-6. ✅ Read specification `requirements.md` (which includes integrated tasks)
+6. ✅ Read specification `requirements.md` and `tasks.md`
 7. ✅ Understand what to build and standards to follow
 
 ---
@@ -146,7 +146,7 @@ test('rate limiter tracks by IP address', async () => {
 - ❌ Don't create convoluted abstractions to avoid small duplication
 
 ### 4. Requirements Alignment Check
-- [ ] Verify against the Tasks section in requirements.md
+- [ ] Verify against tasks.md
 - [ ] Verify against requirements.md
 - [ ] Implementation matches specification intent
 
@@ -257,7 +257,7 @@ Ready for Main Agent verification.
 
 - ❌ **Commit code directly** (report to Main Agent)
 - ❌ **Push to remote** (Main Agent handles this)
-- ❌ **Update the Tasks section in requirements.md directly** (report to Main Agent)
+- ❌ **Update tasks.md directly** (report to Main Agent)
 - ❌ **Spawn verification agents** (ONLY Main Agent can)
 - ❌ **Skip reporting to Main Agent**
 - ❌ **Proceed without Main Agent approval**

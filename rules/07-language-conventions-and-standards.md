@@ -19,9 +19,9 @@ Before any implementation work begins, the agent responsible for gathering speci
    - Specify which parts of the system will use which language
    - Example: "Backend API in Rust, Frontend UI in TypeScript, Build scripts in JavaScript"
 
-3. **Document in Tasks File**
-   - Include language information in `tasks.md` frontmatter under `tools`
-   - Example: `tools: ["Rust", "TypeScript", "Jest", "Cargo"]`
+3. **Document in Requirements File**
+   - Include language information in `requirements.md` frontmatter under `metadata.tools`
+   - Example: `metadata: { tools: ["Rust", "TypeScript", "Jest", "Cargo"] }`
 
 ### Stack Standards Directory Structure
 
@@ -209,8 +209,8 @@ Agents **MUST** update the Learning Log section of stack files when:
    ├─ Reference relevant .agents/stacks/[language].md files
    └─ Note that standards must be followed strictly
    ↓
-4. Create tasks.md
-   ├─ Include languages in frontmatter tools list
+4. Add Tasks section to requirements.md
+   ├─ Include languages in frontmatter metadata.tools list
    └─ Create tasks for each language component
    ↓
 5. Launch Review Agent
@@ -415,7 +415,7 @@ Agent process:
 1. Has conversation with user about feature
 2. Creates requirements.md
 3. **FORGETS to add Language Stack section** (VIOLATION)
-4. Creates tasks.md without language tools
+4. Creates Tasks section without language tools in frontmatter
 5. Launches implementation agent
 
 Implementation agent:

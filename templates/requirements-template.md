@@ -13,6 +13,13 @@ metadata:
   stack_files:
     - .agents/stacks/[language].md
   skills: []
+  tools:
+    - [List of tools used]
+tasks:
+  completed: 0
+  uncompleted: 8
+  total: 8
+  completion_percentage: 0
 builds_on: []
 related_specs: []
 has_features: false
@@ -27,7 +34,6 @@ files_required:
       - .agents/rules/05-coding-practice-agent-orchestration.md
       - .agents/rules/06-specifications-and-requirements.md
     files:
-      - ./tasks.md
       - ./requirements.md
       - ./LEARNINGS.md (if exists)
       - ./PROGRESS.md (if exists)
@@ -39,7 +45,6 @@ files_required:
       - .agents/rules/04-work-commit-and-push-rules.md
       - .agents/rules/06-specifications-and-requirements.md
     files:
-      - ./tasks.md
       - ./requirements.md
       - [stack_file from metadata.stack_files]
   implementation_agent:
@@ -52,9 +57,8 @@ files_required:
       - .agents/rules/11-skills-usage.md (if skills used)
       - [stack_file from metadata.stack_files]
     files:
-      - ./tasks.md
       - ./requirements.md
-      - [feature.md and feature/tasks.md if has_features: true]
+      - [feature.md if has_features: true]
       - [fundamentals/* if has_fundamentals: true]
   verification_agent:
     rules:
@@ -65,7 +69,6 @@ files_required:
       - .agents/rules/08-verification-workflow-complete-guide.md
       - [stack_file from metadata.stack_files]
     files:
-      - ./tasks.md
       - ./requirements.md
   documentation_agent:
     rules:
@@ -82,7 +85,7 @@ files_required:
 
 # [Specification Name] - Requirements
 
-> **Specification Tracking**: See [tasks.md](./tasks.md) for task progress and [learnings.md](./learnings.md) for implementation insights.
+> **Specification Tracking**: Tasks are tracked inline below. See [LEARNINGS.md](./LEARNINGS.md) for implementation insights and [PROGRESS.md](./PROGRESS.md) for current work status.
 >
 > **Agent Instructions**: Review the `files_required` section in frontmatter above. Each agent type has explicit rules and files to load. Load YOUR agent type's requirements before starting work.
 
@@ -121,6 +124,46 @@ Based on the conversation, we agreed on:
 - **Dependencies:** [Required libraries/tools]
 - **Integration Points:** [How this integrates]
 
+---
+
+## Tasks
+
+> **Task Tracking**: Mark tasks as `[x]` immediately upon completion. Update frontmatter counts (completed/uncompleted/completion_percentage) after each task. See Agent Reminders section at end for critical task tracking rules.
+
+### Current Status
+- **Progress**: [X/Y tasks complete (Z%)]
+- **Phase**: [Current phase of work]
+- **Blockers**: [Any blockers, or "None"]
+
+### Implementation Tasks
+
+#### Phase 1: [Phase Name]
+- [ ] Task 1: [Description]
+- [ ] Task 2: [Description]
+- [ ] Task 3: [Description]
+
+#### Phase 2: [Phase Name]
+- [ ] Task 4: [Description]
+- [ ] Task 5: [Description]
+
+### Testing Tasks
+- [ ] Write unit tests for [component]
+- [ ] Write integration tests for [feature]
+- [ ] Add benchmark tests (if applicable)
+
+### Documentation Tasks
+- [ ] Write API documentation
+- [ ] Add usage examples
+- [ ] Create fundamentals documentation (if has_fundamentals: true)
+
+### Verification Tasks
+- [ ] Run all tests and verify 100% pass
+- [ ] Run linter and verify 0 warnings
+- [ ] Run formatter and verify clean
+- [ ] Create verification report
+
+---
+
 ## User-Facing Documentation Requirements (MANDATORY)
 
 **CRITICAL**: If this specification introduces new user-facing features, libraries, or APIs, create a `fundamentals/` directory with comprehensive user documentation.
@@ -139,7 +182,7 @@ Create the following documents in `specifications/[NN-spec-name]/fundamentals/`:
 - **Discuss trade-offs** - When to use, when NOT to use
 - **Be self-contained** - Reader can understand without external resources
 
-**Add fundamentals documentation tasks to tasks.md as HIGH PRIORITY items.**
+**Add fundamentals documentation tasks to the Tasks section above as HIGH PRIORITY items.**
 
 ## Success Criteria
 
@@ -182,24 +225,24 @@ This specification modifies the following modules:
 
 ### 1. Task Completion Verification (100% REQUIRED)
 
-**NO EXCEPTIONS**: Every task in `tasks.md` MUST be completed.
+**NO EXCEPTIONS**: Every task in the Tasks section MUST be completed.
 
-- [ ] Open `tasks.md` and verify ALL tasks are marked `[x]`
-- [ ] Verify `completed` count in frontmatter matches actual `[x]` count
-- [ ] Verify `uncompleted` count is `0`
-- [ ] Verify `completion_percentage` is `100`
+- [ ] Scroll to Tasks section and verify ALL tasks are marked `[x]`
+- [ ] Verify `tasks.completed` count in frontmatter matches actual `[x]` count
+- [ ] Verify `tasks.uncompleted` count is `0`
+- [ ] Verify `tasks.completion_percentage` is `100`
 - [ ] NO tasks left as `[ ]` (incomplete)
 - [ ] NO optional tasks - everything is mandatory unless user explicitly says otherwise
 
 **Validation Command**:
 ```bash
 # Must return 0
-grep -c "^- \[ \]" tasks.md
+grep -c "^- \[ \]" requirements.md
 ```
 
 ### 2. Code/Implementation Verification (100% REQUIRED)
 
-For each task in `tasks.md`:
+For each task in the Tasks section:
 - [ ] Verify the code/file actually exists in the codebase
 - [ ] Verify the implementation matches the task description
 - [ ] Verify all tests for that component pass
@@ -209,14 +252,14 @@ For each task in `tasks.md`:
 ### 3. Documentation Verification (100% REQUIRED - NO OPTIONAL)
 
 **If has_fundamentals: true**:
-- [ ] ALL fundamental documents listed in tasks.md exist
+- [ ] ALL fundamental documents listed in the Tasks section exist
 - [ ] Each fundamental doc is comprehensive (not stub/placeholder)
 - [ ] Code examples in docs compile and work
 - [ ] Cross-references between docs are valid
 
 **Always Required**:
-- [ ] `learnings.md` created with implementation insights
-- [ ] `progress.md` created with timeline and status
+- [ ] `LEARNINGS.md` created with implementation insights
+- [ ] `PROGRESS.md` created with timeline and status
 - [ ] `verification.md` or `VERIFICATION_SIGNOFF.md` created
 
 ### 4. Quality Verification (100% REQUIRED - ZERO TOLERANCE)
@@ -239,11 +282,11 @@ For each task in `tasks.md`:
 
 ### 5. Specification Tracking Verification (MANDATORY)
 
-- [ ] `tasks.md` shows 100% completion
-- [ ] `learnings.md` exists and documents key insights
-- [ ] `progress.md` exists and shows timeline/achievements
+- [ ] Tasks section shows 100% completion
+- [ ] `LEARNINGS.md` exists and documents key insights
+- [ ] `PROGRESS.md` exists and shows timeline/achievements
 - [ ] `verification.md` or `VERIFICATION_SIGNOFF.md` exists with verification results
-- [ ] `requirements.md` frontmatter has correct `status` field
+- [ ] `requirements.md` frontmatter has correct `status` field and `tasks` counts
 
 ### 6. Verification Issue Resolution (MANDATORY)
 
@@ -268,14 +311,14 @@ For each task in `tasks.md`:
 
 Before marking this specification as **completed**:
 
-- [ ] All tasks in tasks.md are checked `[x]` (100%)
+- [ ] All tasks in the Tasks section are checked `[x]` (100%)
 - [ ] All code exists and works (verified in codebase)
 - [ ] All tests pass (100%, no failures/skips)
 - [ ] All documentation complete (no stubs/placeholders)
 - [ ] All quality checks pass (0 warnings)
 - [ ] All verification issues resolved (100% PASS)
-- [ ] learnings.md exists and is comprehensive
-- [ ] progress.md exists with timeline
+- [ ] LEARNINGS.md exists and is comprehensive
+- [ ] PROGRESS.md exists with timeline
 - [ ] verification.md exists with PASS status
 - [ ] fundamentals/ directory exists (if has_fundamentals: true)
 - [ ] All fundamental docs listed are created
@@ -299,21 +342,27 @@ Before marking this specification as **completed**:
    - ❌ DO NOT wait until task completion to update requirements
    - ❌ DO NOT forget to sync requirements with actual implementation
 
-2. **All Requirements Are Mandatory**:
-   - ✅ Unless user explicitly states a requirement is optional, ALL requirements are MANDATORY
-   - ✅ All items must be implemented and completed
-   - ❌ DO NOT skip requirements thinking they are optional
-   - ❌ DO NOT treat any requirement as "nice-to-have" without explicit user confirmation
+2. **Task Tracking (MANDATORY)**:
+   - ✅ Update Tasks section in this file IMMEDIATELY after completing each task
+   - ✅ Mark task as `[x]` the MOMENT you finish it
+   - ✅ Update frontmatter `tasks` counts (completed/uncompleted/completion_percentage) immediately
+   - ❌ DO NOT wait until you're done with multiple tasks to update
+   - ❌ DO NOT create separate task tracking files
+   - ❌ DO NOT batch updates - update after EACH task completion
 
-3. **Task Tracking**:
-   - ✅ Update tasks.md immediately after each task completion (see tasks.md for details)
-   - ✅ Keep requirements.md and tasks.md in sync at all times
+3. **All Requirements and Tasks Are Mandatory**:
+   - ✅ Unless user explicitly states something is optional, ALL items are MANDATORY
+   - ✅ All items must be implemented and completed
+   - ❌ DO NOT skip items thinking they are optional
+   - ❌ DO NOT treat any item as "nice-to-have" without explicit user confirmation
 
 **These rules exist to ensure**:
 - Requirements accurately reflect current understanding
+- Real-time visibility into task progress
 - No work is lost or forgotten
 - User has real-time visibility into project state
 - Future agents have accurate context
+- This requirements.md file is the single source of truth
 
 ---
 

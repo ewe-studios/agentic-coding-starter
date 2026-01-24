@@ -14,7 +14,19 @@ tools:
 skills: []
 ---
 
-# [Specification Name] - Tasks
+# ⚠️ DEPRECATED - DO NOT USE
+
+**This template is deprecated.** Tasks are now integrated directly into `requirements.md`.
+
+**Use instead**:
+- For simple specifications: Add Tasks section to `requirements.md` (see `requirements-template.md`)
+- For feature-based specifications: Add Tasks section to `feature.md` (see `feature-template.md`)
+
+**Reason for deprecation**: Consolidating tasks into requirements/feature files reduces duplication, simplifies agent workflows, and creates self-contained specification documents.
+
+---
+
+# [Specification Name] - Tasks (DEPRECATED STRUCTURE)
 
 ## Task List
 

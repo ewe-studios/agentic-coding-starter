@@ -23,7 +23,7 @@ Before **ANY** work begins on new features, enhancements, or significant changes
 
 ### User Approval Required Before Implementation (MANDATORY)
 
-**CRITICAL**: After creating a complete specification (requirements.md with integrated tasks), the Main Agent **MUST**:
+**CRITICAL**: After creating a complete specification (requirements.md + tasks.md), the Main Agent **MUST**:
 
 1. ✅ **Present the specification to the user**
 2. ✅ **Wait for explicit user approval**
@@ -101,17 +101,20 @@ Main Agent **MUST** include ALL required frontmatter fields:
 - ✅ `related_specs`: (if applicable) Array of related specs
 - ✅ `files_required`: Complete object with entries for each agent type (see Self-Contained Specification Requirements section)
 
-#### Task Tracking in requirements.md:
+#### When Creating specifications/*/tasks.md:
 
-Main Agent **MUST** include task tracking frontmatter in requirements.md:
-- ✅ `tasks`: Complete object with:
-  - `completed`: Count of [x] tasks
-  - `uncompleted`: Count of [ ] tasks
-  - `total`: completed + uncompleted
+Main Agent **MUST** include ALL required frontmatter fields:
+- ✅ `completed`: Count of [x] tasks
+- ✅ `uncompleted`: Count of [ ] tasks
+- ✅ `created`: YYYY-MM-DD
+- ✅ `author`: "Main Agent" or "User Name"
+- ✅ `metadata`: Complete object with:
+  - `version`: "1.0"
+  - `last_updated`: YYYY-MM-DD
+  - `total_tasks`: completed + uncompleted
   - `completion_percentage`: (completed / total) * 100
-- ✅ `metadata.tools`: Array of tools/technologies used
-
-**NOTE**: The `tasks` section is integrated into requirements.md, not a separate file.
+- ✅ `tools`: Array of tools/technologies
+- ✅ `skills`: (if applicable) Array of skill names
 
 #### Validation and Updates:
 
@@ -124,7 +127,7 @@ Before creating any specification file, Main Agent MUST:
 When sub-agents update specifications:
 - ✅ Sub-agents MUST update `metadata.last_updated`
 - ✅ Sub-agents MUST increment `metadata.version` if significant changes
-- ✅ Sub-agents MUST update task counts in requirements.md frontmatter
+- ✅ Sub-agents MUST update counts in tasks.md
 - ✅ Sub-agents MUST add new tools to `tools` array
 - ❌ Sub-agents MUST NOT modify other frontmatter without approval
 
@@ -136,7 +139,7 @@ specifications/
 ├── Spec.md                          # Master index of all specifications
 ├── 01-simple-specification/         # Simple spec (no features needed)
 │   ├── requirements.md              # (MANDATORY) Requirements and conversation summary
-│   ├── (tasks integrated in requirements.md)
+│   ├── tasks.md                     # (MANDATORY) Task list with checkboxes
 │   ├── templates/                   # (OPTIONAL) Code/structure templates
 │   ├── PROGRESS.md                  # (MANDATORY) Ephemeral task-focused status
 │   ├── FINAL_REPORT.md              # (MANDATORY) Comprehensive completion summary
@@ -145,9 +148,11 @@ specifications/
 │
 ├── 02-complex-specification/        # Complex spec with features
 │   ├── requirements.md              # High-level requirements + feature references
+│   ├── tasks.md                     # Feature priority list (not individual tasks)
 │   ├── features/                    # (OPTIONAL) Feature breakdown directory
 │   │   ├── foundation/
-│   │   │   ├── feature.md           # Feature requirements + integrated tasks
+│   │   │   ├── feature.md           # Feature-specific requirements
+│   │   │   ├── tasks.md             # Feature-specific task checkboxes
 │   │   │   └── templates/           # Feature-specific templates
 │   │   └── ...
 │   ├── PROGRESS.md                  # (MANDATORY) Overall progress report
@@ -191,10 +196,9 @@ Each feature directory contains:
 
 | File | Required | Purpose |
 |------|----------|---------|
-| `feature.md` | Yes | Feature-specific requirements, context, success criteria, and integrated task list |
+| `feature.md` | Yes | Feature-specific requirements, context, success criteria |
+| `tasks.md` | Yes | Feature-specific task checkboxes with progress tracking |
 | `templates/` | No | Feature-specific code templates, examples |
-
-**CRITICAL**: Tasks are integrated directly into feature.md files, not in separate tasks.md files.
 
 #### Main Specification Files (With Features)
 
@@ -206,38 +210,34 @@ When using features, the main specification files change **significantly**:
 - High-level overview and goals (2-3 paragraphs)
 - Requirements conversation summary (brief)
 - Feature table with descriptions, dependencies, and links
-- Tasks section with feature priority order and status
-- Feature task counts in Tasks section (e.g., "Feature 1: 12 tasks")
-- Dependencies between features
 - Overall success criteria (high-level checklist)
 - File structure overview
 - Module documentation references
 - **NO detailed code samples** - those go in feature.md files
 - **NO implementation details** - those go in feature.md files
-- **NO individual task checkboxes** - those go in feature.md task sections
+
+**tasks.md** (CONCISE - should be 1-2KB):
+- Feature priority order with status
+- Feature task counts (e.g., "Tasks: 12")
+- Dependencies between features
+- Total task summary table
+- **NO individual task checkboxes** - those go in feature tasks.md files
+- **NO implementation notes** - those go in feature tasks.md files
 
 **Feature files contain ALL the details:**
-- `feature.md` - Detailed requirements, code samples, API examples, implementation patterns, AND integrated task list with checkboxes
+- `feature.md` - Detailed requirements, code samples, API examples, implementation patterns
+- `tasks.md` - Individual task checkboxes, implementation order, code snippets
 
 **Rationale**: This structure keeps context size manageable and ensures:
 1. Main Agent can quickly understand scope without loading 15KB+ files
 2. Implementation Agents load only the feature(s) they're working on
 3. Clear separation between high-level planning and detailed implementation
 
-**Example**: See `.agents/templates/requirements-template.md` for the unified structure with integrated tasks.
+**Example**: See `.agents/templates/examples/feature-based-tasks-example.md` for a complete example of feature-based tasks.md structure.
 
 #### Feature Frontmatter
 
-Feature.md files should include task tracking frontmatter similar to requirements.md:
-```yaml
-tasks:
-  completed: [count]
-  uncompleted: [count]
-  total: [count]
-  completion_percentage: [percentage]
-```
-
-See `.agents/templates/examples/feature-frontmatter-examples.md` for complete examples of feature.md frontmatter.
+See `.agents/templates/examples/feature-frontmatter-examples.md` for complete examples of feature.md and feature tasks.md frontmatter.
 
 #### Verification Files Remain at Main Level
 
@@ -253,7 +253,7 @@ Features do NOT have their own verification/report files.
 
 For simple specifications, the structure remains as before:
 - `requirements.md` - Full requirements with all details
-- Tasks integrated in requirements.md
+- `tasks.md` - All task checkboxes with progress
 - `templates/` - (Optional) Code templates
 - Standard verification files
 
@@ -318,7 +318,7 @@ Specifications that are **NOT completed** can be modified:
 - **Purpose**: Requirements and conversation summary
 - **Contains**: Overview, conversation summary, detailed requirements, success criteria, module documentation references, agent notes
 
-### 2. Task Tracking (Integrated in requirements.md)
+### 2. tasks.md
 - **Template**: `.agents/templates/tasks-template.md`
 - **Purpose**: Task list with checkboxes
 - **Contains**: Task list organized by category, frontmatter with counts and tools
@@ -422,12 +422,15 @@ Specifications that are **NOT completed** can be modified:
 
 ### Feature Files (For Complex Specifications)
 
-**7. feature.md** - Feature-specific requirements and tasks
+**7. feature.md** - Feature-specific requirements
 - **Template**: `.agents/templates/feature-template.md`
 - **When**: Created for each feature in `features/[feature-name]/`
-- **Contains**: Feature overview, dependencies, requirements, implementation details, success criteria, AND integrated task list with checkboxes
+- **Contains**: Feature overview, dependencies, requirements, implementation details, success criteria
 
-**NOTE**: Tasks are integrated into feature.md, not in separate files.
+**8. feature tasks.md** - Feature-specific tasks
+- **Template**: `.agents/templates/feature-tasks-template.md`
+- **When**: Created alongside feature.md
+- **Contains**: Feature-specific task checkboxes, implementation order
 
 ## Self-Contained Specification Requirements
 
@@ -454,7 +457,7 @@ files_required:
       - .agents/rules/05-coding-practice-agent-orchestration.md
       - .agents/rules/06-specifications-and-requirements.md
     files:
-      # Tasks are now in requirements.md
+      - ./tasks.md
       - ./requirements.md
       - ./LEARNINGS.md (if exists)
       - ./PROGRESS.md (if exists)
@@ -467,7 +470,7 @@ files_required:
       - .agents/rules/04-work-commit-and-push-rules.md
       - .agents/rules/06-specifications-and-requirements.md
     files:
-      # Tasks are now in requirements.md
+      - ./tasks.md
       - ./requirements.md
       - [stack_file from metadata.stack_files]
 
@@ -481,9 +484,9 @@ files_required:
       - .agents/rules/11-skills-usage.md (if skills used)
       - [stack_file from metadata.stack_files]
     files:
-      # Tasks are now in requirements.md
+      - ./tasks.md
       - ./requirements.md
-      - [feature.md if has_features: true]
+      - [feature.md and feature/tasks.md if has_features: true]
       - [fundamentals/* if has_fundamentals: true]
 
   verification_agent:
@@ -495,7 +498,7 @@ files_required:
       - .agents/rules/08-verification-workflow-complete-guide.md
       - [stack_file from metadata.stack_files]
     files:
-      # Tasks are now in requirements.md
+      - ./tasks.md
       - ./requirements.md
 
   documentation_agent:
@@ -531,7 +534,7 @@ files_required:
 Some file references are dynamic and must be resolved from other frontmatter fields:
 
 - `[stack_file from metadata.stack_files]` → Load the stack file(s) listed in `metadata.stack_files`
-- `[feature.md if has_features: true]` → Load feature files if `has_features: true` (tasks are integrated in feature.md files)
+- `[feature.md and feature/tasks.md if has_features: true]` → Load feature files if `has_features: true`
 - `[fundamentals/* if has_fundamentals: true]` → Load fundamentals docs if `has_fundamentals: true`
 - `(if exists)` → Load file only if it exists (e.g., PROGRESS.md during active work)
 - `(if skills used)` → Load rule only if `metadata.skills` is not empty
@@ -571,15 +574,14 @@ Before committing `requirements.md`, Main Agent **MUST** verify:
 Every `requirements.md` file MUST contain:
 
 **Top link** (after frontmatter, before Overview):
-- Reference to Tasks section within the same file for task progress
-- Links to `LEARNINGS.md` for implementation insights
-- Links to `PROGRESS.md` for current work status
+- Links to `tasks.md` for task progress
+- Links to `learnings.md` for implementation insights
 - **Agent instruction**: "Review the `files_required` section in frontmatter above"
 
 **Bottom link** (after Final Verification Checklist):
 - Links to `verification.md` or `VERIFICATION_SIGNOFF.md` for verification results
 
-**Example**: See `.agents/templates/requirements-template.md` for the complete unified structure with integrated tasks.
+**Example**: See `.agents/templates/examples/cross-reference-links-example.md` for complete example and validation checklist.
 
 ## Module Documentation System (MANDATORY)
 
@@ -711,7 +713,7 @@ Review agent **MUST** report: Current implementation state, verified task status
    ↓
 5. Create requirements.md (with conversation summary)
    ↓
-6. Add Tasks section to requirements.md (with task tracking in frontmatter)
+6. Create tasks.md (with complete frontmatter)
    ↓
 7. Create/Update Module Documentation (see Module Documentation System section)
    ↓
@@ -752,22 +754,21 @@ Agents **MUST** update requirements.md IMMEDIATELY when: new requirement discove
 
 **Why**: Requirements reflect current understanding, no discoveries lost, real-time user visibility, accurate context for future agents, prevents specification drift.
 
-#### Task Updates (IMMEDIATE - EVERY TASK)
+#### Tasks.md Updates (IMMEDIATE - EVERY TASK)
 
-Agents **MUST**: Update the Tasks section in requirements.md IMMEDIATELY after completing EACH task, mark [x] the MOMENT finished, update frontmatter `tasks` counts immediately. **DO NOT wait**, batch updates, or create separate tracking files - requirements.md Tasks section is THE task tracker.
+Agents **MUST**: Update tasks.md IMMEDIATELY after completing EACH task, mark [x] the MOMENT finished, update frontmatter counts immediately. **DO NOT wait**, batch updates, or create other tracking files - tasks.md is THE task tracker.
 
 **When**: IMMEDIATELY after any task, before next task, before breaks/sessions end, before switching specifications.
 
-**Why**: Real-time progress visibility, no completed work forgotten, user can check status anytime, system crashes won't lose tracking, other agents pick up exactly where left off, requirements.md Tasks section remains single source of truth.
+**Why**: Real-time progress visibility, no completed work forgotten, user can check status anytime, system crashes won't lose tracking, other agents pick up exactly where left off, tasks.md remains single source of truth.
 
 **Frontmatter update requirements**:
 ```yaml
-tasks:
-  completed: [count of [x] tasks]
-  uncompleted: [count of [ ] tasks]
-  total: [completed + uncompleted]
-  completion_percentage: [(completed / total) * 100]
+completed: [count of [x] tasks]
+uncompleted: [count of [ ] tasks]
 metadata:
+  total_tasks: [completed + uncompleted]
+  completion_percentage: [(completed / total_tasks) * 100]
   last_updated: [YYYY-MM-DD - TODAY'S DATE]
 ```
 
@@ -781,7 +782,7 @@ metadata:
 - ❌ DO NOT skip requirements thinking they are optional
 - ❌ DO NOT treat any requirement as "nice-to-have" without explicit user confirmation
 
-**For Tasks section**:
+**For tasks.md**:
 - ✅ Assume ALL tasks must be completed
 - ✅ All tasks must be done before marking specification as complete
 - ❌ DO NOT skip tasks thinking they are optional
@@ -844,7 +845,7 @@ When creating a specification with `has_fundamentals: true`:
 
 Key points:
 1. **Add "User-Facing Documentation Requirements" section** to requirements.md
-2. **Add fundamentals tasks to the Tasks section in requirements.md as FIRST PRIORITY**
+2. **Add fundamentals tasks to tasks.md as FIRST PRIORITY**
 
 #### Implementation Agent Responsibilities
 
@@ -925,11 +926,11 @@ Every `requirements.md` MUST include a complete "MANDATORY Completion and Verifi
 - ❌ Missing Agent Rules Reference section in requirements.md
 - ❌ Missing or inaccurate module documentation
 - ❌ Not verifying module docs match code
-- ❌ Missing any of the 5 mandatory files
+- ❌ Missing any of the 6 mandatory files
 - ❌ Missing cross-reference links in requirements.md
 - ❌ **Not updating requirements.md when new requirements discovered**
 - ❌ **Batching task updates instead of updating immediately after each task**
-- ❌ **Creating separate task tracking files instead of using the Tasks section in requirements.md**
+- ❌ **Creating separate task tracking files instead of using tasks.md**
 
 **Completion Violations**:
 - ❌ Marking complete without 100% verification
@@ -978,10 +979,10 @@ When violation detected:
 - ✅ Read specifications, tasks, review report, and module docs before working
 - ✅ Verify documentation matches reality (STOP if mismatch)
 - ✅ **Update requirements.md IMMEDIATELY when new requirements identified**
-- ✅ **Update the Tasks section in requirements.md IMMEDIATELY after EACH task completion (no batching)**
+- ✅ **Update tasks.md IMMEDIATELY after EACH task completion (no batching)**
 - ✅ **Assume ALL tasks/requirements are mandatory unless user explicitly states otherwise**
 - ✅ Update module docs as work progresses
-- ✅ Create all 5 mandatory files (requirements with tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF)
+- ✅ Create all 6 mandatory files (requirements, tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF)
 - ✅ Commit specification changes following Rules 03 and 04
 - ✅ Push immediately after completion and verification
 
@@ -1003,7 +1004,7 @@ For critical production issues:
 For research/exploration without implementation:
 - Create specification with research questions
 - Document findings in requirements.md
-- Use Tasks section to track research activities
+- Use tasks.md to track research activities
 
 ### Documentation-Only Changes
 For pure documentation updates:
@@ -1033,7 +1034,7 @@ For pure documentation updates:
 - ✅ **PROGRESS.md is EPHEMERAL** - cleared after phases, deleted when complete
 - ✅ **LEARNINGS.md is PERMANENT** - cumulative insights, never deleted
 - ✅ **IMMEDIATE updates to requirements.md when new requirements identified**
-- ✅ **IMMEDIATE updates to Tasks section in requirements.md after EACH task completion**
+- ✅ **IMMEDIATE updates to tasks.md after EACH task completion**
 - ✅ **ALL requirements and tasks are MANDATORY unless user explicitly states otherwise**
 - ✅ 100% completion verification before marking complete
 - ✅ Push immediately after completion and verification

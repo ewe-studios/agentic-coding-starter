@@ -102,7 +102,7 @@ Each implementation agent **MUST**:
 **Before Starting Work**:
 1. ✅ Read `AGENTS.md` file
 2. ✅ Load all rules from `.agents/rules/*`
-3. ✅ Read specification `requirements.md` (which includes integrated tasks)
+3. ✅ Read specification `requirements.md` and `tasks.md`
 4. ✅ Read relevant language stack files from `.agents/stacks/[language].md`
 5. ✅ Understand what to build and standards to follow
 
@@ -176,7 +176,7 @@ Implementation agents **MUST** follow TDD whenever possible:
 **Implementation Agent MUST NOT**:
 - ❌ Commit code directly
 - ❌ Push to remote
-- ❌ Update the Tasks section in requirements.md directly
+- ❌ Update tasks.md directly
 - ❌ Skip reporting to Main Agent
 - ❌ Proceed without Main Agent approval
 - ❌ **Spawn verification agents** (ONLY Main Agent has this authority)
@@ -274,7 +274,7 @@ Implementation agents MUST:
    - **THINK HARD about simplification or USER WILL SHOUT AT YOU**
 
 4. ✅ **Requirements Alignment Check**:
-   - Review the Tasks section in requirements.md - ensure task being reported is actually complete
+   - Review tasks.md - ensure task being reported is actually complete
    - Review requirements.md - ensure all related requirements are satisfied
    - Verify implementation matches the specification's intent
    - No deviation from specified behavior without justification
@@ -760,8 +760,8 @@ Main Agent responsibilities:
 6. Commit specification changes with code
 
 Main Agent MUST NOT:
-❌ Read tasks from requirements.md directly
-❌ Update the Tasks section in requirements.md directly
+❌ Read tasks.md directly
+❌ Update tasks.md directly
 ❌ Update frontmatter directly
 ❌ Mark tasks as complete directly
 ```
@@ -770,14 +770,14 @@ Main Agent MUST NOT:
 
 ```
 Specification Update Agent MUST:
-1. Read the Tasks section from requirements.md in specification directory
+1. Read tasks.md from specification directory
 2. Identify which tasks were completed (from Main Agent's context)
 3. Mark tasks as [x] completed
 4. Update frontmatter:
    - Increment 'completed' count
    - Decrement 'uncompleted' count
 5. Add completion notes if needed
-6. Save requirements.md
+6. Save tasks.md
 7. Report completion to Main Agent
 ```
 
@@ -803,7 +803,7 @@ Main Agent MUST:
 11. ✅ Provide fix recommendations
 
 Main Agent MUST NOT:
-❌ Update the Tasks section in requirements.md directly
+❌ Update tasks.md directly
 ❌ Create verification.md directly
 ❌ Update frontmatter directly
 ❌ Add urgent tasks directly
@@ -817,7 +817,7 @@ Main Agent MUST NOT:
 
 ```
 Specification Update Agent MUST:
-1. Read the Tasks section from requirements.md in specification directory
+1. Read tasks.md from specification directory
 2. Create verification.md file in same directory with full verification report:
    - Status: FAIL
    - Date/time of failure
@@ -826,13 +826,13 @@ Specification Update Agent MUST:
    - Error messages and line numbers
    - Files affected
    - Recommended fixes
-3. Add NEW URGENT task at TOP of Tasks section in requirements.md:
+3. Add NEW URGENT task at TOP of tasks.md:
    - Mark as highest priority
    - Reference verification.md for details
    - Include brief summary of issues
 4. Update frontmatter:
    - Increment 'uncompleted' count by 1
-5. Save requirements.md
+5. Save tasks.md
 6. Save verification.md
 7. Report completion to Main Agent
 
@@ -861,12 +861,12 @@ IMPORTANT: verification.md is TRANSIENT:
    - Addresses ALL failures listed in verification.md
    - Ensures tests pass locally
    - Follows all stack standards
-5. Implementation agent marks urgent fix task as [x] complete in requirements.md Tasks section
+5. Implementation agent marks urgent fix task as [x] complete in tasks.md
 6. Implementation agent REPORTS completion to Main Agent again
 7. Main Agent launches verification agents again (back to Phase 2)
 8. IF verification PASSES:
    - Specification Update Agent deletes verification.md
-   - Marks completed tasks in requirements.md Tasks section
+   - Marks completed tasks in tasks.md
    - Main Agent commits all changes
 9. IF verification FAILS again:
    - Process repeats (Specification Agent updates verification.md)
@@ -900,7 +900,7 @@ Each verification agent **MUST NOT**:
 1. ❌ Skip any verification checks
 2. ❌ Allow partial passes ("tests mostly pass")
 3. ❌ Commit code directly
-4. ❌ Update the Tasks section in requirements.md directly
+4. ❌ Update tasks.md directly
 5. ❌ Create verification.md directly
 6. ❌ Run concurrently with another agent for same language
 7. ❌ Proceed when checks fail
@@ -939,7 +939,7 @@ Bad ❌:
 User Request → Main Agent spawns Implementation Agent
 → Implementation completes (TDD, self-review, document learnings) → Reports to Main
 → Main spawns Verification Agent → All checks PASS ✅
-→ Main spawns Specification Agent → Updates the Tasks section in requirements.md
+→ Main spawns Specification Agent → Updates tasks.md
 → Main commits + pushes → Success!
 ```
 
@@ -1063,7 +1063,7 @@ Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review �
 - ✅ **Check code simplicity: Can it be simplified? Break down nested logic (max 2-3 levels)**
 - ✅ **DRY vs Clarity: Prefer clarity - OK to duplicate 2-5 lines if abstraction adds complexity**
 - ✅ **Code reads like prose: Explicit > clever, straightforward > "smart tricks"**
-- ✅ Check requirements alignment: Verify against requirements.md (including Tasks section)
+- ✅ Check requirements alignment: Verify against tasks.md and requirements.md
 - ✅ Check test coverage: Meaningful tests for all functionality
 - ✅ **Check test documentation: Every test has WHY/WHAT comments (2-5 lines)**
 - ❌ **USER WILL SHOUT AT YOU** if you skip self-review and submit incomplete work

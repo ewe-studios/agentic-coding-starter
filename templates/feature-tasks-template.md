@@ -8,7 +8,17 @@ tools:
   - cargo
 ---
 
-# [Feature Name] - Tasks
+# ⚠️ DEPRECATED - DO NOT USE
+
+**This template is deprecated.** Tasks are now integrated directly into `feature.md` files.
+
+**Use instead**: Add a Tasks section to `feature.md` (see `feature-template.md` for the updated structure with integrated tasks)
+
+**Reason for deprecation**: Consolidating tasks into feature.md files reduces file count, simplifies navigation, and creates self-contained feature documents.
+
+---
+
+# [Feature Name] - Tasks (DEPRECATED STRUCTURE)
 
 ## Task List
 

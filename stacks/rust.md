@@ -2711,3 +2711,16 @@ use foundation_nostd::comp::condvar_comp::{Mutex, CondVar};
 
 **Key Principle**: Move complexity up to dependency, keep consuming code simple and clear.
 
+
+**Explicit Imports Requirement (2026-01-24)**: Always use explicit submodule paths, never wildcard re-exports:
+
+```rust
+// GOOD ✅ - Explicit
+use foundation_nostd::comp::basic::{Mutex, RwLock};
+use foundation_nostd::comp::condvar_comp::{Mutex, CondVar};
+
+// BAD ❌ - Ambiguous (removed)
+use foundation_nostd::comp::{Mutex, RwLock};  // Which Mutex?
+```
+
+This makes it clear which compatibility layer (basic vs specialized) is being used.

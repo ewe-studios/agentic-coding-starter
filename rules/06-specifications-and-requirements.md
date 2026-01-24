@@ -161,19 +161,47 @@ Every requirements.md MUST include `files_required` section listing exact rules 
 ```yaml
 files_required:
   main_agent:
-    rules: [01-04, 05, 06]
-    files: [./requirements.md, ./LEARNINGS.md, ./PROGRESS.md]
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/05-coding-practice-agent-orchestration.md
+      - .agents/rules/06-specifications-and-requirements.md
+    files:
+      - ./requirements.md
+      - ./LEARNINGS.md
+      - ./PROGRESS.md
 
   implementation_agent:
-    rules: [01-04, 13, stack_file]
-    files: [./requirements.md, feature.md, fundamentals/*]
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/13-implementation-agent-guide.md
+      - [stack_file from metadata.stack_files]
+    files:
+      - ./requirements.md
+      - [feature.md if has_features: true]
+      - [fundamentals/* if has_fundamentals: true]
 
   verification_agent:
-    rules: [01-04, 08, stack_file]
-    files: [./requirements.md]
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/08-verification-workflow-complete-guide.md
+      - [stack_file from metadata.stack_files]
+    files:
+      - ./requirements.md
 ```
 
-**Dynamic references**: `[stack_file from metadata.stack_files]`, `[feature.md if has_features: true]`
+**Dynamic references**:
+- `[stack_file from metadata.stack_files]` - Expands to full path from metadata
+- `[feature.md if has_features: true]` - Conditional file inclusion
+- `[fundamentals/* if has_fundamentals: true]` - Conditional directory inclusion
 
 **Benefits**: Agents know exactly what to load, no guessing
 

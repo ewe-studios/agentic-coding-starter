@@ -429,6 +429,227 @@ Specifications that are **NOT completed** can be modified:
 
 **NOTE**: Tasks are integrated into feature.md, not in separate files.
 
+## Specification File Organization and Consolidation (MANDATORY)
+
+### File Consolidation Policy (ZERO TOLERANCE)
+
+**CRITICAL RULE**: Each specification directory MUST contain ONLY the mandatory files listed below. Agents MUST NOT create additional report files, temporary documentation, or duplicate files.
+
+**Violation Examples**:
+- ❌ Creating `PROCESS_LEARNINGS.md` when `LEARNINGS.md` exists
+- ❌ Creating `WASM_TESTING_REPORT.md` instead of adding to `FINAL_REPORT.md`
+- ❌ Creating `WORK_SESSION_SUMMARY.md` instead of updating `FINAL_REPORT.md`
+- ❌ Creating multiple verification files (`VERIFICATION_SIGNOFF.md`, `VERIFICATION_RESULTS.md`, `verification.md`)
+- ❌ Keeping `PROGRESS.md` after specification complete
+
+### Allowed Files Per Specification (EXHAUSTIVE LIST)
+
+**ONLY these files are allowed** in `specifications/[spec-name]/`:
+
+#### 1. **requirements.md** (MANDATORY)
+- **Purpose**: Complete requirements with integrated tasks
+- **Content**: Overview, conversation summary, requirements, task list with checkboxes, success criteria
+- **Template**: `.agents/templates/requirements-template.md`
+- **Status**: Permanent (never deleted)
+
+#### 2. **LEARNINGS.md** (MANDATORY)
+- **Purpose**: Single source of truth for ALL learnings, insights, and lessons
+- **Content**: ALL learnings go here - process learnings, technical learnings, implementation insights, challenges, solutions, best practices, anti-patterns
+- **Consolidation Rules**:
+  - ✅ Process learnings → LEARNINGS.md
+  - ✅ Technical learnings → LEARNINGS.md
+  - ✅ Implementation insights → LEARNINGS.md
+  - ✅ User-requested learnings → LEARNINGS.md
+  - ❌ NEVER create `PROCESS_LEARNINGS.md`, `TECHNICAL_LEARNINGS.md`, or any other learning file
+- **Update Pattern**: Append new learnings to existing sections, organize by category if needed
+- **Template**: `.agents/templates/LEARNINGS-template.md`
+- **Status**: Permanent (never deleted)
+
+#### 3. **FINAL_REPORT.md** (MANDATORY AT COMPLETION)
+- **Purpose**: Single comprehensive report for ALL reporting needs
+- **Content**: ALL reports go here:
+  - Work session summaries
+  - Testing reports (including WASM testing)
+  - Implementation progress
+  - Verification results summary
+  - Completion metrics
+  - Any other reporting needs
+- **Consolidation Rules**:
+  - ✅ Work session summary → FINAL_REPORT.md (add section)
+  - ✅ WASM testing report → FINAL_REPORT.md (add section)
+  - ✅ Platform-specific testing → FINAL_REPORT.md (add section)
+  - ✅ Integration testing summary → FINAL_REPORT.md (add section)
+  - ❌ NEVER create separate report files (`WASM_TESTING_REPORT.md`, `WORK_SESSION_SUMMARY.md`, etc.)
+- **Progressive Updates**: Can be updated progressively despite name containing "FINAL" - it's the final location for reports, not final timing
+- **Template**: `.agents/templates/FINAL_REPORT-template.md`
+- **Status**: Permanent (never deleted), created when specification nears completion
+
+#### 4. **VERIFICATION.md** (MANDATORY AT COMPLETION)
+- **Purpose**: Single verification signoff file
+- **Content**: All verification results from verification agent
+- **Naming**: Use `VERIFICATION.md` (not VERIFICATION_SIGNOFF.md, VERIFICATION_RESULTS.md, or verification.md)
+- **Template**: `.agents/templates/VERIFICATION-template.md` (to be renamed from VERIFICATION_SIGNOFF-template.md)
+- **Status**: Permanent (never deleted), created after final verification
+
+#### 5. **PROGRESS.md** (OPTIONAL - EPHEMERAL)
+- **Purpose**: Current task status and immediate next steps
+- **Content**: Current work only - what's happening RIGHT NOW
+- **Lifecycle**:
+  - Created at 40-60% completion
+  - Cleared and rewritten after each major task
+  - **DELETED** when specification 100% complete
+- **Template**: `.agents/templates/PROGRESS-template.md`
+- **Status**: Ephemeral (deleted at completion)
+
+#### 6. **fundamentals/** (OPTIONAL DIRECTORY)
+- **Purpose**: User-facing documentation
+- **When**: Only if `has_fundamentals: true`
+- **Contains**: Numbered markdown files (00-overview.md, 01-theory.md, etc.)
+- **Status**: Permanent
+
+#### 7. **features/** (OPTIONAL DIRECTORY)
+- **Purpose**: Feature-specific requirements
+- **When**: Only if `has_features: true`
+- **Contains**: Feature subdirectories with feature.md files
+- **Status**: Permanent
+
+#### 8. **templates/** (OPTIONAL DIRECTORY)
+- **Purpose**: Code templates for implementation
+- **When**: Only if needed for code generation
+- **Contains**: Template files
+- **Status**: Permanent
+
+### Strict File Prohibition (ZERO TOLERANCE)
+
+**FORBIDDEN FILES** - These files MUST NOT be created:
+
+#### ❌ Duplicate Learning Files
+- ❌ `PROCESS_LEARNINGS.md` - Use LEARNINGS.md
+- ❌ `TECHNICAL_LEARNINGS.md` - Use LEARNINGS.md
+- ❌ `IMPLEMENTATION_LEARNINGS.md` - Use LEARNINGS.md
+- ❌ Any file with "learning" or "insight" in the name except LEARNINGS.md
+
+#### ❌ Separate Report Files
+- ❌ `WASM_TESTING_REPORT.md` - Add section to FINAL_REPORT.md
+- ❌ `WORK_SESSION_SUMMARY.md` - Add section to FINAL_REPORT.md
+- ❌ `TESTING_REPORT.md` - Add section to FINAL_REPORT.md
+- ❌ `PLATFORM_TESTING_REPORT.md` - Add section to FINAL_REPORT.md
+- ❌ `INTEGRATION_REPORT.md` - Add section to FINAL_REPORT.md
+- ❌ Any file with "report" or "summary" in the name except FINAL_REPORT.md
+
+#### ❌ Multiple Verification Files
+- ❌ `VERIFICATION_SIGNOFF.md` - Use VERIFICATION.md
+- ❌ `VERIFICATION_RESULTS.md` - Use VERIFICATION.md
+- ❌ `verification.md` - Use VERIFICATION.md (capital letters)
+- ❌ Any file with "verification" except VERIFICATION.md
+
+#### ❌ Progress Tracking After Completion
+- ❌ `PROGRESS.md` after 100% completion - MUST be deleted
+- ❌ `STATUS.md` - Use PROGRESS.md during work, delete at completion
+- ❌ Any ephemeral tracking files
+
+#### ❌ Temporary or Scratch Files
+- ❌ `NOTES.md`, `TODO.md`, `SCRATCH.md`
+- ❌ `ISSUES.md` - Use GitHub issues or LEARNINGS.md
+- ❌ Agent working files (create outside spec directory if needed)
+
+### Consolidation Workflow
+
+**When agent wants to create a new report/learning file**:
+
+1. ✅ **STOP** - Do not create a new file
+2. ✅ **Identify** the correct target file:
+   - Learnings/insights → LEARNINGS.md
+   - Reports/summaries → FINAL_REPORT.md
+   - Verification → VERIFICATION.md
+3. ✅ **Add section** to existing file with appropriate heading
+4. ✅ **Update** existing file instead of creating new file
+
+**Example - WASM Testing Report**:
+```markdown
+# Wrong Approach ❌
+Create: specifications/04-condvar-primitives/WASM_TESTING_REPORT.md
+
+# Correct Approach ✅
+Update: specifications/04-condvar-primitives/FINAL_REPORT.md
+Add section: "## WASM Testing Verification"
+```
+
+**Example - Process Learnings**:
+```markdown
+# Wrong Approach ❌
+Create: specifications/04-condvar-primitives/PROCESS_LEARNINGS.md
+
+# Correct Approach ✅
+Update: specifications/04-condvar-primitives/LEARNINGS.md
+Add section: "## Process Learnings" within existing file
+```
+
+### Agent Requirements Reminder (MANDATORY)
+
+**CRITICAL**: At the end of every `requirements.md` file, MUST include this reminder:
+
+```markdown
+---
+
+## CRITICAL REMINDER: Specification File Organization (MANDATORY)
+
+**ONLY these files are allowed in this specification directory:**
+
+1. ✅ `requirements.md` - Requirements with integrated tasks (permanent)
+2. ✅ `LEARNINGS.md` - ALL learnings consolidated here (permanent)
+3. ✅ `FINAL_REPORT.md` - ALL reports consolidated here (permanent)
+4. ✅ `VERIFICATION.md` - Verification signoff (permanent)
+5. ✅ `PROGRESS.md` - Current status ONLY (ephemeral - delete at 100%)
+6. ✅ `fundamentals/` - User docs (if has_fundamentals: true)
+7. ✅ `features/` - Feature files (if has_features: true)
+8. ✅ `templates/` - Code templates (optional)
+
+**FORBIDDEN - DO NOT CREATE:**
+- ❌ `PROCESS_LEARNINGS.md` - Use LEARNINGS.md
+- ❌ `WASM_TESTING_REPORT.md` - Add section to FINAL_REPORT.md
+- ❌ `WORK_SESSION_SUMMARY.md` - Add section to FINAL_REPORT.md
+- ❌ `VERIFICATION_SIGNOFF.md` - Use VERIFICATION.md
+- ❌ Any other report/learning/tracking files
+
+**Consolidation Rules:**
+- ALL learnings → LEARNINGS.md (add sections as needed)
+- ALL reports → FINAL_REPORT.md (add sections as needed)
+- ALL verification → VERIFICATION.md (single file)
+
+**See Rule 06 Section "Specification File Organization and Consolidation" for complete policy.**
+
+---
+```
+
+**Main Agent MUST**:
+- ✅ Include this reminder in requirements.md template
+- ✅ Verify this reminder exists when reviewing specs
+- ✅ Enforce file consolidation policy
+
+**All Agents MUST**:
+- ✅ Read this reminder before creating any files
+- ✅ Follow consolidation rules strictly
+- ✅ Update existing files instead of creating new files
+
+### Cleanup of Existing Specifications
+
+**For specifications with file violations**:
+
+1. ✅ Identify duplicate files (PROCESS_LEARNINGS.md, WASM_TESTING_REPORT.md, etc.)
+2. ✅ Consolidate content into proper files
+3. ✅ Delete the duplicate files
+4. ✅ Commit with message: "Consolidate specification files per Rule 06"
+
+**Example cleanup for Spec 04**:
+```bash
+# Consolidate PROCESS_LEARNINGS.md → LEARNINGS.md
+# Consolidate WASM_TESTING_REPORT.md → FINAL_REPORT.md (add WASM section)
+# Consolidate WORK_SESSION_SUMMARY.md → FINAL_REPORT.md (add session section)
+# Delete PROGRESS.md (spec is 100% complete)
+# Rename VERIFICATION_SIGNOFF.md → VERIFICATION.md
+```
+
 ## Self-Contained Specification Requirements
 
 ### files_required Frontmatter Section (MANDATORY)

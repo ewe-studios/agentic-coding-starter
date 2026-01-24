@@ -40,15 +40,19 @@ Main Agent MUST actively probe requirements, not passively accept vague requests
 
 ### Frontmatter Requirements
 
-Main Agent validates complete frontmatter in requirements.md:
+**Requirements.md MUST include** (see `.agents/templates/requirements-template.md`):
 
 - `description`, `status`, `priority`, `created`, `author`
 - `metadata`: version, last_updated, estimated_effort, tags, stack_files, skills, tools
 - `has_features`, `has_fundamentals`, `builds_on`, `related_specs`
-- `files_required`: Complete object for each agent type (see Self-Contained Specifications)
+- **`files_required`**: Complete object for each agent type (MANDATORY)
 - `tasks`: completed, uncompleted, total, completion_percentage
 
-**See**: `.agents/templates/requirements-template.md` for complete structure
+**Feature.md MUST include** (if has_features: true, see `.agents/templates/feature-template.md`):
+
+- `feature`, `description`, `status`, `priority`, `depends_on`, `estimated_effort`, `created`, `last_updated`, `author`
+- **`tasks`**: completed, uncompleted, total, completion_percentage (MANDATORY)
+- **`files_required`**: implementation_agent and verification_agent entries (MANDATORY)
 
 ## Directory Structure
 

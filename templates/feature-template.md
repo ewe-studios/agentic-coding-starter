@@ -2,15 +2,41 @@
 feature: feature-name
 description: Brief one-sentence description of what this feature implements
 status: pending
+priority: medium
 depends_on: []
 estimated_effort: medium
 created: YYYY-MM-DD
 last_updated: YYYY-MM-DD
+author: Main Agent
 tasks:
   completed: 0
   uncompleted: 0
   total: 0
   completion_percentage: 0
+files_required:
+  implementation_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/13-implementation-agent-guide.md
+      - .agents/stacks/[language].md
+    files:
+      - ../requirements.md
+      - ./feature.md
+      - ./templates/
+  verification_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/08-verification-workflow-complete-guide.md
+      - .agents/stacks/[language].md
+    files:
+      - ../requirements.md
+      - ./feature.md
 ---
 
 # [Feature Name]

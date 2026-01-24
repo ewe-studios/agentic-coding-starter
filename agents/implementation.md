@@ -207,6 +207,55 @@ def test_webhook_fires_after_db_commit():
     assert mock_webhook.call_count == 0
 ```
 
+#### Test Persistence and Problem Investigation (MANDATORY)
+
+**CRITICAL RULE**: Just because a test is failing and other tasks are pending, do NOT leave the test or problem, investigate deeply and find the problem and fix it before going to the next task.
+
+**What This Means:**
+
+1. ✅ **Never abandon a failing test** regardless of task priority or queue
+2. ✅ **Investigate deeply** - trace through code, understand dependencies, identify root cause
+3. ✅ **Fix the problem** - solve the actual issue, not just make the test pass temporarily
+4. ✅ **Verify the fix works** - ensure the failing test now passes AND doesn't regress
+5. ✅ **Document what you found** - note why the test failed, what the real issue was
+
+**When to Apply:**
+
+- Test fails unexpectedly (not because of missing implementation)
+- Test fails after previous work seems complete
+- Test behavior differs from expected
+- Test passes but other tests fail (regression)
+- Test fails intermittently or inconsistently
+
+**Example:**
+
+```
+❌ BAD: Skip failing test, move to next task
+Task 1: Implement cache TTL
+Task 2: Add error handling
+
+Cache TTL test fails...
+"Next task is error handling, let's skip this for now"
+→ Test left broken, user frustrated
+
+✅ GOOD: Investigate and fix
+Cache TTL test fails...
+"Let me trace through the code to understand why"
+→ Found bug: cache key missing timestamp, causing collisions
+→ Fixed bug, verified test passes
+→ Now moving to error handling task
+```
+
+**Root Cause Investigation Steps:**
+
+1. Read the test to understand what it expects
+2. Run the test locally to see the exact error
+3. Search code for related functions and dependencies
+4. Trace execution path to find where behavior diverges
+5. Check for edge cases, race conditions, or logic errors
+6. Verify fix handles all scenarios, not just the failing case
+7. Document findings in LEARNINGS.md
+
 #### Implementation Standards
 
 - ✅ Follow language-specific conventions

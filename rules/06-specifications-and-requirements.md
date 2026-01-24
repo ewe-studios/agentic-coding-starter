@@ -1,6 +1,7 @@
 # Specifications and Requirements Management
 
 ## Purpose
+
 Establishes mandatory requirements-gathering and specification-tracking system. All work begins with documented conversation between Main Agent and user, creating clear record of requirements and tasks in `specifications/` directory.
 
 ## Core Workflow
@@ -8,6 +9,7 @@ Establishes mandatory requirements-gathering and specification-tracking system. 
 ### Requirements-First Development
 
 Before any work begins, Main Agent MUST:
+
 1. Engage in conversation with user about requirements
 2. Document requirements in specification directory
 3. Create integrated task list for tracking
@@ -19,6 +21,7 @@ Before any work begins, Main Agent MUST:
 ### User Approval Required
 
 After creating specification, Main Agent:
+
 1. Presents specification to user
 2. Waits for explicit approval: "Start implementation", "Go ahead", "Proceed with implementation"
 3. Never assumes "ok" or "thanks" means approval
@@ -38,6 +41,7 @@ Main Agent MUST actively probe requirements, not passively accept vague requests
 ### Frontmatter Requirements
 
 Main Agent validates complete frontmatter in requirements.md:
+
 - `description`, `status`, `priority`, `created`, `author`
 - `metadata`: version, last_updated, estimated_effort, tags, stack_files, skills, tools
 - `has_features`, `has_fundamentals`, `builds_on`, `related_specs`
@@ -49,6 +53,7 @@ Main Agent validates complete frontmatter in requirements.md:
 ## Directory Structure
 
 ### Simple Specification
+
 ```
 specifications/01-simple-spec/
 ├── requirements.md          # Requirements with integrated tasks
@@ -61,6 +66,7 @@ specifications/01-simple-spec/
 ```
 
 ### Complex Specification with Features
+
 ```
 specifications/02-complex-spec/
 ├── requirements.md          # High-level overview + feature table
@@ -102,16 +108,16 @@ Once completed (status: completed, REPORT.md and VERIFICATION.md created), speci
 
 Each specification directory MUST contain ONLY these files:
 
-| File | Status | Purpose |
-|------|--------|---------|
-| `requirements.md` | Permanent | Requirements with integrated tasks |
-| `LEARNINGS.md` | Permanent | ALL learnings consolidated (technical + process) |
-| `REPORT.md` | Permanent | ALL reports consolidated (work sessions, testing, completion) |
-| `VERIFICATION.md` | Permanent | Verification signoff |
-| `PROGRESS.md` | Ephemeral | Current status (DELETE at 100%) |
-| `fundamentals/` | Permanent | User docs (if has_fundamentals: true) |
-| `features/` | Permanent | Feature breakdown (if has_features: true) |
-| `templates/` | Permanent | Code templates (optional) |
+| File              | Status    | Purpose                                                       |
+| ----------------- | --------- | ------------------------------------------------------------- |
+| `requirements.md` | Permanent | Requirements with integrated tasks                            |
+| `LEARNINGS.md`    | Permanent | ALL learnings consolidated (technical + process)              |
+| `REPORT.md`       | Permanent | ALL reports consolidated (work sessions, testing, completion) |
+| `VERIFICATION.md` | Permanent | Verification signoff                                          |
+| `PROGRESS.md`     | Ephemeral | Current status (DELETE at 100%)                               |
+| `fundamentals/`   | Permanent | User docs (if has_fundamentals: true)                         |
+| `features/`       | Permanent | Feature breakdown (if has_features: true)                     |
+| `templates/`      | Permanent | Code templates (optional)                                     |
 
 ### File Consolidation Rules
 
@@ -122,6 +128,7 @@ Each specification directory MUST contain ONLY these files:
 ### Forbidden Files
 
 DO NOT create:
+
 - `PROCESS_LEARNINGS.md`, `TECHNICAL_LEARNINGS.md` → Use LEARNINGS.md
 - `WASM_TESTING_REPORT.md`, `WORK_SESSION_SUMMARY.md`, `TESTING_REPORT.md` → Add sections to REPORT.md
 - `VERIFICATION_SIGNOFF.md`, `VERIFICATION_RESULTS.md` → Use VERIFICATION.md
@@ -137,6 +144,7 @@ Every requirements.md MUST end with:
 ## File Organization Reminder
 
 ONLY these files allowed:
+
 1. requirements.md - Requirements with tasks
 2. LEARNINGS.md - All learnings
 3. REPORT.md - All reports
@@ -158,6 +166,7 @@ See Rule 06 "File Organization" for complete policy.
 Every requirements.md MUST include `files_required` section listing exact rules and files for each agent type.
 
 **Example**:
+
 ```yaml
 files_required:
   main_agent:
@@ -199,6 +208,7 @@ files_required:
 ```
 
 **Dynamic references**:
+
 - `[stack_file from metadata.stack_files]` - Expands to full path from metadata
 - `[feature.md if has_features: true]` - Conditional file inclusion
 - `[fundamentals/* if has_fundamentals: true]` - Conditional directory inclusion
@@ -210,6 +220,7 @@ files_required:
 ## Module Documentation
 
 ### Purpose
+
 `documentation/` directory at project root provides detailed module documentation agents MUST read before changes.
 
 ### doc.md Structure
@@ -233,18 +244,21 @@ files_required:
 ### Progress Tracking
 
 **PROGRESS.md** (Ephemeral):
-- Created at 40-60% completion
+
+- Created at for each task you start, cleared after task completion
 - Tracks current task and immediate next steps
-- Cleared and rewritten after each major phase
+- Cleared and rewritten after each task is done
 - DELETED when specification 100% complete
 
 **LEARNINGS.md** (Permanent):
+
 - Created early, updated throughout
 - Cumulative record of all insights
 - Never cleared or deleted
 - Technical + process learnings consolidated here
 
 **REPORT.md** (Permanent):
+
 - Created when nearing completion
 - Comprehensive summary of work, testing, metrics
 - Can be updated progressively despite name
@@ -253,6 +267,7 @@ files_required:
 ### Pre-Work Review
 
 Before any agent starts work, spawn Review Agent:
+
 1. Reads specifications thoroughly
 2. Analyzes current codebase
 3. Compares reality vs documentation
@@ -264,6 +279,7 @@ Before any agent starts work, spawn Review Agent:
 ### Verification Agent
 
 After implementation complete:
+
 1. Main Agent spawns Verification Agent
 2. Verification Agent runs all checks (format, lint, tests, build, docs)
 3. Creates VERIFICATION.md with results
@@ -273,6 +289,7 @@ After implementation complete:
 ## Spec.md Master Index
 
 Central dashboard at `specifications/Spec.md`:
+
 - List of all specifications with status
 - Status dashboard (completed, in-progress, pending counts)
 - Organized by completion status
@@ -324,5 +341,5 @@ Central dashboard at `specifications/Spec.md`:
 
 ---
 
-*Created: 2026-01-11*
-*Last Updated: 2026-01-24 (Optimized: reduced from 1,270 to 660 lines, removed duplication, renamed FINAL_REPORT → REPORT)*
+_Created: 2026-01-11_
+_Last Updated: 2026-01-24 (Optimized: reduced from 1,270 to 660 lines, removed duplication, renamed FINAL_REPORT → REPORT)_

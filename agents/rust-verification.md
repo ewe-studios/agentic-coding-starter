@@ -650,20 +650,8 @@ Verification Agent Workflow:
 ✅ Code ready for commit
 ```
 
-## Version History
-
-### Version 1.1 - 2026-01-24
-- Updated to use requirements.md as single source (tasks now integrated)
-- Added explicit step to load files_required.verification_agent context
-- Emphasized requirements.md contains all necessary context
-
-### Version 1.0 - 2026-01-14
-- Initial documentation
-- Comprehensive Rust verification workflow
-- User-specified scripts support
-- Standards compliance checking
-- Complete report generation
-
 ---
-*Last Updated: 2026-01-24*
-*Documentation Version: 1.1*
+
+*Version: 1.1 - Last Updated: 2026-01-24*
+
+*For complete version history, see [../CHANGELOG.md](../CHANGELOG.md)*

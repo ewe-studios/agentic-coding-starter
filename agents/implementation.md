@@ -635,35 +635,8 @@ CORRECT WORKFLOW:
 8. Main Agent commits AFTER verification passes
 ```
 
-## Version History
-
-### Version 1.3 - 2026-01-24
-- Fixed remaining tasks.md references in "Works With" section, examples, and violation examples
-- Changed all references to use requirements.md task status instead of tasks.md
-- Ensured consistency across all examples and documentation
-
-### Version 1.2 - 2026-01-24
-- Added explicit requirement to report completed tasks to Main Agent
-- Updated completion report format to include "Completed Tasks" section
-- Added workflow steps showing Specification Update Agent marks tasks complete
-- Clarified that implementation agent only reports task completion, doesn't update requirements.md directly
-- Added note in self-review about identifying completed tasks
-
-### Version 1.1 - 2026-01-24
-- Updated to use requirements.md as single source (tasks now integrated)
-- Changed references from tasks.md to requirements.md task status
-- Updated learnings.md references to LEARNINGS.md (uppercase per Rule 06)
-- Added explicit step to load files_required.implementation_agent context
-
-### Version 1.0 - 2026-01-14
-- Initial documentation
-- TDD workflow
-- Test documentation requirements
-- Self-review requirements
-- Learning documentation
-- Module documentation verification
-- Critical identity rules for SUB-AGENT
-
 ---
-*Last Updated: 2026-01-24*
-*Documentation Version: 1.3*
+
+*Version: 1.3 - Last Updated: 2026-01-24*
+
+*For complete version history, see [../.agents/CHANGELOG.md](../CHANGELOG.md)*

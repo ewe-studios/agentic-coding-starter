@@ -100,15 +100,8 @@ This agent prevents wasted effort by catching problems BEFORE implementation sta
    - Recommendations
 ```
 
-## Version History
-
-### Version 1.1 - 2026-01-24
-- Updated to use requirements.md as single source (tasks now integrated)
-- Added explicit step to load files_required.review_agent context
-- Removed references to separate tasks.md file
-
-### Version 1.0 - 2026-01-14
-- Initial documentation
-
 ---
-*Last Updated: 2026-01-24*
+
+*Version: 1.1 - Last Updated: 2026-01-24*
+
+*For complete version history, see [../CHANGELOG.md](../CHANGELOG.md)*

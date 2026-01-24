@@ -75,15 +75,8 @@ This agent maintains specification accuracy by updating task statuses and creati
 6. Report to Main Agent
 ```
 
-## Version History
-
-### Version 1.1 - 2026-01-24
-- Updated to work with requirements.md (tasks now integrated)
-- Changed references from verification.md to VERIFICATION.md (uppercase per Rule 06)
-- Updated to modify tasks section within requirements.md instead of separate tasks.md
-
-### Version 1.0 - 2026-01-14
-- Initial documentation
-
 ---
-*Last Updated: 2026-01-24*
+
+*Version: 1.1 - Last Updated: 2026-01-24*
+
+*For complete version history, see [../CHANGELOG.md](../CHANGELOG.md)*

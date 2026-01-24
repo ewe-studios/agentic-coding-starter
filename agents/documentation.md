@@ -243,18 +243,8 @@ Documentation Agent **MUST** create assets based on module type:
 - PNG acceptable for complex diagrams
 - Include legend if needed
 
-## Version History
-
-### Version 2.0 - 2026-01-14
-- Added comprehensive asset creation requirements
-- OpenAPI specifications for APIs
-- JSON schemas for data models
-- Examples and configuration templates
-- Architecture diagrams mandatory
-- Asset quality standards defined
-
-### Version 1.0 - 2026-01-14
-- Initial documentation
-
 ---
-*Last Updated: 2026-01-14*
+
+*Version: 2.0 - Last Updated: 2026-01-14*
+
+*For complete version history, see [../CHANGELOG.md](../CHANGELOG.md)*

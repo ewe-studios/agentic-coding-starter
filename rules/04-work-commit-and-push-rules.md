@@ -592,6 +592,119 @@ The following violations are **CRITICAL** and trigger immediate corrective actio
 - Commits apply to rule files and all other files
 - Naming convention changes are committed immediately
 
+## Version History Management
+
+**Purpose**: Centralize all version history in a single changelog file to reduce context size and improve maintainability.
+
+### Mandatory Changelog Location
+- **File**: `.agents/CHANGELOG.md`
+- **Purpose**: Central repository for all version history across `.agents/` directory
+- **Scope**: Covers all files in `.agents/` (rules, agents, skills, stacks, templates)
+
+### Individual File Version References
+Individual files **MUST NOT** contain full version history sections. Instead, they should:
+
+1. **Show current version only**: Display version number and last updated date
+2. **Link to changelog**: Reference the central CHANGELOG.md file
+
+**Format**:
+```markdown
+---
+
+*Version: [version] - Last Updated: [date]*
+
+*For complete version history, see [CHANGELOG.md](./CHANGELOG.md)* or [../CHANGELOG.md](../CHANGELOG.md)*
+```
+
+**Example**:
+```markdown
+---
+
+*Version: 1.3 - Last Updated: 2026-01-24*
+
+*For complete version history, see [../CHANGELOG.md](../CHANGELOG.md)*
+```
+
+### CHANGELOG.md Structure
+
+**Format**:
+```markdown
+# .agents Directory - Change Log
+
+## [YYYY-MM-DD]
+
+### [file_path] - Version [version]
+- Change 1
+- Change 2
+- Change N
+```
+
+**Entry Rules**:
+- Organized by date (newest first)
+- Each file update gets its own entry
+- Multiple updates on same date listed separately
+- Version numbers follow semantic versioning where applicable
+- Changes listed as bullet points
+- Use past tense for change descriptions
+
+**Example**:
+```markdown
+## 2026-01-24
+
+### agents/implementation.md - Version 1.3
+- Fixed remaining tasks.md references
+- Changed all references to use requirements.md
+- Ensured consistency across examples
+
+### agents/review.md - Version 1.1
+- Updated to use requirements.md as single source
+- Added explicit context loading step
+```
+
+### Why This Matters
+
+**Context Optimization**:
+- Individual files are smaller without version history
+- Agents load less unnecessary historical information
+- Central changelog is only loaded when needed
+- Reduces token usage for routine file reads
+
+**Maintainability**:
+- Single source of truth for all version history
+- Easier to track changes across multiple files
+- Clear chronological record of all updates
+- No duplication of version information
+
+### Commit Workflow for Version Changes
+
+When updating a file in `.agents/`:
+
+1. **Update the file content**
+2. **Update version/date at end of file** (remove old version history if present)
+3. **Add entry to CHANGELOG.md** with version number and changes
+4. **Commit both files together**
+
+```bash
+git add [file] CHANGELOG.md
+git commit -m "Update [file] to version [X]: [brief description]
+
+Added changelog entry for version [X] changes.
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+git push
+```
+
+**Example**:
+```bash
+git add agents/implementation.md CHANGELOG.md
+git commit -m "Update implementation.md to version 1.3: fix tasks.md references
+
+Added changelog entry documenting tasks.md reference fixes.
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+git push
+```
+
 ## Summary
 
 **Core Workflow**:

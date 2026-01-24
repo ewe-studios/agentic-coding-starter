@@ -113,10 +113,8 @@ FAIL: Vulnerabilities found
 READY FOR COMMIT ✅ / NEEDS FIXES ❌
 ```
 
-## Version History
-
-### Version 1.0 - 2026-01-14
-- Initial documentation
-
 ---
-*Last Updated: 2026-01-14*
+
+*Version: 1.0 - Last Updated: 2026-01-14*
+
+*For complete version history, see [../CHANGELOG.md](../CHANGELOG.md)*

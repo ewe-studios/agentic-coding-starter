@@ -82,7 +82,9 @@ This agent acts as the **mandatory quality gate** for all Rust code. NO Rust cod
    - Understand verification requirements
 
 2. **Read Specification Files** (if provided by Main Agent)
-   - `specifications/[NN-spec-name]/requirements.md`
+   - `specifications/[NN-spec-name]/requirements.md` (contains integrated tasks)
+   - Extract `files_required.verification_agent` from frontmatter
+   - Load all rules and files listed in that section
    - Check for user-specified verification scripts
    - Check for Makefile references
 
@@ -561,8 +563,8 @@ Verification Agent Workflow:
 Main Agent actions:
 - Does NOT commit code
 - Spawns Specification Update Agent
-- Specification Agent creates verification.md
-- Specification Agent adds urgent fix task to tasks.md
+- Specification Agent creates VERIFICATION.md
+- Specification Agent adds urgent fix task to requirements.md
 - Reports failures to user
 
 ❌ Verification failed
@@ -650,6 +652,11 @@ Verification Agent Workflow:
 
 ## Version History
 
+### Version 1.1 - 2026-01-24
+- Updated to use requirements.md as single source (tasks now integrated)
+- Added explicit step to load files_required.verification_agent context
+- Emphasized requirements.md contains all necessary context
+
 ### Version 1.0 - 2026-01-14
 - Initial documentation
 - Comprehensive Rust verification workflow
@@ -658,5 +665,5 @@ Verification Agent Workflow:
 - Complete report generation
 
 ---
-*Last Updated: 2026-01-14*
-*Documentation Version: 1.0*
+*Last Updated: 2026-01-24*
+*Documentation Version: 1.1*

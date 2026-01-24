@@ -44,12 +44,13 @@ This agent prevents wasted effort by catching problems BEFORE implementation sta
 ## Capabilities
 
 ### What This Agent Does
-1. **Read Specifications**: Thoroughly read requirements.md and tasks.md
-2. **Search Codebase**: Use Glob/Grep to find relevant implementations
-3. **Verify Task Status**: Check if marked tasks match reality
-4. **Compare Documentation vs Reality**: Find inconsistencies
-5. **Identify Blockers**: Find unclear requirements or missing information
-6. **Report Readiness**: Recommend GO/STOP/CLARIFY
+1. **Read Specifications**: Thoroughly read requirements.md (which contains integrated tasks)
+2. **Understand Context**: Load all files specified in `files_required.review_agent` section of requirements.md frontmatter
+3. **Search Codebase**: Use Glob/Grep to find relevant implementations
+4. **Verify Task Status**: Check if marked tasks match reality
+5. **Compare Documentation vs Reality**: Find inconsistencies
+6. **Identify Blockers**: Find unclear requirements or missing information
+7. **Report Readiness**: Recommend GO/STOP/CLARIFY
 
 ## Workflow
 
@@ -58,8 +59,13 @@ This agent prevents wasted effort by catching problems BEFORE implementation sta
    - Context: specification path
    ↓
 2. Read requirements.md thoroughly
+   - Extract files_required.review_agent section from frontmatter
+   - Understand all tasks (integrated within requirements.md)
    ↓
-3. Read tasks.md thoroughly
+3. Load Required Context Files
+   - Read all rules listed in files_required.review_agent.rules
+   - Read all files listed in files_required.review_agent.files
+   - Read stack files if referenced
    ↓
 4. Search codebase for implementations
    - Glob for relevant files
@@ -96,8 +102,13 @@ This agent prevents wasted effort by catching problems BEFORE implementation sta
 
 ## Version History
 
+### Version 1.1 - 2026-01-24
+- Updated to use requirements.md as single source (tasks now integrated)
+- Added explicit step to load files_required.review_agent context
+- Removed references to separate tasks.md file
+
 ### Version 1.0 - 2026-01-14
 - Initial documentation
 
 ---
-*Last Updated: 2026-01-14*
+*Last Updated: 2026-01-24*

@@ -1,8 +1,8 @@
 ---
 purpose: Central entry point for AI agent configuration
 description: Minimal configuration directing agents to load rules selectively
-version: 5.0.0
-last_updated: 2026-01-19
+version: 5.1.0
+last_updated: 2026-01-24
 ---
 
 # Agent Configuration
@@ -91,4 +91,15 @@ OPTIONAL: Rule 11 (skills), Rule 13 (implementation), stack file, spec
 
 ---
 
-_Version: 5.0.0 - Selective rule loading for context optimization_
+## Version History
+
+### Version 5.1.0 - 2026-01-24
+- Updated agent references to use requirements.md (tasks integrated into requirements.md)
+- Emphasized files_required frontmatter as source of truth for agent context
+
+### Version 5.0.0 - 2026-01-19
+- Selective rule loading for context optimization
+
+---
+
+_Version: 5.1.0 - Selective rule loading with requirements.md as single source of truth_

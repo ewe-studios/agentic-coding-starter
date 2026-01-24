@@ -42,7 +42,7 @@ If you were spawned by the Main Agent, you are a **SUB-AGENT**, which means:
 - ❌ **NEVER commit code directly**
 - ❌ **NEVER push to remote**
 - ❌ **NEVER spawn verification agents** (only Main Agent can)
-- ❌ **NEVER update tasks.md directly**
+- ❌ **NEVER update requirements.md directly** (only report completion)
 - ✅ **ALWAYS report to Main Agent when done**
 - ✅ **ALWAYS wait for Main Agent's next instructions**
 
@@ -64,7 +64,7 @@ If you were spawned by the Main Agent, you are a **SUB-AGENT**, which means:
 - ❌ Commit code (only Main Agent commits)
 - ❌ Push to remote (only Main Agent pushes)
 - ❌ Spawn verification agents (only Main Agent spawns)
-- ❌ Update tasks.md directly (Specification Agent handles this)
+- ❌ Update requirements.md task status directly (Specification Agent handles this)
 - ❌ Make assumptions without verification
 
 ## Requirements
@@ -106,8 +106,9 @@ If you were spawned by the Main Agent, you are a **SUB-AGENT**, which means:
    - Rule 08: Verification Workflow
 
 4. **Read Specification Files**
-   - `specifications/[NN-spec-name]/requirements.md`
-   - `specifications/[NN-spec-name]/tasks.md`
+   - `specifications/[NN-spec-name]/requirements.md` (contains integrated tasks)
+   - Extract `files_required.implementation_agent` from frontmatter
+   - Load all rules and files listed in that section
    - Review agent's report (if provided)
 
 5. **Read Module Documentation** (if referenced in requirements.md)
@@ -243,7 +244,7 @@ Before reporting to Main Agent, perform thorough self-review:
 
 #### Document Learnings (MANDATORY)
 
-After self-review, document learnings in `specifications/[NN-spec-name]/learnings.md`:
+After self-review, document learnings in `specifications/[NN-spec-name]/LEARNINGS.md`:
 
 **What to Document:**
 - Challenges encountered and how solved
@@ -292,7 +293,7 @@ Module Documentation:
 - Documented token workflow
 
 Learnings:
-- Documented in specifications/03-user-authentication/learnings.md
+- Documented in specifications/03-user-authentication/LEARNINGS.md
 
 Ready for verification.
 ```
@@ -311,8 +312,9 @@ Ready for verification.
 3. Read AGENTS.md and All Rules
    ↓
 4. Read Specification Files
-   - requirements.md
-   - tasks.md
+   - requirements.md (contains integrated tasks)
+   - Extract files_required.implementation_agent from frontmatter
+   - Load all rules and files listed
    - Review agent report
    ↓
 5. Read Module Documentation
@@ -337,7 +339,7 @@ Ready for verification.
    - Quality check
    - Standards check
    ↓
-10. Document Learnings in learnings.md
+10. Document Learnings in LEARNINGS.md
    ↓
 11. Update Module Documentation (if structure changed)
    ↓
@@ -367,8 +369,8 @@ Ready for verification.
    - You are a SUB-AGENT without verification authority
    - Report to Main Agent, who will spawn verification
 
-4. ❌ **Update tasks.md Directly**
-   - Specification Update Agent handles tasks.md
+4. ❌ **Update requirements.md Directly**
+   - Specification Update Agent handles task status updates
    - Main Agent coordinates specification updates
 
 5. ❌ **Proceed Without Main Agent Approval**
@@ -388,7 +390,7 @@ Ready for verification.
    - Verification agents check quality, but you're responsible for completeness
 
 9. ❌ **Skip Learning Documentation**
-   - Always document insights in learnings.md
+   - Always document insights in LEARNINGS.md
    - Knowledge transfer is critical
 
 10. ❌ **Assume Module Documentation is Accurate**
@@ -457,7 +459,7 @@ Implementation Agent Workflow:
     - Follows TypeScript conventions ✅
     - No obvious bugs ✅
 
-12. Document learnings in learnings.md:
+12. Document learnings in LEARNINGS.md:
     - Redis connection pooling strategy
     - Cache key design considerations
     - TTL trade-offs
@@ -490,7 +492,7 @@ Implementation Agent Workflow:
     - Added caching section with line numbers
 
     Learnings:
-    - Documented in specifications/04-add-caching-layer/learnings.md
+    - Documented in specifications/04-add-caching-layer/LEARNINGS.md
 
     Ready for verification.
     ```
@@ -610,6 +612,12 @@ CORRECT WORKFLOW:
 
 ## Version History
 
+### Version 1.1 - 2026-01-24
+- Updated to use requirements.md as single source (tasks now integrated)
+- Changed references from tasks.md to requirements.md task status
+- Updated learnings.md references to LEARNINGS.md (uppercase per Rule 06)
+- Added explicit step to load files_required.implementation_agent context
+
 ### Version 1.0 - 2026-01-14
 - Initial documentation
 - TDD workflow
@@ -620,5 +628,5 @@ CORRECT WORKFLOW:
 - Critical identity rules for SUB-AGENT
 
 ---
-*Last Updated: 2026-01-14*
-*Documentation Version: 1.0*
+*Last Updated: 2026-01-24*
+*Documentation Version: 1.1*

@@ -1347,6 +1347,266 @@ mod tests {
 }
 ```
 
+#### Feature-Gating Tests (MANDATORY)
+
+**CRITICAL**: When tests are specific to certain feature flags or platform configurations, they MUST be properly feature-gated using test modules, not individual test attributes.
+
+**Rule**: Prefer grouping feature-gated tests into modules with `#[cfg(...)]` attributes rather than applying `#[cfg(...)]` to individual test functions.
+
+**Why**: This approach provides:
+- Better organization and clarity
+- Easier maintenance (change cfg once vs many times)
+- Clearer test output
+- Reduced duplication of cfg attributes
+- Better understanding of which tests run in which configurations
+
+**BAD - Individual test attributes** ❌:
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Scattered cfg attributes on each test
+    #[test]
+    #[cfg(not(feature = "std"))]
+    fn test_spinlock_basic() { }
+
+    #[test]
+    #[cfg(not(feature = "std"))]
+    fn test_spinlock_contention() { }
+
+    #[test]
+    #[cfg(not(feature = "std"))]
+    fn test_spinlock_timeout() { }
+
+    #[test]
+    #[cfg(feature = "std")]
+    fn test_std_mutex() { }
+
+    #[test]
+    #[cfg(feature = "std")]
+    fn test_std_rwlock() { }
+}
+```
+
+**GOOD - Feature-gated test modules** ✅:
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Common tests that work in all configurations
+    #[test]
+    fn test_basic_functionality() {
+        // Works with both std and no_std
+    }
+
+    // No-std specific tests grouped together
+    #[cfg(not(feature = "std"))]
+    mod nostd_tests {
+        use super::*;
+
+        #[test]
+        fn test_spinlock_basic() {
+            // SpinLock only available in no_std
+        }
+
+        #[test]
+        fn test_spinlock_contention() { }
+
+        #[test]
+        fn test_spinlock_timeout() { }
+    }
+
+    // Std-specific tests grouped together
+    #[cfg(feature = "std")]
+    mod std_tests {
+        use super::*;
+        use std::sync::Arc;
+        use std::thread;
+
+        #[test]
+        fn test_std_mutex_threading() {
+            // Test with real OS threads
+        }
+
+        #[test]
+        fn test_std_rwlock_poisoning() { }
+    }
+}
+```
+
+**EXCELLENT - Descriptive module names with comments** ✅:
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ------------------------------------------------------------------------
+    // Platform-independent tests
+    // ------------------------------------------------------------------------
+
+    #[test]
+    fn test_creation() { }
+
+    #[test]
+    fn test_basic_operations() { }
+
+    // ------------------------------------------------------------------------
+    // No-std specific: SpinLock implementation tests
+    // ------------------------------------------------------------------------
+    #[cfg(not(feature = "std"))]
+    mod spinlock_impl_tests {
+        use super::*;
+
+        /// Tests SpinLock basic locking
+        #[test]
+        fn test_lock_unlock() { }
+
+        /// Tests SpinLock try_lock behavior
+        #[test]
+        fn test_try_lock() { }
+
+        /// Tests SpinLock under contention
+        #[test]
+        fn test_contention() { }
+    }
+
+    // ------------------------------------------------------------------------
+    // Std-specific: OS threading and poisoning tests
+    // ------------------------------------------------------------------------
+    #[cfg(feature = "std")]
+    mod threading_tests {
+        use super::*;
+        use std::sync::Arc;
+        use std::thread;
+
+        /// Tests mutex behavior across threads
+        #[test]
+        fn test_multithreaded_access() { }
+
+        /// Tests poisoning on panic
+        #[test]
+        fn test_poison_recovery() { }
+    }
+
+    // ------------------------------------------------------------------------
+    // Platform-specific tests
+    // ------------------------------------------------------------------------
+    #[cfg(target_arch = "wasm32")]
+    mod wasm_tests {
+        use super::*;
+
+        #[test]
+        fn test_wasm_compatibility() { }
+    }
+}
+```
+
+**Common Patterns**:
+
+1. **Feature Flag Tests**:
+```rust
+#[cfg(test)]
+mod tests {
+    // Group by feature
+    #[cfg(feature = "serde")]
+    mod serde_tests {
+        use super::*;
+
+        #[test]
+        fn test_serialization() { }
+
+        #[test]
+        fn test_deserialization() { }
+    }
+
+    #[cfg(all(feature = "async", feature = "tokio"))]
+    mod async_tests {
+        use super::*;
+
+        #[tokio::test]
+        async fn test_async_operation() { }
+    }
+}
+```
+
+2. **Platform-Specific Tests**:
+```rust
+#[cfg(test)]
+mod tests {
+    #[cfg(unix)]
+    mod unix_tests {
+        use super::*;
+
+        #[test]
+        fn test_unix_specific() { }
+    }
+
+    #[cfg(windows)]
+    mod windows_tests {
+        use super::*;
+
+        #[test]
+        fn test_windows_specific() { }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    mod wasm_tests {
+        use super::*;
+
+        #[test]
+        fn test_wasm_specific() { }
+    }
+}
+```
+
+3. **Combined Conditions**:
+```rust
+#[cfg(test)]
+mod tests {
+    // Tests that require std AND threading
+    #[cfg(all(feature = "std", not(target_arch = "wasm32")))]
+    mod multithreaded_tests {
+        use super::*;
+        use std::thread;
+
+        #[test]
+        fn test_concurrent_access() { }
+    }
+
+    // Tests for types only available without std
+    #[cfg(not(feature = "std"))]
+    mod foundation_types_tests {
+        use super::*;
+
+        #[test]
+        fn test_rwlock_condvar() {
+            // RwLockCondVar only exists in no_std mode
+        }
+    }
+}
+```
+
+**When to Use Test Modules**:
+- ✅ 3+ tests with same cfg condition
+- ✅ Tests for types that only exist under certain features
+- ✅ Tests requiring feature-specific imports
+- ✅ Platform-specific functionality
+- ✅ Tests that test different implementations of same API
+
+**When Individual Attributes are OK**:
+- ✅ Single test needing different cfg
+- ✅ Temporary exclusion (with TODO comment)
+- ✅ One-off platform workaround
+
+**Benefits**:
+1. **Clarity**: Immediately see which tests run in which configuration
+2. **Maintenance**: Change cfg once instead of N times
+3. **Organization**: Related tests grouped together
+4. **Documentation**: Module names document what's being tested
+5. **Imports**: Feature-specific imports scoped to relevant module
+
 #### Property-Based Testing
 ```rust
 use proptest::prelude::*;

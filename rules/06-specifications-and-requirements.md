@@ -3,7 +3,7 @@
 ## Purpose
 This rule establishes a mandatory requirements-gathering and specification-tracking system that ensures all work begins with a documented conversation between the main agent and user, creating a clear record of requirements and tasks in the `specifications/` directory.
 
-## Rule
+## Core Requirements
 
 ### Requirements-First Development
 Before **ANY** work begins on new features, enhancements, or significant changes, the main agent **MUST**:
@@ -14,7 +14,7 @@ Before **ANY** work begins on new features, enhancements, or significant changes
 4. **Have agents read specifications** before starting work
 5. **Verify and update status** as work progresses
 
-### No Exceptions
+**No Exceptions**:
 - **NO coding** without documented requirements
 - **NO starting work** without a specification
 - **NO skipping** the requirements conversation
@@ -84,7 +84,6 @@ Before **ANY** work begins on new features, enhancements, or significant changes
    - Make corrections based on user feedback
 
 **The Main Agent MUST NOT**:
-
 - ❌ Accept vague requests without clarification
 - ❌ Make assumptions about unspecified requirements
 - ❌ Skip questioning to "save time"
@@ -134,6 +133,10 @@ Main Agent **MUST** include ALL required frontmatter fields:
   - `last_updated`: YYYY-MM-DD
   - `estimated_effort`: small | medium | large | xl
   - `tags`: Array with minimum 1 tag
+  - `stack_files`: Array of stack files from `.agents/stacks/`
+  - `skills`: Array of skill names from `.agents/skills/` (or `[]` if none)
+- ✅ `has_features`: Boolean - true if using features/ directory
+- ✅ `has_fundamentals`: Boolean - true if fundamentals/ documentation needed
 - ✅ `builds_on`: (if applicable) Array of parent specs
 - ✅ `related_specs`: (if applicable) Array of related specs
 
@@ -177,10 +180,10 @@ specifications/
 │   ├── requirements.md              # (MANDATORY) Requirements and conversation summary
 │   ├── tasks.md                     # (MANDATORY) Task list with checkboxes
 │   ├── templates/                   # (OPTIONAL) Code/structure templates
-│   ├── PROGRESS.md                  # (MANDATORY) Mid-work progress report
+│   ├── PROGRESS.md                  # (MANDATORY) Ephemeral task-focused status
 │   ├── FINAL_REPORT.md              # (MANDATORY) Comprehensive completion summary
 │   ├── VERIFICATION_SIGNOFF.md      # (MANDATORY) Official verification report
-│   └── LEARNINGS.md                 # (MANDATORY) Lessons learned and insights
+│   └── LEARNINGS.md                 # (MANDATORY) Permanent lessons learned
 │
 ├── 02-complex-specification/        # Complex spec with features
 │   ├── requirements.md              # High-level requirements + feature references
@@ -190,14 +193,7 @@ specifications/
 │   │   │   ├── feature.md           # Feature-specific requirements
 │   │   │   ├── tasks.md             # Feature-specific task checkboxes
 │   │   │   └── templates/           # Feature-specific templates
-│   │   ├── connection/
-│   │   │   ├── feature.md
-│   │   │   ├── tasks.md
-│   │   │   └── templates/
-│   │   └── public-api/
-│   │       ├── feature.md
-│   │       ├── tasks.md
-│   │       └── templates/
+│   │   └── ...
 │   ├── PROGRESS.md                  # (MANDATORY) Overall progress report
 │   ├── FINAL_REPORT.md              # (MANDATORY) Overall completion summary
 │   ├── VERIFICATION_SIGNOFF.md      # (MANDATORY) Overall verification report
@@ -285,10 +281,10 @@ See `.agents/templates/examples/feature-frontmatter-examples.md` for complete ex
 #### Verification Files Remain at Main Level
 
 **CRITICAL**: These files are ONLY at the main specification level, NOT in features:
-- `PROGRESS.md` - Overall specification progress
+- `PROGRESS.md` - Overall specification progress (ephemeral)
 - `FINAL_REPORT.md` - Overall completion summary
 - `VERIFICATION_SIGNOFF.md` - Overall verification
-- `LEARNINGS.md` - Overall lessons learned
+- `LEARNINGS.md` - Overall lessons learned (permanent)
 
 Features do NOT have their own verification/report files.
 
@@ -354,115 +350,128 @@ Specifications that are **NOT completed** can be modified:
 - No FINAL_REPORT.md exists
 - Work is still ongoing
 
-## Frontmatter Fields Reference
+## Mandatory Files
 
-### requirements.md Frontmatter
+### 1. requirements.md
+- **Template**: `.agents/templates/requirements-template.md`
+- **Purpose**: Requirements and conversation summary
+- **Contains**: Overview, conversation summary, detailed requirements, success criteria, module documentation references, agent notes
 
-**REQUIRED Fields:**
+### 2. tasks.md
+- **Template**: `.agents/templates/tasks-template.md`
+- **Purpose**: Task list with checkboxes
+- **Contains**: Task list organized by category, frontmatter with counts and tools
 
-- **`description`**: One-sentence summary
-- **`status`**: Current state (in-progress | completed | blocked)
-- **`priority`**: Importance level (high | medium | low)
-- **`created`**: Date specification created (YYYY-MM-DD)
-- **`author`**: Who created it ("Main Agent", "John Doe", etc.)
-- **`metadata`**: Structured metadata object
-  - **`version`**: Semantic version (e.g., "1.0")
-  - **`last_updated`**: Date of last update (YYYY-MM-DD)
-  - **`estimated_effort`**: Size estimate (small | medium | large | xl)
-  - **`tags`**: Array of tags (lowercase with hyphens, minimum 1)
-  - **`stack_files`**: Array of stack files from `.agents/stacks/` (e.g., `[".agents/stacks/rust.md"]`)
-  - **`skills`**: Array of skill names from `.agents/skills/` (e.g., `["skill-name"]`, or `[]` if none)
-- **`has_features`**: Boolean - true if using features/ directory structure
-- **`has_fundamentals`**: Boolean - true if fundamentals/ documentation directory needed
+### 3. PROGRESS.md - Ephemeral Task-Focused Status (MANDATORY)
 
-**OPTIONAL Fields:**
+**CRITICAL**: PROGRESS.md is **EPHEMERAL** and task-focused, NOT a permanent record.
 
-- **`builds_on`**: Array of parent specifications (creates lineage chain)
-- **`related_specs`**: Array of related specifications (context only)
+**Template**: `.agents/templates/PROGRESS-template.md`
 
-### tasks.md Frontmatter
+**Purpose**: Track current task progress and immediate next steps.
 
-**REQUIRED Fields:**
+**Lifecycle**:
+- ✅ Created when starting work on a task/phase
+- ✅ **CLEARED and REWRITTEN** after each major task/phase completion
+- ✅ **DELETED** when specification marked complete (before FINAL_REPORT.md creation)
+- ✅ Focus: "What am I doing RIGHT NOW and what's immediately next?"
 
-- **`completed`**: Total count of [x] completed tasks
-- **`uncompleted`**: Total count of [ ] pending tasks
-- **`created`**: Date tasks file created (YYYY-MM-DD)
-- **`author`**: Who created it
-- **`metadata`**: Structured metadata object
-  - **`version`**: Semantic version
-  - **`last_updated`**: Date of last update
-  - **`total_tasks`**: completed + uncompleted
-  - **`completion_percentage`**: (completed / total) * 100
-- **`tools`**: List of tools/technologies used
+**Content Focus**:
+- Current task being worked on
+- Immediate blockers for THIS task
+- Next 2-3 steps for THIS task
+- Statistics for CURRENT work session
+- **NOT** cumulative history (that's LEARNINGS.md)
+- **NOT** permanent insights (that's LEARNINGS.md)
 
-**OPTIONAL Fields:**
+**When to Create**:
+- Starting work at 40-60% completion
+- Major phase transitions
 
-- **`skills`**: List of skill names from `.agents/skills/`
+**When to Clear and Rewrite**:
+- Completed a major task/phase
+- Switching to different task/feature
+- Major milestone reached
+- Coming back after break (write fresh status)
 
-## File Templates
+**When to Delete**:
+- ALL tasks complete (100%)
+- Ready to create FINAL_REPORT.md
+- Specification being marked as complete
 
-All specification file templates are located in `.agents/templates/`. Reference these when creating files:
+**Contrast with LEARNINGS.md**:
+- PROGRESS.md = ephemeral, current status only
+- LEARNINGS.md = permanent, cumulative insights and lessons
+- Insights from PROGRESS.md → transferred to LEARNINGS.md before clearing
 
-### Mandatory Files for Every Specification
+### 4. LEARNINGS.md - Permanent Insights (MANDATORY)
 
-1. **requirements.md** - Requirements and conversation summary
-   - Template: `.agents/templates/requirements-template.md`
-   - Contains: Overview, conversation summary, detailed requirements, success criteria, module documentation references, agent notes
+**Template**: `.agents/templates/LEARNINGS-template.md`
 
-2. **tasks.md** - Task list with checkboxes
-   - Template: `.agents/templates/tasks-template.md`
-   - Contains: Task list organized by category, frontmatter with counts and tools
+**Purpose**: Permanent record of lessons learned and insights
 
-3. **PROGRESS.md** - Mid-work progress report
-   - Template: `.agents/templates/PROGRESS-template.md`
-   - When: Created at 40-60% completion or major phase transitions
-   - Contains: Completion status, completed work, current status, remaining work, blockers, statistics, next steps
+**When**: Created at completion
 
-4. **FINAL_REPORT.md** - Comprehensive completion summary
-   - Template: `.agents/templates/FINAL_REPORT-template.md`
-   - When: Created when all tasks are 100% complete
-   - Contains: Work completed, task breakdown, detailed accomplishments, commits, statistics, verification results, impact, recommendation
+**Contains**:
+- Key insights
+- Challenges and solutions
+- Best practices
+- Anti-patterns
+- Recommendations
+- Knowledge gained
+- Technical debt
 
-5. **LEARNINGS.md** - Lessons learned and insights
-   - Template: `.agents/templates/LEARNINGS-template.md`
-   - When: Created at completion
-   - Contains: Key insights, challenges and solutions, best practices, anti-patterns, recommendations, knowledge gained, technical debt
+**CRITICAL DISTINCTION**:
+- LEARNINGS.md is **PERMANENT** - never cleared or deleted
+- Cumulative record of all insights across entire specification
+- Survives PROGRESS.md clearing/deletion
+- Single source of truth for what was learned
 
-6. **VERIFICATION_SIGNOFF.md** - Official verification report
-   - Template: `.agents/templates/VERIFICATION_SIGNOFF-template.md`
-   - When: Created after verification agent completes final verification
-   - Contains: Executive summary, verification results, quality assessment, compliance check, issues found, final verdict, checklist, sign-off
+### 5. FINAL_REPORT.md (MANDATORY)
+
+**Template**: `.agents/templates/FINAL_REPORT-template.md`
+
+**When**: Created when all tasks are 100% complete
+
+**Contains**:
+- Work completed
+- Task breakdown
+- Detailed accomplishments
+- Commits
+- Statistics
+- Verification results
+- Impact
+- Recommendation
+
+### 6. VERIFICATION_SIGNOFF.md (MANDATORY)
+
+**Template**: `.agents/templates/VERIFICATION_SIGNOFF-template.md`
+
+**When**: Created after verification agent completes final verification
+
+**Contains**:
+- Executive summary
+- Verification results
+- Quality assessment
+- Compliance check
+- Issues found
+- Final verdict
+- Checklist
+- Sign-off
 
 ### Feature Files (For Complex Specifications)
 
-7. **feature.md** - Feature-specific requirements
-   - Template: `.agents/templates/feature-template.md`
-   - When: Created for each feature in `features/[feature-name]/`
-   - Contains: Feature overview, dependencies, requirements, implementation details, success criteria
+**7. feature.md** - Feature-specific requirements
+- **Template**: `.agents/templates/feature-template.md`
+- **When**: Created for each feature in `features/[feature-name]/`
+- **Contains**: Feature overview, dependencies, requirements, implementation details, success criteria
 
-8. **feature tasks.md** - Feature-specific tasks
-   - Template: `.agents/templates/feature-tasks-template.md`
-   - When: Created alongside feature.md
-   - Contains: Feature-specific task checkboxes, implementation order
+**8. feature tasks.md** - Feature-specific tasks
+- **Template**: `.agents/templates/feature-tasks-template.md`
+- **When**: Created alongside feature.md
+- **Contains**: Feature-specific task checkboxes, implementation order
 
-## Self-Contained Specification Requirement (MANDATORY)
-
-### Purpose
-Every `requirements.md` file MUST be **self-contained**, meaning an agent can receive ONLY the specification file and understand exactly which rules to load for their role. This eliminates the need for agents to guess or search for applicable rules.
-
-### Why Self-Contained Specifications Matter
-
-**Without Agent Rules Reference:**
-- Agents don't know which rules apply to them
-- Agents may miss critical rules (verification, safety, etc.)
-- Users must manually specify rules when passing specs to agents
-- Inconsistent rule loading across different agent invocations
-
-**With Agent Rules Reference:**
-- Agents read the spec and immediately know their required rules
-- Users can pass `requirements.md` directly to any agent
-- Consistent rule loading guaranteed
-- Specification is the single source of truth
+## Self-Contained Specification Requirements
 
 ### Agent Rules Reference Section (MANDATORY)
 
@@ -525,26 +534,23 @@ Before committing `requirements.md`, Main Agent **MUST** verify:
 
 **Template Location**: `.agents/templates/requirements-template.md`
 
----
+### Cross-Reference Links (MANDATORY)
+
+Every `requirements.md` file MUST contain:
+
+**Top link** (after frontmatter, before Overview):
+- Links to `tasks.md` for task progress
+- Links to `learnings.md` for implementation insights
+
+**Bottom link** (after Final Verification Checklist):
+- Links to `verification.md` or `VERIFICATION_SIGNOFF.md` for verification results
+
+**Example**: See `.agents/templates/examples/cross-reference-links-example.md` for complete example and validation checklist.
 
 ## Module Documentation System (MANDATORY)
 
 ### Purpose
 The `documentation/` directory provides living, detailed documentation of individual code modules. This ensures agents have clear understanding of what each module implements **BEFORE** making changes.
-
-### Why Module Documentation Is Critical
-
-**Without Module Documentation:**
-- Agents waste time using Grep/Glob to understand code
-- Agents miss critical context about module purpose
-- Agents make changes without understanding full impact
-- No central place to understand module architecture
-
-**With Module Documentation:**
-- Agents read `documentation/[module]/doc.md` for immediate understanding
-- Clear documentation of what module implements, imports, calls
-- Line number references to key implementations
-- Faster onboarding and safer changes
 
 ### Context Window Management
 
@@ -633,7 +639,7 @@ When implementation agent spawned:
 6. **Update module docs** if structure changes
 7. **Report completion** with documentation status
 
-## Spec.md File (Master Index)
+## Spec.md Master Index
 
 ### Purpose
 Central index and dashboard for all specifications.
@@ -648,9 +654,9 @@ The master Spec.md file provides:
 - Status dashboard with counts and percentages
 - Organized by completion status (Completed, In Progress, Pending)
 
-## Pre-Work Review Agent Requirement
+## Workflow and Process
 
-### MANDATORY REVIEW AGENT REQUIREMENT
+### Pre-Work Review Agent (MANDATORY)
 
 Before **ANY** agent starts work on tasks, a **review agent MUST be launched first**. This is a **HARD REQUIREMENT** with **NO EXCEPTIONS**.
 
@@ -682,22 +688,7 @@ Review agent **MUST** report:
 4. **Readiness assessment** (GO/STOP/CLARIFY)
 5. **Recommendations** (corrections needed)
 
-#### Enforcement - Zero Tolerance
-
-- ❌ **FORBIDDEN**: Starting work without review agent first
-- ❌ **FORBIDDEN**: Skipping review agent "to save time"
-- ❌ **FORBIDDEN**: Assuming specifications are accurate
-- ❌ **FORBIDDEN**: Proceeding when review reports STOP/CLARIFY
-
-**VIOLATION CONSEQUENCES:**
-1. Immediately stopped
-2. Work discarded
-3. Review agent run properly
-4. Violation reported to user
-
-## Workflow
-
-### Complete Requirements-to-Implementation Workflow
+### Complete Workflow
 
 ```
 1. User Requests Feature
@@ -750,9 +741,99 @@ Review agent **MUST** report:
 19. Update Spec.md, commit, push
 ```
 
-## Verification Requirements
+### Immediate Updates (MANDATORY)
 
-### Critical: Verify Actual Implementation
+**ZERO TOLERANCE RULE**: Agents MUST update specification files IMMEDIATELY as work progresses. NO batching, NO waiting, NO exceptions.
+
+#### Requirements.md Updates (IMMEDIATE)
+
+Agents working on requirements or implementation **MUST**:
+
+- ✅ **Update requirements.md IMMEDIATELY** when identifying new requirements
+- ✅ **Update IMMEDIATELY** when requirements changes are confirmed with user
+- ✅ **If user grants full rights**, auto-update requirements without seeking approval
+- ❌ **DO NOT wait** until task completion to update requirements
+- ❌ **DO NOT forget** to sync requirements with actual implementation
+
+**When to update requirements.md**:
+- New requirement discovered during implementation
+- User clarifies or changes a requirement
+- Technical constraint requires requirement adjustment
+- Integration reveals additional requirements
+- User explicitly approves a requirement change
+
+**Why immediate updates matter**:
+- Requirements accurately reflect current understanding
+- No discoveries are lost or forgotten
+- User has real-time visibility into scope changes
+- Future agents have accurate context
+- Prevents specification drift from reality
+
+#### Tasks.md Updates (IMMEDIATE - EVERY TASK)
+
+Agents working on tasks **MUST**:
+
+- ✅ **Update tasks.md IMMEDIATELY** after completing EACH task
+- ✅ **Mark task as [x]** the MOMENT you finish it
+- ✅ **Update frontmatter counts** (completed/uncompleted/completion_percentage) immediately
+- ❌ **DO NOT wait** until you're done with multiple tasks to update
+- ❌ **DO NOT create** other task tracking files - tasks.md is THE task tracker
+- ❌ **DO NOT batch** updates - update after EACH task completion
+
+**When to update tasks.md**:
+- IMMEDIATELY after completing any task
+- IMMEDIATELY after marking any checkbox [x]
+- Before moving to the next task
+- Before taking breaks or ending work sessions
+- Before switching to a different specification
+
+**Why immediate task updates matter**:
+- Real-time visibility into task progress
+- No completed work is forgotten or lost
+- User can check status at any time and see current progress
+- System crashes won't lose your progress tracking
+- Other agents can pick up exactly where you left off
+- tasks.md remains the single source of truth
+
+**Frontmatter update requirements**:
+```yaml
+completed: [count of [x] tasks]
+uncompleted: [count of [ ] tasks]
+metadata:
+  total_tasks: [completed + uncompleted]
+  completion_percentage: [(completed / total_tasks) * 100]
+  last_updated: [YYYY-MM-DD - TODAY'S DATE]
+```
+
+#### All Requirements and Tasks Are Mandatory (DEFAULT)
+
+**CRITICAL ASSUMPTION**: Unless user EXPLICITLY states otherwise, ALL requirements and tasks are MANDATORY.
+
+**For requirements.md**:
+- ✅ Assume ALL requirements must be implemented
+- ✅ Assume ALL items must be completed
+- ❌ DO NOT skip requirements thinking they are optional
+- ❌ DO NOT treat any requirement as "nice-to-have" without explicit user confirmation
+
+**For tasks.md**:
+- ✅ Assume ALL tasks must be completed
+- ✅ All tasks must be done before marking specification as complete
+- ❌ DO NOT skip tasks thinking they are optional
+- ❌ DO NOT leave tasks unchecked thinking "that can be done later"
+
+**How user indicates optional items**:
+- User explicitly says: "This requirement is optional"
+- User explicitly says: "This task can be skipped if needed"
+- Requirement/task is marked with "(OPTIONAL)" prefix
+- User provides priority levels and explicitly says lower priority items are optional
+
+**If in doubt**: ASK the user. Never assume something is optional.
+
+## Quality and Verification
+
+### Verification Requirements
+
+#### Critical: Verify Actual Implementation
 
 Agents **MUST NOT** trust status or checkboxes blindly. Instead:
 
@@ -778,102 +859,101 @@ Agents **MUST NOT** trust status or checkboxes blindly. Instead:
    - If tasks marked done but code doesn't exist, correct
    - User should know if specs are inaccurate
 
-## Examples
+### Fundamentals Documentation Priority
 
-### Good Practice ✅
+#### When Fundamentals Are Required
 
-**Starting with Review Agent**
-- User requests caching layer
-- Main Agent asks 8 clarifying questions (strategy, storage, invalidation, TTL, etc.)
-- User provides detailed answers
-- Agent creates specification with full conversation documented
-- **Agent launches REVIEW AGENT FIRST** ✅
-- Review agent verifies, reports "GO"
-- Agent launches implementation agents with accurate context
+Set `has_fundamentals: true` in frontmatter when:
+- Implementing new user-facing libraries or APIs
+- Creating reusable components users need to understand deeply
+- Introducing complex patterns, algorithms, or abstractions
+- Building foundational primitives or developer tools
+- User needs to make architectural decisions using this code
 
-### Bad Practice ❌
+#### Main Agent Responsibilities
 
-**Starting Without Review Agent**
-- User: "Implement authentication"
-- Main Agent creates spec, commits
-- **Immediately launches implementation WITHOUT review** ❌
-- Agents assume task statuses are accurate
-- Discover "completed" tasks aren't done
-- Waste hours on wrong approach
-- **CRITICAL VIOLATION**: Skipped mandatory review agent
+When creating a specification with `has_fundamentals: true`:
 
-**Passive Acceptance Without Questions**
-- User: "Add user authentication"
-- Main Agent: "Ok, I'll create a specification"
-- **No clarifying questions asked** ❌
-- Missing: authentication method, storage, security requirements
-- Implements wrong solution
-- User expectations not met
+**See `.agents/templates/examples/fundamentals-section-example.md` for complete example of how to structure the "User-Facing Documentation Requirements" section and corresponding tasks.**
 
-## Rationale
+Key points:
+1. **Add "User-Facing Documentation Requirements" section** to requirements.md
+2. **Add fundamentals tasks to tasks.md as FIRST PRIORITY**
 
-### Why Requirements-First Development
-1. **Clear Direction**: Agents know what to implement
-2. **User Alignment**: Work meets expectations
-3. **Scope Control**: Prevents unnecessary work
-4. **Better Planning**: Estimate effort, identify dependencies
-5. **Documentation**: Permanent record of decisions
-6. **Onboarding**: Understand project evolution
+#### Implementation Agent Responsibilities
 
-### Why Verification is Critical
-1. **Accuracy**: Status reflects reality
-2. **Trust**: User relies on correct information
-3. **Quality**: Ensures work is actually done
-4. **Debugging**: Prevents confusion
-5. **Handoffs**: Next agent gets accurate state
+**CRITICAL ORDER**: Documentation BEFORE implementation.
 
-### Why Review Agent is Mandatory
-Saves hours of wasted effort by:
-- Verifying task accuracy before implementation
-- Identifying unclear requirements needing clarification
-- Catching inconsistencies between docs and code
-- Preventing work based on false assumptions
-- Ensuring specifications are actionable
+1. **Read fundamentals list** from requirements.md
+2. **Create fundamentals/ directory** first
+3. **Write ALL fundamental documents** listed
+4. **Mark fundamentals tasks complete**
+5. **ONLY THEN** start implementation coding
 
-### Why Module Documentation is Mandatory
-Saves hours by:
-- Providing immediate module understanding
-- Preventing breaking changes from misunderstanding
-- Catching documentation drift before implementation
-- Giving clear context instead of forcing grep/glob searches
-- Ensuring all agents have same accurate understanding
+**Why This Order**:
+- Thinking about user documentation clarifies the API design
+- Prevents building APIs that are hard to explain
+- Catches design flaws early
+- Ensures user-centric approach
 
-### Why Documentation Files are Mandatory
-- **PROGRESS.md**: Mid-work visibility, tracks momentum
-- **FINAL_REPORT.md**: Official completion record
-- **LEARNINGS.md**: Knowledge transfer for future work
-- **VERIFICATION_SIGNOFF.md**: Formal quality assurance
+### 100% Completion Verification
+
+Every `requirements.md` MUST include a complete "MANDATORY Completion and Verification Requirements" section.
+
+**Complete Section Template**: See `.agents/templates/examples/completion-verification-section-example.md` for the full section to copy into requirements.md.
+
+**This section enforces**:
+1. **Task Completion Verification** - 100% tasks complete, NO exceptions
+2. **Code/Implementation Verification** - All code exists and works
+3. **Documentation Verification** - All docs exist and are comprehensive
+4. **Quality Verification** - 0 build errors, 0 test failures, 0 linter warnings
+5. **Specification Tracking Verification** - All tracking files exist
+6. **Verification Issue Resolution** - ALL issues fixed, NO optional fixes
+
+### Git Commit and Push Requirements
+
+**CRITICAL**: To ensure no work is lost and maintain safety, follow these git practices.
+
+**See `.agents/templates/examples/git-workflow-examples.md` for complete examples of atomic commits and final commit workflows.**
+
+#### Key Requirements
+
+**During Implementation (Atomic Commits)**:
+- ✅ Commit and push frequently (after each logical unit of work)
+- ✅ After tests pass for that unit
+- ✅ Every 30-60 minutes of active work
+- ✅ Before taking breaks or ending sessions
+
+**After Completion and Verification (MANDATORY PUSH)**:
+1. ✅ **Verify all checks pass** (tasks 100%, tests 100%, clippy 0 warnings)
+2. ✅ **Create final commit** with all remaining changes
+3. ✅ **Push to remote IMMEDIATELY** - DO NOT DELAY
+4. ✅ **Verify push succeeded**
+
+#### Safety Rules
+
+**MUST push immediately**:
+- ✅ After marking specification complete
+- ✅ After verification passes
+- ✅ After all tasks show 100%
+- ✅ After fixing all verification issues
+
+**WHY this is critical**:
+- Prevents work loss from system failures
+- Ensures remote backup of completed work
+- Allows team visibility into progress
+- Creates audit trail of when work completed
 
 ## Enforcement
 
-### Mandatory Compliance Checklist
-
-All agents **MUST** (details in sections above):
-- ✅ Engage in thorough requirements conversation (3-10+ questions minimum)
-- ✅ Create self-contained specifications (Agent Rules Reference, cross-references, enhanced frontmatter)
-- ✅ Create/verify module documentation after requirements, before implementation
-- ✅ Launch review agent BEFORE any implementation (read and act on report)
-- ✅ Read specifications, tasks, review report, and module docs before working
-- ✅ Verify documentation matches reality (STOP if mismatch)
-- ✅ **Update requirements.md IMMEDIATELY when new requirements identified**
-- ✅ **Update tasks.md IMMEDIATELY after EACH task completion (no batching)**
-- ✅ **Assume ALL tasks/requirements are mandatory unless user explicitly states otherwise**
-- ✅ Update module docs as work progresses
-- ✅ Create all 6 mandatory files (requirements, tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF)
-- ✅ Commit specification changes following Rules 03 and 04
-
-### Critical Violations (ZERO TOLERANCE)
+### Zero Tolerance Violations (Comprehensive List)
 
 **Process Violations**:
 - ❌ Passively accepting requests without clarifying questions
 - ❌ Starting implementation without review agent
 - ❌ Ignoring review agent's STOP or CLARIFY directive
 - ❌ Skipping or incomplete requirements conversation
+- ❌ Starting implementation without user approval
 
 **Documentation Violations**:
 - ❌ Missing Agent Rules Reference section in requirements.md
@@ -890,12 +970,28 @@ All agents **MUST** (details in sections above):
 - ❌ Marking complete with unchecked tasks
 - ❌ Proceeding when docs don't match code
 - ❌ **Skipping tasks or requirements assuming they are optional without explicit user confirmation**
+- ❌ Ignoring test failures or linter warnings as "optional"
+- ❌ Missing fundamentals/ when has_fundamentals: true
+- ❌ Creating fundamentals AFTER implementation (must be FIRST)
+
+**Git Violations**:
+- ❌ Delaying push after completion
+- ❌ Leaving completed work unpushed
+- ❌ Forgetting to push after final commit
 
 **User Impact**: Violations cause user frustration, wasted effort, lost context, false progress, broken changes, and trust erosion.
 
-### Corrective Action
+### Consequences
 
 When violation detected:
+
+**Status must be reverted**:
+- Status MUST be reverted to "in-progress"
+- ALL incomplete items MUST be completed
+- Verification MUST be re-run from scratch
+- Specification CANNOT be marked complete until 100% PASS
+
+**Work must be corrected**:
 1. **Stop immediately** - No further work until corrected
 2. **Launch review agent** if skipped
 3. **Create/verify module docs** if missing or inaccurate
@@ -905,6 +1001,23 @@ When violation detected:
 7. **Report violation** to user with corrective actions taken
 
 **Only proceed** when review reports GO and all documentation accurate.
+
+### Corrective Actions
+
+**Mandatory Compliance Checklist** - All agents **MUST**:
+- ✅ Engage in thorough requirements conversation (3-10+ questions minimum)
+- ✅ Create self-contained specifications (Agent Rules Reference, cross-references, enhanced frontmatter)
+- ✅ Create/verify module documentation after requirements, before implementation
+- ✅ Launch review agent BEFORE any implementation (read and act on report)
+- ✅ Read specifications, tasks, review report, and module docs before working
+- ✅ Verify documentation matches reality (STOP if mismatch)
+- ✅ **Update requirements.md IMMEDIATELY when new requirements identified**
+- ✅ **Update tasks.md IMMEDIATELY after EACH task completion (no batching)**
+- ✅ **Assume ALL tasks/requirements are mandatory unless user explicitly states otherwise**
+- ✅ Update module docs as work progresses
+- ✅ Create all 6 mandatory files (requirements, tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF)
+- ✅ Commit specification changes following Rules 03 and 04
+- ✅ Push immediately after completion and verification
 
 ## Special Cases
 
@@ -945,328 +1058,26 @@ For pure documentation updates:
 **Workflow Order** (NO exceptions):
 1. Requirements conversation → 2. Create specs → 3. Module docs → 4. Review agent → 5. Implementation → 6. Verification
 
-**Critical Requirements** (see detailed sections above for full details):
+**Critical Requirements**:
 - ✅ Active requirements conversation with 3-10+ clarifying questions
 - ✅ Self-contained requirements.md with Agent Rules Reference, cross-references, enhanced frontmatter
 - ✅ Module documentation created/verified before implementation
 - ✅ Review agent launched before any implementation work
 - ✅ All 6 mandatory files created (requirements, tasks, PROGRESS, FINAL_REPORT, LEARNINGS, VERIFICATION_SIGNOFF)
+- ✅ **PROGRESS.md is EPHEMERAL** - cleared after phases, deleted when complete
+- ✅ **LEARNINGS.md is PERMANENT** - cumulative insights, never deleted
 - ✅ **IMMEDIATE updates to requirements.md when new requirements identified**
 - ✅ **IMMEDIATE updates to tasks.md after EACH task completion**
 - ✅ **ALL requirements and tasks are MANDATORY unless user explicitly states otherwise**
 - ✅ 100% completion verification before marking complete
-
-**ZERO TOLERANCE Violations** (comprehensive list in Enforcement section above):
-- Skipping requirements conversation, review agent, or module documentation
-- Missing mandatory files or sections
-- Marking complete without 100% verification
-- Proceeding when review agent reports STOP/CLARIFY
-- **Batching task updates instead of updating immediately**
-- **Not updating requirements.md when new requirements discovered**
-- **Assuming tasks/requirements are optional without explicit user confirmation**
+- ✅ Push immediately after completion and verification
 
 **Templates**: All templates in `.agents/templates/` - use these for consistency.
 
-**Remember**: User will be upset if work proceeds without proper requirements conversation, review agent, accurate module docs, or complete verification!
-
----
-
-## Agent Responsibilities During Implementation (CRITICAL)
-
-### Immediate Updates to Specification Files (MANDATORY)
-
-**ZERO TOLERANCE RULE**: Agents MUST update specification files IMMEDIATELY as work progresses. NO batching, NO waiting, NO exceptions.
-
-#### 1. Requirements.md Updates (IMMEDIATE)
-
-Agents working on requirements or implementation **MUST**:
-
-- ✅ **Update requirements.md IMMEDIATELY** when identifying new requirements
-- ✅ **Update IMMEDIATELY** when requirements changes are confirmed with user
-- ✅ **If user grants full rights**, auto-update requirements without seeking approval
-- ❌ **DO NOT wait** until task completion to update requirements
-- ❌ **DO NOT forget** to sync requirements with actual implementation
-
-**When to update requirements.md**:
-- New requirement discovered during implementation
-- User clarifies or changes a requirement
-- Technical constraint requires requirement adjustment
-- Integration reveals additional requirements
-- User explicitly approves a requirement change
-
-**Why immediate updates matter**:
-- Requirements accurately reflect current understanding
-- No discoveries are lost or forgotten
-- User has real-time visibility into scope changes
-- Future agents have accurate context
-- Prevents specification drift from reality
-
-#### 2. Tasks.md Updates (IMMEDIATE - EVERY TASK)
-
-Agents working on tasks **MUST**:
-
-- ✅ **Update tasks.md IMMEDIATELY** after completing EACH task
-- ✅ **Mark task as [x]** the MOMENT you finish it
-- ✅ **Update frontmatter counts** (completed/uncompleted/completion_percentage) immediately
-- ❌ **DO NOT wait** until you're done with multiple tasks to update
-- ❌ **DO NOT create** other task tracking files - tasks.md is THE task tracker
-- ❌ **DO NOT batch** updates - update after EACH task completion
-
-**When to update tasks.md**:
-- IMMEDIATELY after completing any task
-- IMMEDIATELY after marking any checkbox [x]
-- Before moving to the next task
-- Before taking breaks or ending work sessions
-- Before switching to a different specification
-
-**Why immediate task updates matter**:
-- Real-time visibility into task progress
-- No completed work is forgotten or lost
-- User can check status at any time and see current progress
-- System crashes won't lose your progress tracking
-- Other agents can pick up exactly where you left off
-- tasks.md remains the single source of truth
-
-**Frontmatter update requirements**:
-```yaml
-completed: [count of [x] tasks]
-uncompleted: [count of [ ] tasks]
-metadata:
-  total_tasks: [completed + uncompleted]
-  completion_percentage: [(completed / total_tasks) * 100]
-  last_updated: [YYYY-MM-DD - TODAY'S DATE]
-```
-
-#### 3. All Requirements and Tasks Are Mandatory (DEFAULT)
-
-**CRITICAL ASSUMPTION**: Unless user EXPLICITLY states otherwise, ALL requirements and tasks are MANDATORY.
-
-**For requirements.md**:
-- ✅ Assume ALL requirements must be implemented
-- ✅ Assume ALL items must be completed
-- ❌ DO NOT skip requirements thinking they are optional
-- ❌ DO NOT treat any requirement as "nice-to-have" without explicit user confirmation
-
-**For tasks.md**:
-- ✅ Assume ALL tasks must be completed
-- ✅ All tasks must be done before marking specification as complete
-- ❌ DO NOT skip tasks thinking they are optional
-- ❌ DO NOT leave tasks unchecked thinking "that can be done later"
-
-**How user indicates optional items**:
-- User explicitly says: "This requirement is optional"
-- User explicitly says: "This task can be skipped if needed"
-- Requirement/task is marked with "(OPTIONAL)" prefix
-- User provides priority levels and explicitly says lower priority items are optional
-
-**If in doubt**: ASK the user. Never assume something is optional.
-
-#### 4. Enforcement and Consequences
-
-**Violations with ZERO TOLERANCE**:
-- ❌ Completing 3+ tasks before updating tasks.md
-- ❌ Discovering new requirements but not updating requirements.md
-- ❌ Creating separate task tracking files instead of using tasks.md
-- ❌ Marking specification complete with unchecked tasks
-- ❌ Skipping requirements/tasks without explicit user approval
-
-**Consequences of violations**:
-- User frustration from inaccurate progress visibility
-- Lost work when system crashes without updates
-- Confusion for future agents who see incorrect status
-- Wasted effort redoing "completed" but unmarked work
-- Trust erosion when user checks and sees stale status
-
-**Corrective action when violation detected**:
-1. STOP immediately
-2. Update ALL specification files to reflect current reality
-3. Verify frontmatter counts match actual task status
-4. Report discrepancy to user with apology
-5. Commit updates immediately
-6. Resume work with commitment to immediate updates
-
----
-
-## Self-Containment and Mandatory Verification Requirements (CRITICAL)
-
-**Added**: 2026-01-22
-**Purpose**: Ensure every requirements.md is self-contained with all necessary cross-references and mandatory 100% completion verification.
-
-### 1. Requirements.md Self-Containment (MANDATORY)
-
-Every `requirements.md` file MUST contain ALL of the following:
-
-#### A. Cross-Reference Links at Top and Bottom
-
-**Example**: See `.agents/templates/examples/cross-reference-links-example.md` for complete example and validation checklist.
-
-**Top link** (after frontmatter, before Overview):
-- Links to `tasks.md` for task progress
-- Links to `learnings.md` for implementation insights
-
-**Bottom link** (after Final Verification Checklist):
-- Links to `verification.md` or `VERIFICATION_SIGNOFF.md` for verification results
-
-#### B. Enhanced Frontmatter (MANDATORY Additions)
-
-**Example**: See `.agents/templates/examples/enhanced-frontmatter-example.md` for complete frontmatter example, migration guide, and validation checklist.
-
-**New required fields**:
-- `metadata.stack_files`: Array of stack file paths from `.agents/stacks/`
-- `metadata.skills`: Array of skill names from `.agents/skills/` (or empty array)
-- `has_features`: Boolean indicating if `features/` directory used
-- `has_fundamentals`: Boolean indicating if `fundamentals/` documentation required
-
-This makes specifications machine-readable and self-documenting.
-
-### 2. Fundamentals Documentation as First Priority (MANDATORY)
-
-#### When Fundamentals Are Required
-
-Set `has_fundamentals: true` in frontmatter when:
-- Implementing new user-facing libraries or APIs
-- Creating reusable components users need to understand deeply
-- Introducing complex patterns, algorithms, or abstractions
-- Building foundational primitives or developer tools
-- User needs to make architectural decisions using this code
-
-#### Main Agent Responsibilities
-
-When creating a specification with `has_fundamentals: true`:
-
-**See `.agents/templates/examples/fundamentals-section-example.md` for complete example of how to structure the "User-Facing Documentation Requirements" section and corresponding tasks.**
-
-Key points:
-1. **Add "User-Facing Documentation Requirements" section** to requirements.md
-2. **Add fundamentals tasks to tasks.md as FIRST PRIORITY**
-
-#### Implementation Agent Responsibilities
-
-**CRITICAL ORDER**: Documentation BEFORE implementation.
-
-1. **Read fundamentals list** from requirements.md
-2. **Create fundamentals/ directory** first
-3. **Write ALL fundamental documents** listed
-4. **Mark fundamentals tasks complete**
-5. **ONLY THEN** start implementation coding
-
-**Why This Order**:
-- Thinking about user documentation clarifies the API design
-- Prevents building APIs that are hard to explain
-- Catches design flaws early
-- Ensures user-centric approach
-
-### 3. Mandatory 100% Completion Verification
-
-Every `requirements.md` MUST include a complete "MANDATORY Completion and Verification Requirements" section.
-
-**Complete Section Template**: See `.agents/templates/examples/completion-verification-section-example.md` for the full section to copy into requirements.md.
-
-**This section enforces**:
-1. **Task Completion Verification** - 100% tasks complete, NO exceptions
-2. **Code/Implementation Verification** - All code exists and works
-3. **Documentation Verification** - All docs exist and are comprehensive
-4. **Quality Verification** - 0 build errors, 0 test failures, 0 linter warnings
-5. **Specification Tracking Verification** - All tracking files exist
-6. **Verification Issue Resolution** - ALL issues fixed, NO optional fixes
-
-**Zero Tolerance Violations**:
-- Marking complete with unchecked tasks
-- Ignoring test failures or linter warnings
-- Missing mandatory files (learnings.md, progress.md, verification.md)
-- Creating fundamentals AFTER implementation (must be FIRST)
-- Missing cross-reference links
-
-### 4. Validation Before Marking Complete
-
-**Complete Validation Commands**: See `.agents/templates/examples/validation-commands-example.md` for exact bash commands, complete validation script, and common failure examples.
-
-**Main Agent MUST validate**:
-1. **Task Validation** - Verify 0 unchecked tasks, all tasks marked `[x]`
-2. **File Existence Validation** - Verify all mandatory files exist
-3. **Quality Validation** - Verify build succeeds, tests pass, linter shows 0 warnings
-4. **Frontmatter Validation** - Verify counts match reality, completion is 100%
-5. **Documentation Quality** - Verify fundamentals exist (if required) and are comprehensive
-
-**Validation Script**: Available at `.agents/templates/examples/validation-commands-example.md` - complete bash script for automated validation.
-
-**ONLY after ALL validations pass** can status be set to "completed".
-
-### 5. Zero Tolerance Enforcement
-
-**Violations with ZERO TOLERANCE**:
-- ❌ Marking spec complete with tasks.md showing `[ ]` tasks
-- ❌ Marking spec complete with verification showing FAIL
-- ❌ Ignoring clippy/lint warnings as "optional"
-- ❌ Missing learnings.md, progress.md, or verification.md
-- ❌ Missing fundamentals/ when has_fundamentals: true
-- ❌ Creating fundamentals AFTER implementation (must be FIRST)
-- ❌ Missing cross-reference links in requirements.md
-
-**Consequences**:
-- Status MUST be reverted to "in-progress"
-- ALL incomplete items MUST be completed
-- Verification MUST be re-run from scratch
-- Specification CANNOT be marked complete until 100% PASS
-
-### 6. Template Updates
-
-The updated requirements template at `.agents/templates/requirements-template.md` now includes:
-- Enhanced frontmatter with stack_files, skills, has_features, has_fundamentals
-- Cross-reference links at top and bottom
-- User-Facing Documentation Requirements section
-- Complete MANDATORY Completion and Verification Requirements section
-- Final Verification Checklist
-
-**Main Agent MUST use this updated template** for all new specifications.
-
-### 7. Mandatory Git Commit and Push Requirements (CRITICAL)
-
-**CRITICAL**: To ensure no work is lost and maintain safety, follow these git practices.
-
-**See `.agents/templates/examples/git-workflow-examples.md` for complete examples of atomic commits and final commit workflows.**
-
-#### Key Requirements
-
-**During Implementation (Atomic Commits)**:
-- ✅ Commit and push frequently (after each logical unit of work)
-- ✅ After tests pass for that unit
-- ✅ Every 30-60 minutes of active work
-- ✅ Before taking breaks or ending sessions
-
-**After Completion and Verification (MANDATORY PUSH)**:
-1. ✅ **Verify all checks pass** (tasks 100%, tests 100%, clippy 0 warnings)
-2. ✅ **Create final commit** with all remaining changes
-3. ✅ **Push to remote IMMEDIATELY** - DO NOT DELAY
-4. ✅ **Verify push succeeded**
-
-#### Safety Rules
-
-**MUST push immediately**:
-- ✅ After marking specification complete
-- ✅ After verification passes
-- ✅ After all tasks show 100%
-- ✅ After fixing all verification issues
-
-**WHY this is critical**:
-- Prevents work loss from system failures
-- Ensures remote backup of completed work
-- Allows team visibility into progress
-- Creates audit trail of when work completed
-
-**ZERO TOLERANCE**:
-- ❌ DO NOT delay pushing after completion
-- ❌ DO NOT "batch" pushes across specifications
-- ❌ DO NOT leave completed work unpushed
-- ❌ DO NOT forget to push after final commit
-
-**User will be upset if**:
-- Work is completed but not pushed (risk of loss)
-- Specification marked complete but changes not in remote
-- Hours of work lost due to unpushed commits
+**Remember**: User will be upset if work proceeds without proper requirements conversation, review agent, accurate module docs, immediate updates, or complete verification!
 
 ---
 
 *Created: 2026-01-11*
 *Last Updated: 2026-01-24*
-*Version: 6.1 - Added immediate update requirements, mandatory task/requirement clarifications, and agent reminder sections*
+*Version: 6.2 - Consolidated from 1272 to 881 lines, clarified PROGRESS.md as ephemeral, removed duplication*

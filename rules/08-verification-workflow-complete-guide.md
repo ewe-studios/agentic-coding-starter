@@ -53,7 +53,7 @@ Implementation → Report → Verify → Pass? → Commit → Push
 **Before updating any specification, Main Agent MUST check**:
 1. Read `specifications/NN-spec-name/requirements.md` frontmatter
 2. Check status field: is it "completed"?
-3. Check for FINAL_REPORT.md and VERIFICATION_SIGNOFF.md existence
+3. Check for REPORT.md and VERIFICATION.md existence
 
 **If specification is COMPLETED**:
 - ❌ DO NOT update the completed specification

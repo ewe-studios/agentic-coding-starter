@@ -74,9 +74,9 @@ Where `NN` is a two-digit number (01, 02, 03, etc.) that determines the loading 
 ├── requirements-template.md       # For Rule 06 (Specifications)
 ├── tasks-template.md              # For Rule 06 (Specifications)
 ├── PROGRESS-template.md           # For Rule 06 (Specifications)
-├── FINAL_REPORT-template.md       # For Rule 06 (Specifications)
+├── REPORT-template.md             # For Rule 06 (Specifications)
 ├── LEARNINGS-template.md          # For Rule 06 (Specifications)
-├── VERIFICATION_SIGNOFF-template.md # For Rule 06 (Specifications)
+├── VERIFICATION-template.md       # For Rule 06 (Specifications)
 └── agent-documentation-template.md  # For Rule 10 (Agent Registry)
 ```
 

@@ -407,7 +407,7 @@ Insert these sections AFTER "Agent Responsibilities During Implementation (CRITI
 **Checkpoint 4**: Final verification (existing workflow)
 - Spawn dedicated Verification Agent
 - Complete verification per Rule 08
-- Create VERIFICATION_SIGNOFF.md
+- Create VERIFICATION.md
 
 **Benefits**:
 - Issues caught early (easier to fix)
@@ -503,7 +503,7 @@ When working on this specification, agents should:
 - **tasks.md**: Task checkboxes - UPDATE THIS CONTINUOUSLY (see Rule 06)
 - **LEARNINGS.md**: Document implementation insights as you discover them
 - **PROGRESS.md**: Created mid-specification for progress reporting
-- **FINAL_REPORT.md**: Created when all work complete
+- **REPORT.md**: Created when all work complete
 
 ### Critical Reminders
 

@@ -55,7 +55,7 @@ Implementation → Report to Main → Verification → Update Spec → Commit
 ### 4. Specification Versioning (CRITICAL)
 **MANDATORY REQUIREMENT**: Completed specifications are IMMUTABLE.
 
-**From Rule 06**: Once a specification is marked as completed (with FINAL_REPORT.md and VERIFICATION_SIGNOFF.md), it is **LOCKED** and represents historical fact.
+**From Rule 06**: Once a specification is marked as completed (with REPORT.md and VERIFICATION.md), it is **LOCKED** and represents historical fact.
 
 **Main Agent MUST**:
 - ✅ Check if specification status is "completed"

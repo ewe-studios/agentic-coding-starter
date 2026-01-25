@@ -31,10 +31,10 @@ Agents load rules **selectively** based on role and task to optimize context win
 | Agent Type | Load These Rules |
 |------------|------------------|
 | **Main Agent** | 01-04, [05](./rules/05-coding-practice-agent-orchestration.md), [06](./rules/06-specifications-and-requirements.md) (+ [09](./rules/09-skills-identification-and-creation.md), [10](./rules/10-agent-documentation-and-registry.md) when creating skills/agents) |
-| **Implementation Agent** | 01-04, [13](./rules/13-implementation-agent-guide.md), [11](./rules/11-skills-usage.md) (if skills), stack file, spec |
-| **Verification Agent** | 01-04, [08](./rules/08-verification-workflow-complete-guide.md), stack file |
+| **Implementation Agent** | 01-04, [13](./rules/13-implementation-agent-guide.md), [11](./rules/11-skills-usage.md) (if skills), stack file (includes [07](./rules/07-language-conventions-and-standards.md)), spec |
+| **Verification Agent** | 01-04, [08](./rules/08-verification-workflow-complete-guide.md), stack file (includes [07](./rules/07-language-conventions-and-standards.md)) |
 | **Specification Agent** | 01-04, [06](./rules/06-specifications-and-requirements.md) |
-| **Any Sub-Agent** | 01-04, [12](./rules/12-agent-registry-usage.md), own agent doc, relevant stack |
+| **Any Sub-Agent** | 01-04, [12](./rules/12-agent-registry-usage.md), own agent doc, relevant stack (includes [07](./rules/07-language-conventions-and-standards.md) if applicable) |
 
 ---
 
@@ -45,7 +45,7 @@ Agents load rules **selectively** based on role and task to optimize context win
 | 01-04 | All | Core mandatory rules |
 | 05 | Main Agent | Agent orchestration and verification coordination |
 | 06 | Main Agent, Spec agents | Specifications and requirements |
-| 07 | Code writers | Language conventions |
+| 07 | Code writers (via stack files) | Language conventions (embedded in stack files) |
 | 08 | Verification agents | Verification workflow |
 | 09 | Main Agent | Skills creation and review |
 | 10 | Main Agent | Agent documentation and creation |
@@ -91,6 +91,6 @@ OPTIONAL: Rule 11 (skills), Rule 13 (implementation), stack file, spec
 
 ---
 
-_Version: 5.1.0 - Last Updated: 2026-01-24_
+_Version: 5.1.1 - Last Updated: 2026-01-25_
 
 _For complete version history, see [CHANGELOG.md](./CHANGELOG.md)_

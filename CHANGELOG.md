@@ -8,6 +8,29 @@ This file contains the complete version history for all files in the `.agents/` 
 
 ## 2026-01-25
 
+### rules/07-language-conventions-and-standards.md - Version 1.1
+- **CRITICAL FIX**: Corrected typo in Summary section (line 681)
+- Changed: "Never document language stack in requirements" → "Never skip documenting language stack in requirements"
+- Reason: Original text contradicted rule's intent which REQUIRES language stack documentation
+- Benefit: Removes logical inconsistency, clarifies mandatory requirement
+
+### AGENTS.md - Version 5.1.1
+- **CLARIFICATION**: Updated "By Role" table to explicitly show Rule 07 inclusion via stack files
+- Updated: Implementation Agent - "stack file (includes Rule 07)"
+- Updated: Verification Agent - "stack file (includes Rule 07)"
+- Updated: Any Sub-Agent - "relevant stack (includes Rule 07 if applicable)"
+- Updated: Rules Reference table - Rule 07 purpose changed to "Language conventions (embedded in stack files)"
+- Benefit: Makes clear that Rule 07 is implicitly loaded via stack files, not separately
+- Rationale: Stack files contain language-specific standards, making separate Rule 07 loading redundant
+
+### CHANGELOG.md - Version 1.1
+- Added: Today's changes for Rule 07 typo fix and AGENTS.md clarification
+- Benefit: Complete audit trail of all rule updates
+
+---
+
+## 2026-01-25
+
 ### templates/requirements-template.md - Version 3.0
 - **MAJOR**: Complete rewrite based on working Spec 02 example
 - Reduced from ~450 lines to ~200 lines (56% reduction)

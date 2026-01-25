@@ -678,10 +678,10 @@ Code is considered valid when:
 - ❌ **Never write code without reading stack standards**
 - ❌ **Never deviate from documented standards**
 - ❌ **Never skip updating Learning Log**
-- ❌ **Never document language stack in requirements**
+- ❌ **Never skip documenting language stack in requirements**
 
 **Remember**: Standards exist to ensure quality and consistency. Following them is not optional. Learning from mistakes makes the system better for everyone!
 
 ---
 *Created: 2026-01-11*
-*Last Updated: 2026-01-11*
+*Last Updated: 2026-01-25 (Fixed typo in Summary section - clarified language stack documentation requirement)*

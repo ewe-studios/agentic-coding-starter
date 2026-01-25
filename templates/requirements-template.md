@@ -271,5 +271,15 @@ Based on Review Agent assessment:
 
 ---
 
+> **INSTRUCTION FOR SPECIFICATION AGENT**:
+>
+> Copy the content from ONE of these files below based on `has_features` value:
+> - **If has_features: true** → Copy content from `.agents/templates/examples/agent-instructions-with-features.md`
+> - **If has_features: false** → Copy content from `.agents/templates/examples/agent-instructions-without-features.md`
+>
+> Paste the content here, then delete this instruction block.
+
+---
+
 _Created: YYYY-MM-DD_
 _Last Updated: YYYY-MM-DD_

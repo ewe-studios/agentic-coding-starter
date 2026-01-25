@@ -136,7 +136,7 @@ cargo test --package [package] -- [test_filter]
 cargo build --package [package]
 ```
 
-## Notes for Agents
+## Agent Instructions
 
 ### Before Starting (MANDATORY)
 
@@ -159,6 +159,61 @@ cargo build --package [package]
 - Prevents building on broken foundations
 - **USER EXPECTS verification before implementation starts**
 
+### For Main Agent
+
+**CRITICAL REMINDERS**:
+
+1. **Load Relevant Rules**: Before starting work, ensure you have loaded all rules specified in parent `requirements.md` file's `files_required.main_agent.rules`.
+
+2. **Autonomous Agent Behavior**: Follow `.agents/rules/05-coding-practice-agent-orchestration.md` - Work autonomously without unnecessary back-and-forth. Make informed decisions based on loaded context and rules.
+
+3. **Implementation Review First**:
+   - **ALWAYS** start by reviewing current implementation status for this feature
+   - Verify if reported issues are still pending or already resolved
+   - Check git history and actual code state for feature-related files
+   - Do NOT assume issues are unresolved without verification
+
+4. **No Unnecessary Questions**:
+   - If this feature is already approved, it tells you what to do
+   - Do NOT ask for clarification on items already clearly defined
+   - Do NOT seek permission for implementation details covered in approved feature
+   - Only ask questions when genuinely ambiguous or blocking
+
+### For Sub-Agents (Implementation/Verification)
+
+**CRITICAL REMINDERS**:
+
+1. **Load Your Role-Specific Rules**:
+   - **Implementation agents**: Load rules from `files_required.implementation_agent.rules` in frontmatter above
+   - **Verification agents**: Load rules from `files_required.verification_agent.rules` in frontmatter above
+   - Load appropriate stack files specified in files_required
+
+2. **Read Required Context**:
+   - **MUST READ** parent specification's `../requirements.md`
+   - **MUST READ** this `feature.md` file for complete feature context
+   - **MUST VERIFY** dependent features (in depends_on) are complete
+   - **MUST READ** any templates in `./templates/` directory
+   - **MUST READ** `../fundamentals/*` documentation if parent spec has_fundamentals: true
+
+3. **Autonomous Execution**:
+   - Execute your assigned tasks without seeking unnecessary approval
+   - This feature is pre-approved - implement as specified
+   - Make technical decisions within scope of your role and expertise
+   - Follow existing patterns in codebase and use types from dependent features
+
+4. **Status Verification**:
+   - Before starting, verify current state of assigned tasks in this feature
+   - Check if work is partially complete or already done
+   - Review recent commits and code changes related to your tasks
+   - Check dependency status before beginning work
+
+5. **Complete Your Scope**:
+   - Focus ONLY on tasks assigned to you in this feature
+   - Do NOT expand scope without explicit instruction
+   - Update Tasks section and frontmatter counts (completed/uncompleted/total/completion_percentage) as you progress
+   - Mark tasks complete only when fully implemented and verified
+   - Commit after task completion + verification pass (Rule 04)
+
 ### Implementation Guidelines
 - Follow existing patterns in codebase
 - Use types from dependent features
@@ -168,5 +223,6 @@ cargo build --package [package]
 - Document learnings in ../LEARNINGS.md
 
 ---
+
 *Created: YYYY-MM-DD*
 *Last Updated: YYYY-MM-DD*

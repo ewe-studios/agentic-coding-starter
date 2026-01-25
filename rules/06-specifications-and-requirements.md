@@ -45,8 +45,8 @@ Main Agent MUST actively probe requirements, not passively accept vague requests
 - `description`, `status`, `priority`, `created`, `author`
 - `metadata`: version, last_updated, estimated_effort, tags, stack_files, skills, tools
 - `has_features`, `has_fundamentals`, `builds_on`, `related_specs`
-- **`files_required`**: Complete object for each agent type (MANDATORY)
-- `tasks`: completed, uncompleted, total, completion_percentage
+- **`files_required`**: Complete object for each agent type (MANDATORY, use correct type for requirements file based on this flag)
+- `tasks` or `features`: completed, uncompleted, total, completion_percentage
 
 **Feature.md MUST include** (if has_features: true, see `.agents/templates/feature-template.md`):
 
@@ -56,11 +56,13 @@ Main Agent MUST actively probe requirements, not passively accept vague requests
 
 ## Directory Structure
 
-### Simple Specification
+### Simple Specification (has_features: false)
+
+**Use ONLY for trivial specs (1-3 simple tasks)**
 
 ```
 specifications/01-simple-spec/
-├── requirements.md          # Requirements with integrated tasks
+├── requirements.md          # Complete requirements with integrated tasks
 ├── LEARNINGS.md            # All learnings (permanent)
 ├── REPORT.md               # All reports (permanent)
 ├── VERIFICATION.md         # Verification signoff (permanent)
@@ -69,27 +71,84 @@ specifications/01-simple-spec/
 └── templates/              # Code templates (optional)
 ```
 
-### Complex Specification with Features
+### Feature-Based Specification (has_features: true - DEFAULT)
+
+**Use for all non-trivial work**
 
 ```
-specifications/02-complex-spec/
-├── requirements.md          # High-level overview + feature table
+specifications/02-feature-spec/
+├── requirements.md          # High-level overview + feature index ONLY
 ├── features/
-│   ├── foundation/
-│   │   ├── feature.md      # Feature requirements + integrated tasks
-│   │   └── templates/
-│   └── ...
-├── LEARNINGS.md
-├── REPORT.md
-├── VERIFICATION.md
-└── PROGRESS.md
+│   ├── 00-foundation/
+│   │   ├── feature.md      # Detailed feature requirements + tasks
+│   │   └── templates/      # Feature-specific templates (optional)
+│   ├── 01-core-api/
+│   │   └── feature.md
+│   └── 02-integrations/
+│       └── feature.md
+├── LEARNINGS.md            # Spec-wide learnings
+├── REPORT.md               # Spec-wide completion report
+├── VERIFICATION.md         # Spec-wide verification signoff
+├── PROGRESS.md             # Current work status (ephemeral)
+└── fundamentals/           # User docs (if has_fundamentals: true)
 ```
 
 ### When to Use Features
 
-**Use features when**: Specification >15KB, multiple distinct components, different dependencies, needs context size reduction
+**DEFAULT: Use features** unless specification is very simple and cannot be broken down further.
 
-**Keep simple when**: Small focused work, single coherent piece, <10 tasks, no logical component boundaries
+**Use `has_features: true` when**:
+- Specification involves multiple components or logical groupings
+- Work can be split into phases with clear dependencies
+- Requirements exceed ~5 tasks
+- Context optimization needed for agent efficiency
+
+**Use `has_features: false` ONLY when**:
+- Specification is trivial (1-3 simple tasks)
+- No logical component boundaries exist
+- Breaking into features adds more complexity than value
+- User explicitly requests simple structure
+
+**Decision Rule**: When in doubt, default to `has_features: true`. Features provide better organization, clearer dependencies, and improved context management.
+
+## Requirements.md Content Structure
+
+### For Simple Specs (has_features: false)
+
+**requirements.md contains COMPLETE details**:
+- Full functional requirements
+- Full technical specifications
+- Complete task breakdown with all subtasks
+- Detailed implementation guidance
+- All success criteria
+- All verification commands
+
+**Purpose**: Single file contains everything agents need to implement.
+
+### For Feature-Based Specs (has_features: true - DEFAULT)
+
+**requirements.md contains HIGH-LEVEL OVERVIEW ONLY**:
+
+#### What to Include:
+- **Overview**: Brief summary of specification purpose
+- **Known Issues/Limitations**: Pre-existing blockers or constraints
+- **Feature Index**: Table listing all features with descriptions and dependencies
+- **Requirements Conversation Summary**: What user asked for and clarifications
+- **High-Level Architecture**: Overall approach (not implementation details)
+- **Success Criteria**: Spec-wide completion criteria (not feature-specific)
+- **Module References**: Links to documentation agents must read
+
+#### What NOT to Include:
+- ❌ Detailed functional requirements (goes in feature.md)
+- ❌ Detailed technical specifications (goes in feature.md)
+- ❌ Individual task breakdowns (goes in feature.md)
+- ❌ Implementation details (goes in feature.md)
+- ❌ Feature-specific verification commands (goes in feature.md)
+- ❌ Code examples or templates (goes in feature.md or templates/)
+
+**Purpose**: Lightweight index that directs agents to relevant features. Agents load specific features as needed, not entire spec.
+
+**Benefit**: Context optimization - agents read overview + specific feature, not all features.
 
 ### Naming Convention
 
@@ -112,16 +171,16 @@ Once completed (status: completed, REPORT.md and VERIFICATION.md created), speci
 
 Each specification directory MUST contain ONLY these files:
 
-| File              | Status    | Purpose                                                       |
-| ----------------- | --------- | ------------------------------------------------------------- |
-| `requirements.md` | Permanent | Requirements with integrated tasks                            |
-| `LEARNINGS.md`    | Permanent | ALL learnings consolidated (technical + process)              |
-| `REPORT.md`       | Permanent | ALL reports consolidated (work sessions, testing, completion) |
-| `VERIFICATION.md` | Permanent | Verification signoff                                          |
-| `PROGRESS.md`     | Ephemeral | Current status (DELETE at 100%)                               |
-| `fundamentals/`   | Permanent | User docs (if has_fundamentals: true)                         |
-| `features/`       | Permanent | Feature breakdown (if has_features: true)                     |
-| `templates/`      | Permanent | Code templates (optional)                                     |
+| File              | Status    | Purpose                                                                              |
+| ----------------- | --------- | ------------------------------------------------------------------------------------ |
+| `requirements.md` | Permanent | Requirements with integrated tasks                                                   |
+| `LEARNINGS.md`    | Permanent | ALL learnings consolidated (technical + process, with efficient writing for context) |
+| `REPORT.md`       | Permanent | ALL reports consolidated (work sessions, testing, completion)                        |
+| `VERIFICATION.md` | Permanent | Verification signoff                                                                 |
+| `PROGRESS.md`     | Ephemeral | Current status (DELETE at 100%)                                                      |
+| `fundamentals/`   | Permanent | User docs (if has_fundamentals: true)                                                |
+| `features/`       | Permanent | Feature breakdown (if has_features: true)                                            |
+| `templates/`      | Permanent | Code templates (optional)                                                            |
 
 ### File Consolidation Rules
 
@@ -169,7 +228,11 @@ See Rule 06 "File Organization" for complete policy.
 
 Every requirements.md MUST include `files_required` section listing exact rules and files for each agent type.
 
-**Example**:
+**CRITICAL**: Structure differs based on `has_features` value:
+- **has_features: false** → Include `implementation_agent` section (agents read requirements.md)
+- **has_features: true** → NO `implementation_agent` section (agents read feature.md files per feature's files_required)
+
+**Example for has_features: false**:
 
 ```yaml
 files_required:
@@ -211,10 +274,42 @@ files_required:
       - ./requirements.md
 ```
 
+**Example for has_features: true**:
+
+```yaml
+files_required:
+  main_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/05-coding-practice-agent-orchestration.md
+      - .agents/rules/06-specifications-and-requirements.md
+    files:
+      - ./requirements.md
+      - ./LEARNINGS.md
+      - ./PROGRESS.md
+
+  verification_agent:
+    rules:
+      - .agents/rules/01-rule-naming-and-structure.md
+      - .agents/rules/02-rules-directory-policy.md
+      - .agents/rules/03-dangerous-operations-safety.md
+      - .agents/rules/04-work-commit-and-push-rules.md
+      - .agents/rules/08-verification-workflow-complete-guide.md
+      - [stack_file from metadata.stack_files]
+    files:
+      - ./requirements.md
+
+  # NOTE: No implementation_agent section for feature-based specs
+  # Implementation agents load feature.md files directly (each feature has its own files_required)
+```
+
 **Dynamic references**:
 
 - `[stack_file from metadata.stack_files]` - Expands to full path from metadata
-- `[feature.md if has_features: true]` - Conditional file inclusion
+- `[feature.md if has_features: true]` - Conditional file inclusion (usually complex requirements always have features)
 - `[fundamentals/* if has_fundamentals: true]` - Conditional directory inclusion
 
 **Benefits**: Agents know exactly what to load, no guessing
@@ -231,7 +326,11 @@ files_required:
 
 **Required frontmatter**: module, language, status, last_updated, maintainer, related_specs
 
+Depending on `has_features=false`:
 **Required sections**: Overview, Purpose, Location, Implementation, Public API, Imports, Calls, Workflows, Architecture, Tests, Dependencies, Configuration, Issues, Improvements, Related Docs, Version History
+
+Depending on `has_features=true`:
+**Required sections**: Overview, Purpose, Location, Features, Public API, configuration, Architecture, Related Docs.
 
 **Context optimization**: If >8-10KB, agents use Grep/Glob/Read tools instead of loading entire file
 
@@ -260,6 +359,7 @@ files_required:
 - Cumulative record of all insights
 - Never cleared or deleted
 - Technical + process learnings consolidated here
+- Efficiently written with precision and surgical care to manage context but without loosing information
 
 **REPORT.md** (Permanent):
 
@@ -267,6 +367,7 @@ files_required:
 - Comprehensive summary of work, testing, metrics
 - Can be updated progressively despite name
 - Consolidates ALL reports (work sessions, WASM testing, etc.)
+- Efficiently written with precision and surgical care to manage context but without loosing information
 
 ### Pre-Work Review
 
@@ -329,7 +430,7 @@ Central dashboard at `specifications/Spec.md`:
 
 **Rule 08**: Verification workflow complements continuous verification checkpoints
 
-**Rule 13**: Implementation agents update LEARNINGS.md and requirements.md tasks
+**Rule 13**: Implementation agents update LEARNINGS.md and requirements.md tasks/features
 
 ## Summary
 

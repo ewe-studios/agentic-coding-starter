@@ -18,13 +18,13 @@ This document summarizes the comprehensive mandatory code verification workflow 
 ### Core Principle
 
 ```
-Implementation → Report → Verify → Pass? → Commit → Push
-                            ↓
-                          Fail → Urgent Task → Fix → Loop
+Task/Feature Complete → Report → Verify → Pass? → Commit → Push
+                                     ↓
+                                   Fail → Urgent Task → Fix → Loop
 ```
 
 **CRITICAL RULES**:
-- Code commits happen ONLY after verification passes
+- Code commits happen ONLY after task/feature complete + verification passes
 - Implementation agents **NEVER** commit directly
 - **ONLY Main Agent can spawn verification agents**
 

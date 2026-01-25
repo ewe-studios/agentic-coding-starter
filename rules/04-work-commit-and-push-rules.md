@@ -1,24 +1,41 @@
 # Work Commit and Push Rules
 
 ## Purpose
-This rule establishes mandatory version control practices requiring immediate commits after every change during development work, followed by automatic push to remote repository, eliminating manual approval steps while maintaining strict safety guarantees.
+
+This rule establishes mandatory version control practices requiring commits after task/feature completion (following full verification), followed by automatic push to remote repository. This provides clean, atomic history where each commit represents a verified, complete unit of work that can be safely reverted.
 
 ## Core Principles
 
-### 1. Immediate Commit Requirement
-After **EVERY** change or modification to any file in the codebase, agents **MUST** commit immediately.
+### 1. Task/Feature Commit Requirement
+
+After completing a **TASK or FEATURE** (following full verification), agents **MUST** commit immediately. This represents a logical, verified unit of work that can be safely reverted.
 
 ### 2. Automatic Push Requirement
+
 After **EVERY** successful commit, agents **MUST** automatically push to remote without user confirmation.
 
 ### 3. Safety First
+
 Only safe, non-destructive git operations are allowed. Destructive operations are **ABSOLUTELY FORBIDDEN**.
 
-## Rule: Immediate Commit and Automatic Push
+## Rule: Task/Feature Commit and Automatic Push
+
+### Branch Management Workflow
+
+```
+1. User starts new specification
+   ↓
+2. Main Agent checks current branch:
+   - IF on main/master → Create new branch from spec name (e.g., "04-add-auth-middleware")
+   - ELSE → Use current branch as-is
+   ↓
+3. Main Agent proceeds with specification setup
+```
 
 ### Complete Workflow (Code Changes)
+
 ```
-1. Implementation agent completes code changes
+1. Implementation agent completes task/feature implementation
    ↓
 2. Reports to Main Agent (never commits directly)
    ↓
@@ -28,9 +45,9 @@ Only safe, non-destructive git operations are allowed. Destructive operations ar
    ↓
 5. IF ALL PASS:
    ↓
-6. Main Agent: git add [files]
+6. Main Agent: git add [all files for this task/feature]
    ↓
-7. Main Agent: git commit -m "[message with verification status]"
+7. Main Agent: git commit -m "[task/feature complete with verification status]"
    ↓
 8. Main Agent: git status (verify commit succeeded)
    ↓
@@ -38,12 +55,13 @@ Only safe, non-destructive git operations are allowed. Destructive operations ar
    ↓
 10. Verify push succeeded
    ↓
-11. Proceed to next task
+11. Proceed to next task/feature
 
 IF ANY FAIL: Main Agent creates urgent task, does NOT commit
 ```
 
 ### Complete Workflow (Non-Code Changes)
+
 ```
 1. Make changes to file(s) (docs, config, etc.)
    ↓
@@ -61,9 +79,10 @@ IF ANY FAIL: Main Agent creates urgent task, does NOT commit
 ```
 
 ### No Exceptions
-- **NO batching** of commits at the end of work
-- **NO skipping** commits for "small changes"
-- **NO deferring** commits until "later"
+
+- **NO batching** multiple completed tasks/features into one commit
+- **NO committing** incomplete tasks/features
+- **COMMIT ONLY** after task/feature passes full verification
 - **NO asking** for permission to commit or push
 - **NO manual approval** steps in the workflow
 - **ALWAYS push** after successful commit
@@ -74,6 +93,7 @@ IF ANY FAIL: Main Agent creates urgent task, does NOT commit
 **Complete Templates and Examples**: See `.agents/templates/examples/commit-message-templates.md` for detailed templates, real-world examples, and formatting guidelines.
 
 Every commit message **MUST** include:
+
 1. Brief summary line (50 characters or less)
 2. Blank line
 3. Detailed explanation of what and why
@@ -84,6 +104,7 @@ Every commit message **MUST** include:
 8. Co-authorship: `Co-Authored-By: Claude <noreply@anthropic.com>`
 
 **Quick Templates**:
+
 - **Non-code changes**: Summary + explanation + changes list + co-author
 - **Code changes**: Summary + explanation + changes list + verification status + co-author
 
@@ -94,7 +115,7 @@ Every commit message **MUST** include:
 1. **NEVER commit directly** after implementation
 2. **ALWAYS delegate to verification agent first** (see Rule 05)
 3. **WAIT for verification results** before committing
-4. **ONLY commit if ALL verifications PASS**
+4. **ONLY commit if ALL verifications and validation PASS**
 5. **INCLUDE verification status** in commit message
 6. **AUTOMATICALLY push** after successful commit
 
@@ -105,6 +126,7 @@ See **Rule 05 (Coding Practice and Agent Orchestration)** for complete verificat
 To ensure automatic approval is safe, the following operations are **ABSOLUTELY FORBIDDEN**:
 
 ### ❌ FORBIDDEN Operations
+
 - `git push --force` or `git push -f` (force push)
 - `git push --force-with-lease` (force push variant)
 - `git reset --hard` (hard reset)
@@ -120,6 +142,7 @@ To ensure automatic approval is safe, the following operations are **ABSOLUTELY 
 - Any operations that could destroy data or corrupt git history
 
 ### ✅ ALLOWED Operations
+
 - `git add [files]` (stage files)
 - `git commit -m "[message]"` (create commit)
 - `git status` (check status)
@@ -144,12 +167,14 @@ This automatic system is safe because:
 2. **Standard push only**: Regular `git push` will fail if conflicts exist, forcing proper resolution
 3. **No force operations**: Cannot overwrite remote history or other developers' work
 4. **Verification required**: Code commits only happen after all checks pass
-5. **Atomic commits**: Each commit is verified before pushing
+5. **Task/Feature atomicity**: Each commit is a complete, verified unit of work
 6. **Recoverable**: All operations can be undone using standard git recovery methods
+7. **Clean history**: Feature-level commits provide clear rollback points
 
 ## Examples
 
 **Complete Examples**: See `.agents/templates/examples/commit-message-templates.md` for 8+ real-world examples including:
+
 - Adding features with verification
 - Bug fixes
 - Documentation updates
@@ -191,6 +216,7 @@ git push
 ### Bad Practice ❌
 
 **Example 1: Batching multiple unrelated changes**
+
 ```bash
 # Made changes to auth.js, user-validator.js, and README.md
 git add .
@@ -204,20 +230,21 @@ git push
 ❌ Missing co-authorship
 ```
 
-**Example 2: Making multiple changes before committing**
+**Example 2: Committing incomplete work**
+
 ```bash
-# Changed file A
-# Changed file B
-# Changed file C
-git add file-a.js file-b.js file-c.js
-git commit -m "Multiple updates"
+# Started implementing feature, only 30% done
+git add partial-implementation.js
+git commit -m "Add user feature"
 git push
 
-❌ Should have committed after each change
-❌ Batched commits instead of immediate commits
+❌ Task/feature not complete
+❌ Verification not run
+❌ Breaks atomicity principle
 ```
 
 **Example 3: Asking for approval**
+
 ```bash
 git add src/feature.js
 git commit -m "Add feature"
@@ -228,6 +255,7 @@ git commit -m "Add feature"
 ```
 
 **Example 4: Not pushing automatically**
+
 ```bash
 git add src/feature.js
 git commit -m "Add feature"
@@ -239,6 +267,7 @@ git status
 ```
 
 **Example 5: Using force push**
+
 ```bash
 git add src/feature.js
 git commit -m "Add feature"
@@ -249,6 +278,7 @@ git push --force
 ```
 
 **Example 6: Committing code without verification (CRITICAL VIOLATION)**
+
 ```bash
 # Implementation agent completes work
 git add src/payment/processor.js
@@ -281,6 +311,7 @@ git push
 ### Main Agent Responsibilities
 
 **When Main Agent commits code** (after verification passes per Rule 05):
+
 1. ✅ Execute commit and push:
    ```bash
    git add [files]
@@ -292,6 +323,7 @@ git push
 3. ✅ Confirm push in report to user
 
 **When Main Agent receives completion report from sub-agent**:
+
 1. ✅ Check if sub-agent pushed to remote
 2. ✅ If push confirmed: Proceed to next step
 3. ✅ If push NOT confirmed:
@@ -307,6 +339,7 @@ git push
 ### Detection Methods
 
 Main Agent can detect unpushed commits by:
+
 ```bash
 # Check if local branch is ahead of remote
 git status
@@ -320,6 +353,7 @@ git log origin/main..HEAD
 ### Enforcement Scenarios
 
 **Scenario 1: Sub-agent reports completion without mentioning push**
+
 ```
 Sub-agent: "Task completed. Files changed: [list]. Implementation done."
 
@@ -331,6 +365,7 @@ Main Agent MUST:
 ```
 
 **Scenario 2: Sub-agent commits but doesn't push**
+
 ```
 Sub-agent: "Changes committed successfully."
 
@@ -342,6 +377,7 @@ Main Agent MUST:
 ```
 
 **Scenario 3: Sub-agent says "push failed"**
+
 ```
 Sub-agent: "Commit succeeded but push failed due to [error]"
 
@@ -356,12 +392,14 @@ Main Agent MUST:
 ```
 
 **Main Agent MUST NOT**:
+
 - ❌ Accept completion reports without push confirmation
 - ❌ Proceed to next task if commits are unpushed
 - ❌ Assume sub-agent pushed without verification
 - ❌ Skip push verification to save time
 
 **Why This Matters**:
+
 - Unpushed commits risk data loss
 - Remote backup is critical for collaboration
 - CI/CD pipelines need pushed commits
@@ -371,7 +409,9 @@ Main Agent MUST:
 ## Special Cases
 
 ### Merge Conflicts
+
 If `git push` fails due to merge conflicts:
+
 ```bash
 git push
 # Error: Updates were rejected because remote contains work...
@@ -388,7 +428,9 @@ git push              # Push again (automatic)
 **Never use `--force` to override conflicts.**
 
 ### Branch Protection Rules
+
 If remote has branch protection requiring reviews:
+
 ```bash
 git push
 # Error: Protected branch requires review...
@@ -401,6 +443,7 @@ git push
 **Do not attempt to bypass branch protection rules.**
 
 ### First Push to New Branch
+
 ```bash
 git checkout -b new-feature-branch
 # Make changes
@@ -413,7 +456,9 @@ git push -u origin new-feature-branch  # Use -u for first push to new branch
 **The `-u` flag is allowed for setting upstream branch.**
 
 ### Network Issues
+
 If `git push` fails due to network issues:
+
 ```bash
 git push
 # Error: Could not resolve host / Connection timeout
@@ -427,16 +472,18 @@ git push
 
 ## Rationale
 
-### Why Immediate Commits Matter
-1. **Atomic Changes**: Each commit represents a single, logical unit of work
-2. **Clear History**: Makes it easy to understand what changed and why
-3. **Easier Rollback**: Can revert specific changes without affecting other work
-4. **Better Collaboration**: Other agents/developers can see progress in real-time
-5. **Accountability**: Clear attribution of who made what changes
-6. **Debugging**: Easier to identify when and where bugs were introduced
-7. **Code Review**: Smaller, focused commits are easier to review
+### Why Task/Feature Commits Matter
+
+1. **Logical Units**: Each commit represents a complete, verified task or feature
+2. **Clean History**: Easy to understand what each commit accomplishes
+3. **Easy Rollback**: Revert entire task/feature atomically without affecting others
+4. **Better Collaboration**: Progress visible at meaningful milestones
+5. **Accountability**: Clear attribution of feature-level work
+6. **Debugging**: Identify when features were introduced, not individual file changes
+7. **Code Review**: Cohesive changesets easier to review than fragmented commits
 
 ### Why Automatic Push Matters
+
 1. **Immediate Backup**: Changes are backed up to remote server instantly
 2. **Collaboration**: Other developers/agents can see changes in real-time
 3. **Continuous Integration**: CI/CD pipelines can process changes immediately
@@ -445,18 +492,21 @@ git push
 6. **Accountability**: Clear, immediate record of all changes
 
 ### Why Detailed Messages Matter
+
 1. **Context**: Future readers understand the reasoning behind changes
 2. **Documentation**: Commit history serves as a development log
 3. **Searchability**: Detailed messages make it easier to find specific changes
 4. **Knowledge Transfer**: Helps new team members understand evolution of code
 
 ### Why Co-Authorship Matters
+
 1. **Transparency**: Clear indication that AI assisted with the change
 2. **Attribution**: Proper credit for collaborative work
 3. **Tracking**: Helps identify AI-generated code for review purposes
 4. **Standards**: Maintains ethical AI usage practices
 
 ### Why Safety Restrictions
+
 1. **Prevent Data Loss**: Forbidden operations could destroy commit history
 2. **Protect Team**: Cannot overwrite other developers' work
 3. **Maintain History**: Git history remains intact and recoverable
@@ -469,6 +519,7 @@ git push
 ### Mandatory Compliance
 
 All agents **MUST**:
+
 - Commit immediately after every change
 - Push automatically after every commit
 - Never ask for approval before git operations
@@ -484,17 +535,19 @@ All agents **MUST**:
 Any of the following constitutes a violation:
 
 **Commit Violations**:
-- Making multiple changes before committing
-- Batching commits at the end of work
+
+- Committing incomplete tasks/features (work not finished)
+- Batching multiple tasks/features into single commit
 - Using vague or non-descriptive commit messages
 - Omitting detailed explanations or bullet points
 - Missing co-authorship attribution
 - Failing to verify commit success
-- Skipping commits for "small" changes
+- Committing before verification completes
 - **CRITICAL**: Committing code without verification (see Rule 05)
 - **CRITICAL**: Missing verification status in commit message for code changes
 
 **Push Violations**:
+
 - Asking for approval before push
 - Not pushing after successful commit
 - Using any forbidden git operation
@@ -504,6 +557,7 @@ Any of the following constitutes a violation:
 - Any attempt to rewrite or destroy git history
 
 **Main Agent Violations**:
+
 - ❌ Accepting completion reports without verifying push
 - ❌ Proceeding to next task when commits are unpushed
 - ❌ Not checking git status to detect unpushed commits
@@ -538,6 +592,7 @@ The following violations are **CRITICAL** and trigger immediate corrective actio
 ### Corrective Action
 
 **For Commit Violations**:
+
 1. **Stop immediately** and do not proceed with further changes
 2. **Create proper commits** for any uncommitted changes
 3. **Follow the correct format** for commit messages
@@ -545,6 +600,7 @@ The following violations are **CRITICAL** and trigger immediate corrective actio
 5. **Report the violation** to maintain awareness
 
 **For Critical Violations** (committing without verification):
+
 1. **REVERT the commit immediately** using `git revert` or `git reset`
 2. **Report to Main Agent** about the violation
 3. **Run proper verification workflow** (Rule 05)
@@ -553,6 +609,7 @@ The following violations are **CRITICAL** and trigger immediate corrective actio
 6. **Document violation** in Learning Log
 
 **For Forbidden Operations**:
+
 1. **Stop immediately** if forbidden operation is about to be executed
 2. **Do not proceed** with the forbidden operation
 3. **Use safe alternative** if one exists
@@ -562,6 +619,7 @@ The following violations are **CRITICAL** and trigger immediate corrective actio
 ## Integration with Other Rules
 
 ### Rule 05 (Coding Practice and Agent Orchestration) - CRITICAL INTEGRATION
+
 - **MANDATORY**: All code commits MUST go through verification workflow first
 - Implementation agents report to Main Agent (never commit directly)
 - Main Agent delegates to verification agent
@@ -570,25 +628,30 @@ The following violations are **CRITICAL** and trigger immediate corrective actio
 - See Rule 05 for complete verification workflow
 
 ### Rule 03 (Dangerous Operations Safety)
+
 - Git Safety Checkpoint required before dangerous operations
 - ALL agents must commit and push before dangerous operations
 - Dangerous operations blocked if git push fails
 
 ### Rule 07 (Specifications and Requirements)
+
 - Commits apply to specification files (requirements.md, tasks.md)
 - Specification updates are committed after verification
 - Task completion commits include verification results
 
 ### Rule 08 (Language Conventions and Standards)
+
 - Commits must follow language-specific standards
 - Verification ensures standards compliance
 - Learning Log updates are committed immediately
 
 ### Rule 02 (Directory Policy)
+
 - Commits apply to files in all locations
 - Stack files, rules, and specifications all follow this rule
 
 ### Rule 01 (Naming Conventions)
+
 - Commits apply to rule files and all other files
 - Naming convention changes are committed immediately
 
@@ -597,49 +660,56 @@ The following violations are **CRITICAL** and trigger immediate corrective actio
 **Purpose**: Centralize all version history in a single changelog file to reduce context size and improve maintainability.
 
 ### Mandatory Changelog Location
+
 - **File**: `.agents/CHANGELOG.md`
 - **Purpose**: Central repository for all version history across `.agents/` directory
 - **Scope**: Covers all files in `.agents/` (rules, agents, skills, stacks, templates)
 
 ### Individual File Version References
+
 Individual files **MUST NOT** contain full version history sections. Instead, they should:
 
 1. **Show current version only**: Display version number and last updated date
 2. **Link to changelog**: Reference the central CHANGELOG.md file
 
 **Format**:
+
 ```markdown
 ---
 
-*Version: [version] - Last Updated: [date]*
+_Version: [version] - Last Updated: [date]_
 
-*For complete version history, see [CHANGELOG.md](./CHANGELOG.md)* or [../CHANGELOG.md](../CHANGELOG.md)*
+_For complete version history, see [CHANGELOG.md](./CHANGELOG.md)_ or [../CHANGELOG.md](../CHANGELOG.md)\*
 ```
 
 **Example**:
+
 ```markdown
 ---
 
-*Version: 1.3 - Last Updated: 2026-01-24*
+_Version: 1.3 - Last Updated: 2026-01-24_
 
-*For complete version history, see [../CHANGELOG.md](../CHANGELOG.md)*
+_For complete version history, see [../CHANGELOG.md](../CHANGELOG.md)_
 ```
 
 ### CHANGELOG.md Structure
 
 **Format**:
+
 ```markdown
 # .agents Directory - Change Log
 
 ## [YYYY-MM-DD]
 
 ### [file_path] - Version [version]
+
 - Change 1
 - Change 2
 - Change N
 ```
 
 **Entry Rules**:
+
 - Organized by date (newest first)
 - Each file update gets its own entry
 - Multiple updates on same date listed separately
@@ -648,15 +718,18 @@ Individual files **MUST NOT** contain full version history sections. Instead, th
 - Use past tense for change descriptions
 
 **Example**:
+
 ```markdown
 ## 2026-01-24
 
 ### agents/implementation.md - Version 1.3
+
 - Fixed remaining tasks.md references
 - Changed all references to use requirements.md
 - Ensured consistency across examples
 
 ### agents/review.md - Version 1.1
+
 - Updated to use requirements.md as single source
 - Added explicit context loading step
 ```
@@ -664,12 +737,14 @@ Individual files **MUST NOT** contain full version history sections. Instead, th
 ### Why This Matters
 
 **Context Optimization**:
+
 - Individual files are smaller without version history
 - Agents load less unnecessary historical information
 - Central changelog is only loaded when needed
 - Reduces token usage for routine file reads
 
 **Maintainability**:
+
 - Single source of truth for all version history
 - Easier to track changes across multiple files
 - Clear chronological record of all updates
@@ -695,6 +770,7 @@ git push
 ```
 
 **Example**:
+
 ```bash
 git add agents/implementation.md CHANGELOG.md
 git commit -m "Update implementation.md to version 1.3: fix tasks.md references
@@ -708,24 +784,29 @@ git push
 ## Summary
 
 **Core Workflow**:
+
 ```
-Change → git add → git commit → git status → git push → verify → proceed
+Task/Feature Complete → Verification Pass → git add → git commit → git status → git push → verify → proceed
 ```
 
 **For Code Changes**:
+
 ```
-Implement → Report to Main → Verification (Rule 05) → ALL PASS →
-git add → git commit (with verification) → git status → git push → verify → proceed
+Implement Task/Feature → Report to Main → Verification (Rule 05) → ALL PASS →
+git add [task files] → git commit (with verification) → git status → git push → verify → proceed
 ```
 
 **Key Points**:
-- ✅ Commit immediately after every change
+
+- ✅ Commit after each completed task/feature (post-verification)
 - ✅ Push automatically after every commit
 - ✅ Detailed commit messages with co-authorship
 - ✅ Verification required for all code commits
 - ✅ Main Agent verifies sub-agents pushed
 - ✅ Only safe, non-destructive operations allowed
-- ❌ Never batch commits
+- ✅ Create branch from spec name if on main/master
+- ❌ Never commit incomplete work
+- ❌ Never batch multiple tasks/features into one commit
 - ❌ Never ask for approval
 - ❌ Never skip push
 - ❌ Never use force push
@@ -734,6 +815,7 @@ git add → git commit (with verification) → git status → git push → verif
 **This rule is non-negotiable.**
 
 ---
-*Created: 2026-01-13*
-*Merged from: Rule 04 (Work Commit Rules) and Rule 06 (Git Auto-Approval and Push)*
-*Last Updated: 2026-01-13*
+
+_Created: 2026-01-13_
+_Merged from: Rule 04 (Work Commit Rules) and Rule 06 (Git Auto-Approval and Push)_
+_Last Updated: 2026-01-13_

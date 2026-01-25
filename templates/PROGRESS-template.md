@@ -1,16 +1,34 @@
 # [Specification Name] - Progress Report
 
-> **⚠️ EPHEMERAL FILE**: This file is CLEARED and REWRITTEN after each major task/phase completion, and DELETED when specification is complete.
+> **⚠️ EPHEMERAL FILE**: This file tracks CURRENT work only. Cleared after completing each major task/feature, DELETED when specification complete.
 >
-> **Purpose**: Track CURRENT task progress only. All permanent insights → LEARNINGS.md
+> **Purpose**: Track current task/feature progress. All permanent insights → LEARNINGS.md
+>
+> **Commit Strategy**: Update this file during work. Commit happens AFTER task/feature verification passes (Rule 04).
 
 ---
 
-## Current Task: [What you're working on RIGHT NOW]
+## Current Task/Feature: [What you're working on RIGHT NOW]
 
-**Status**: [In Progress / Blocked / Testing / etc.]
+**Status**: [In Progress / Testing / Blocked / Awaiting Verification]
 
-**Started**: [Date/Time when you started this specific task]
+**Started**: [Date/Time when you started this specific task/feature]
+
+**Expected Completion**: [Estimated date/time]
+
+---
+
+## Progress This Session
+
+**Completed**:
+- ✅ [What was finished this session]
+- ✅ [What was finished this session]
+
+**In Progress**:
+- 🔄 [What you're actively working on]
+
+**Ready for Verification**:
+- ⏳ [Implemented but awaiting verification]
 
 ---
 

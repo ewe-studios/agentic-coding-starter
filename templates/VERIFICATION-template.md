@@ -1,11 +1,14 @@
 # [Specification Name] - Verification Sign-Off
 
+> **Note**: For feature-based specifications (has_features: true), this is the SPEC-WIDE verification. Individual features have their own verification during implementation.
+
 ## Executive Summary
 **Specification**: [NN]: [Specification Name]
 **Verification Date**: [YYYY-MM-DD]
 **Verification Agent**: [Agent Name]
 **Status**: ✅ APPROVED | ⚠️ APPROVED WITH NOTES | ❌ REJECTED
 **Confidence Level**: [High/Medium/Low]
+**Specification Type**: [Simple / Feature-Based]
 
 ## ✅ Verification Results
 

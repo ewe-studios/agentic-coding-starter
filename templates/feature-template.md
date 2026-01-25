@@ -21,11 +21,13 @@ files_required:
       - .agents/rules/03-dangerous-operations-safety.md
       - .agents/rules/04-work-commit-and-push-rules.md
       - .agents/rules/13-implementation-agent-guide.md
+      - .agents/rules/11-skills-usage.md
       - .agents/stacks/[language].md
     files:
       - ../requirements.md
       - ./feature.md
-      - ./templates/
+      - ./templates/ # If feature has templates
+      - ../fundamentals/* # If parent spec has_fundamentals: true
   verification_agent:
     rules:
       - .agents/rules/01-rule-naming-and-structure.md
@@ -98,7 +100,9 @@ See `templates/` directory for:
 
 ## Tasks
 
-> **Task Tracking**: Mark tasks as `[x]` immediately upon completion. Update frontmatter counts (completed/uncompleted/total/completion_percentage) after each task.
+> **Task Tracking**: Mark tasks as `[x]` after completing AND verifying each task. Update frontmatter counts (completed/uncompleted/total/completion_percentage) immediately. Commit after task completion + verification pass (Rule 04).
+>
+> **Important**: Each feature manages its own task tracking. Update this file's frontmatter as tasks complete.
 
 ### Implementation Tasks
 - [ ] Task 1: Implement core structure

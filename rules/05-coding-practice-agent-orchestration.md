@@ -49,7 +49,7 @@ Directly interacting with user? → MAIN AGENT (can spawn verification)
 **CRITICAL REQUIREMENT**: NO code is EVER committed without verification.
 
 ```
-Implementation → Report to Main → Verification → Update Spec → Commit
+Implement Task/Feature → Report to Main → Verification → Update Spec → Commit
 ```
 
 ### 4. Specification Versioning (CRITICAL)

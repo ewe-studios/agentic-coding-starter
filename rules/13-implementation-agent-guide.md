@@ -28,7 +28,9 @@ As a sub-agent:
 3. ✅ Load Rule 11 (if using skills)
 4. ✅ Load your agent documentation (`.agents/agents/[name].md`)
 5. ✅ Load relevant stack file (`.agents/stacks/[language].md`)
-6. ✅ Read specification `requirements.md` (which includes integrated tasks)
+6. ✅ Read specification files:
+   - **If has_features: false**: Read `requirements.md` (contains complete requirements + tasks)
+   - **If has_features: true**: Read `requirements.md` (overview) + specific `features/[name]/feature.md` (detailed requirements + tasks)
 7. ✅ Understand what to build and standards to follow
 
 ---

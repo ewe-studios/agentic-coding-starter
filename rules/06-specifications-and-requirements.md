@@ -27,16 +27,72 @@ After creating specification, Main Agent:
 3. Never assumes "ok" or "thanks" means approval
 4. When in doubt, asks: "Would you like me to begin implementation now?"
 
-### Requirements Conversation
+### Requirements Conversation (CRITICAL)
 
-Main Agent MUST actively probe requirements, not passively accept vague requests.
+Main Agent MUST actively probe requirements using **Socratic method** to help user think deeply.
 
-**Minimum questions**: 3-5 (small features), 5-10 (medium), 10+ (large/complex)
+**Deep Thinking Approach**:
+- ✅ **Ask clarifying questions** to expose assumptions
+- ✅ **Probe edge cases** user hasn't considered
+- ✅ **Challenge vague requirements** with specific scenarios
+- ✅ **Help define "success"** concretely
+- ✅ **Explore unknowns** and dependencies
+- ✅ **Make user think harder** about implications
 
-**Critical areas**: Scope, technical approach, constraints, success criteria, edge cases, integration, priority, timeline
+**Minimum questions**: 3-5 (small), 5-10 (medium), 10+ (large/complex)
 
-**Example - Bad**: User: "Add authentication" → Agent: "Ok, I'll create spec"
-**Example - Good**: User: "Add authentication" → Agent asks: method, storage, security, registration, password reset, timeout → Confirms → Creates spec
+**Critical areas**: Scope, technical approach, constraints, success criteria, edge cases, integration, priority, timeline, failure scenarios
+
+**Bad Example**:
+```
+User: "Add authentication"
+Agent: "Ok, I'll create spec"
+```
+
+**Good Example**:
+```
+User: "Add authentication"
+Agent: "Let's think through this thoroughly:
+  1. What auth method? (JWT, sessions, OAuth?)
+  2. Where stored? (DB, Redis, memory?)
+  3. Token expiry? What happens on expiry?
+  4. Password reset flow? Email verification?
+  5. Rate limiting? Account lockout after failed attempts?
+  6. What about edge case: user logs in from multiple devices?
+  7. Success criteria: What does 'working auth' mean specifically?
+  8. Security requirements: HTTPS only? Password strength rules?
+  9. Integration: How does this affect existing API endpoints?
+  10. What shouldn't we build? (YAGNI principle)
+
+[After discussion, confirms understanding]
+Agent: "Let me summarize what success looks like..."
+[Creates comprehensive spec]
+```
+
+**Encode Everything in Spec**:
+- All decisions → requirements.md
+- All edge cases → test scenarios
+- Success criteria → clear, measurable statements
+- Unknowns resolved → documented in spec
+
+**Principle**: Specification quality determines implementation quality. Invest time upfront in deep requirements gathering.
+
+### When User Review/Approval Required
+
+**MANDATORY user review during**:
+- ✅ Specification writing (CRITICAL: user must approve specs)
+- ✅ Requirements clarification phase
+- ✅ Defining success criteria
+- ✅ Major architectural decisions
+
+**NO user approval needed for**:
+- ❌ Implementation details (follow the spec)
+- ❌ Fixing broken tests (fix immediately)
+- ❌ Completing incomplete tests (if requirements clear)
+- ❌ Standard quality improvements
+- ❌ Following established patterns
+
+**Principle**: Get user deeply involved upfront in **what** to build. Then agents autonomously execute **how** to build it per the approved spec.
 
 ### Frontmatter Requirements
 
@@ -434,9 +490,20 @@ Central dashboard at `specifications/Spec.md`:
 
 ## Summary
 
-**Core workflow**: Requirements conversation → Document → User approval → Implementation → Verification → Completion
+**Core workflow**: Deep requirements gathering (Socratic method) → Document → User approval of spec → Autonomous implementation → Verification → Completion
 
-**File structure**: requirements.md (tasks integrated) + LEARNINGS.md + REPORT.md + VERIFICATION.md + PROGRESS.md (ephemeral)
+**Requirements Excellence**:
+- Use Socratic method to probe deeply
+- Challenge assumptions, explore edge cases
+- Help user define success concretely
+- Encode all decisions, edge cases, unknowns in spec
+- Invest time upfront for quality specs
+
+**User Involvement**:
+- MANDATORY approval: Specifications, requirements, success criteria
+- NO approval needed: Implementation details, fixing tests, following specs
+
+**File structure**: requirements.md (with tasks) + LEARNINGS.md + REPORT.md + VERIFICATION.md + PROGRESS.md (ephemeral)
 
 **Consolidation**: All learnings in one file, all reports in one file, one verification file
 

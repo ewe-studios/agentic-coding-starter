@@ -127,19 +127,26 @@ To ensure automatic approval is safe, the following operations are **ABSOLUTELY 
 
 ### ❌ FORBIDDEN Operations
 
-- `git push --force` or `git push -f` (force push)
-- `git push --force-with-lease` (force push variant)
-- `git reset --hard` (hard reset)
+- `git push --force` or `git push -f` (force push - NEVER use)
+- `git push --force-with-lease` (ONLY allowed for Commit Correction pattern - see Special Cases)
+- `git reset --hard` (hard reset - NEVER use)
+- `git reset --soft HEAD~N` (ONLY allowed for Commit Correction pattern - see Special Cases)
 - `git rebase -i` (interactive rebase)
 - `git filter-branch` (history rewriting)
 - `git reflog expire` (reflog deletion)
 - `git gc --prune=now` (aggressive garbage collection)
 - `git branch -D` (force delete branch)
-- `git reset --hard HEAD~N` (discarding commits)
 - `git commit --amend` (unless specific conditions met per Rule 03)
-- Any command with `--force` flag
-- Any history-rewriting operations
+- Any command with `--force` flag (except `--force-with-lease` for Commit Correction)
+- Any history-rewriting operations (except Commit Correction pattern)
 - Any operations that could destroy data or corrupt git history
+
+**EXCEPTION**: The Commit Correction pattern (see Special Cases) allows:
+- `git reset --soft HEAD~1` (safe, keeps all changes)
+- `git push --force-with-lease` (safer than `--force`)
+- ONLY for just-committed features needing immediate fixes
+- ONLY when no other commits exist after
+- ONLY on feature branches (not main/master)
 
 ### ✅ ALLOWED Operations
 
@@ -147,6 +154,8 @@ To ensure automatic approval is safe, the following operations are **ABSOLUTELY 
 - `git commit -m "[message]"` (create commit)
 - `git status` (check status)
 - `git push` (push to remote - standard push only)
+- `git push --force-with-lease` (ONLY for Commit Correction pattern)
+- `git reset --soft HEAD~1` (ONLY for Commit Correction pattern)
 - `git pull` (pull from remote)
 - `git fetch` (fetch from remote)
 - `git branch` (list or create branches)
@@ -407,6 +416,90 @@ Main Agent MUST:
 - Rule 04 compliance depends on Main Agent enforcement
 
 ## Special Cases
+
+### Commit Correction (Soft Undo Pattern)
+
+When a just-committed feature needs a fix (discovered quickly, before moving to new work):
+
+**Use Case**: Feature committed but verification fails, or immediate issue discovered.
+
+**Pattern**:
+```bash
+# 1. Soft undo (keeps changes staged)
+git reset --soft HEAD~1
+
+# 2. Make the fix
+[fix the code, tests, etc.]
+
+# 3. Re-stage all changes (original + fix)
+git add [all files]
+
+# 4. Recommit with complete feature
+git commit -m "$(cat <<'EOF'
+Complete feature with fix: [description]
+
+[Explain original feature and the fix]
+
+Changes made:
+- [Original change 1]
+- [Original change 2]
+- [Fix: description of what was fixed]
+
+Verified by [Language] Verification Agent: All checks passed
+[verification details]
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+
+# 5. Push (or force push if already pushed - see safety note)
+git push  # If not yet pushed
+# OR
+git push --force-with-lease  # If already pushed (ONLY for this pattern)
+```
+
+**When to Use**:
+- Just committed feature (within last 1-2 commits)
+- No other commits after this one
+- Want clean history with complete, working feature
+- Prefer one good commit over "add fix" commits
+
+**When NOT to Use**:
+- Commit is old or already deployed
+- Multiple commits exist after this one
+- Other developers may have pulled the commit
+- In production or shared branch
+- **In these cases**: Create new commit with fix instead
+
+**Safety Notes**:
+- `git reset --soft HEAD~1` is SAFE (keeps all changes)
+- `--force-with-lease` ONLY allowed for this specific pattern
+- NEVER use `--force` (use `--force-with-lease` instead)
+- Check `git status` before and after
+- Ensures committed features are complete and working
+
+**Example**:
+```bash
+# Scenario: Committed authentication feature, verification found missing type
+git reset --soft HEAD~1
+# Add missing type annotation
+git add src/auth.ts
+git commit -m "Add authentication with JWT validation
+
+Complete JWT-based authentication with proper TypeScript types.
+
+Changes made:
+- Implement JWT token generation and validation
+- Add authentication middleware
+- Create comprehensive test suite
+- Fix: Add proper return type to validateToken function
+
+Verified by TypeScript Verification Agent: All checks passed
+...
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+git push --force-with-lease
+```
 
 ### Merge Conflicts
 
@@ -784,33 +877,42 @@ git push
 ## Summary
 
 **Core Workflow**:
-
 ```
 Task/Feature Complete → Verification Pass → git add → git commit → git status → git push → verify → proceed
 ```
 
 **For Code Changes**:
-
 ```
-Implement Task/Feature → Report to Main → Verification (Rule 05) → ALL PASS →
-git add [task files] → git commit (with verification) → git status → git push → verify → proceed
+Implement → Report → Verification (Rule 05) → PASS → git add → git commit → git push → verify → proceed
+```
+
+**Commit Correction (when needed)**:
+```
+Just committed → Issue found → git reset --soft HEAD~1 → Fix → Re-stage all → Recommit complete → git push --force-with-lease
 ```
 
 **Key Points**:
-
 - ✅ Commit after each completed task/feature (post-verification)
 - ✅ Push automatically after every commit
+- ✅ Commit Correction pattern for just-committed features needing fixes
 - ✅ Detailed commit messages with co-authorship
 - ✅ Verification required for all code commits
 - ✅ Main Agent verifies sub-agents pushed
-- ✅ Only safe, non-destructive operations allowed
+- ✅ Only safe operations (with Commit Correction exception)
 - ✅ Create branch from spec name if on main/master
 - ❌ Never commit incomplete work
-- ❌ Never batch multiple tasks/features into one commit
+- ❌ Never batch multiple tasks/features
 - ❌ Never ask for approval
 - ❌ Never skip push
-- ❌ Never use force push
-- ❌ Never bypass verification for code
+- ❌ Never use `--force` (use `--force-with-lease` only for Commit Correction)
+- ❌ Never bypass verification
+
+**Commit Correction Allows**:
+- `git reset --soft HEAD~1` (safe - keeps changes)
+- `git push --force-with-lease` (safer than `--force`)
+- ONLY for just-committed features
+- ONLY when no commits after
+- Ensures commits are complete and working
 
 **This rule is non-negotiable.**
 

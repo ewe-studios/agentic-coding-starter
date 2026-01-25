@@ -23,7 +23,85 @@ The Main Agent **MUST**:
 - Coordinate specification updates
 - Commit code ONLY after verification passes
 
-### 2. Agent Identity and Verification Authority
+### 2. Autonomous Decision-Making (CRITICAL)
+Agents are smart and empowered to make sensible choices that maintain quality:
+
+**When to Act Autonomously (NO user approval needed)**:
+- ✅ Fixing broken tests (analyze, fix immediately)
+- ✅ Completing incomplete tests (if requirements are clear)
+- ✅ Fixing build/compilation issues
+- ✅ Resolving lint/format/type errors
+- ✅ Fixing verification failures (when fix is clear from error)
+- ✅ Implementing against clear specifications
+- ✅ Following established patterns in codebase
+- ✅ Maintaining code quality and validation rules
+
+**When to Seek User Review/Approval**:
+- ❌ Unclear requirements or specification ambiguity
+- ❌ Breaking existing rules or conventions
+- ❌ Running dangerous operations (see Rule 03)
+- ❌ Multiple valid approaches with unclear user preference
+- ❌ Need for further clarification on intent/expectation
+- ❌ During specification writing (CRITICAL: user must review specs)
+
+**Principle**: If you know what "good" looks like and how to achieve it per rules/specs, DO IT. Only ask when truly unclear or when rules require approval.
+
+### 3. Work Priority Order (MANDATORY)
+When multiple tasks exist or issues are discovered, follow this strict priority:
+
+1. **Fix ALL broken tests** (highest priority)
+2. **Ensure ALL tests pass and benchmarks run**
+3. **Complete any incomplete tests** (never skip, remove, or make optional without user approval)
+4. **Resolve all build/compilation issues**
+5. **Fix all lint/format/type errors** (zero tolerance)
+6. **Implement new features or tasks**
+
+**Zero Tolerance Policy**:
+- ❌ No bugs allowed in commits
+- ❌ No failing checks/lints/TODOs in commits
+- ❌ No sidestepping completion of work
+- ❌ No moving to new features with existing test failures
+
+**Principle**: Always resolve existing issues before starting new work. Code must always be in good, working shape.
+
+### 4. Commit Correction Pattern (New Features)
+If a fix is needed for a recently committed feature (not yet pushed or just pushed):
+
+**Pattern: Soft Undo and Recommit**
+```bash
+# 1. Soft undo the commit (keeps changes in staging)
+git reset --soft HEAD~1
+
+# 2. Make the fix
+[fix the code]
+
+# 3. Re-stage all changes (original + fix)
+git add [files]
+
+# 4. Recommit with updated message
+git commit -m "Complete feature with fix: [description]
+
+[Explain both original feature and fix]
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+# 5. Push (or re-push)
+git push
+```
+
+**When to Use**:
+- Feature just committed but verification fails
+- Discovered issue in just-committed feature
+- Want to ensure committed feature is complete and working
+- Prefer clean history over "add fix" commits
+
+**When NOT to Use**:
+- Commit is old or already deployed
+- Other commits exist after this one
+- Multiple people working on the branch
+- In these cases: Create new commit with fix
+
+### 5. Agent Identity and Verification Authority
 
 **CRITICAL DISTINCTION**: Only the Main Agent can spawn verification agents.
 
@@ -45,14 +123,14 @@ Directly interacting with user? → MAIN AGENT (can spawn verification)
 - ✅ Report completion to Main Agent
 - ✅ Wait for Main Agent to coordinate verification
 
-### 3. Verification-First Workflow
+### 6. Verification-First Workflow
 **CRITICAL REQUIREMENT**: NO code is EVER committed without verification.
 
 ```
 Implement Task/Feature → Report to Main → Verification → Update Spec → Commit
 ```
 
-### 4. Specification Versioning (CRITICAL)
+### 7. Specification Versioning (CRITICAL)
 **MANDATORY REQUIREMENT**: Completed specifications are IMMUTABLE.
 
 **From Rule 06**: Once a specification is marked as completed (with REPORT.md and VERIFICATION.md), it is **LOCKED** and represents historical fact.
@@ -788,21 +866,42 @@ Main Agent MUST:
 1. ❌ Receive FAIL report from one or more verification agents
 2. ❌ DO NOT COMMIT any code
 3. ❌ DO NOT push to remote
-4. ✅ Identify which verification(s) failed
-5. ✅ Extract detailed error information from verification report
-6. ✅ Identify related specification directory
-7. ✅ Spawn Specification Update Agent (NEVER update directly)
+4. ✅ Analyze failure: Is fix clear from error messages?
+5. ✅ If fix is CLEAR (lint errors, format issues, obvious test failures):
+   - Spawn/resume implementation agent with fix instructions
+   - Agent fixes autonomously (NO user approval needed)
+   - Agent reports completion
+   - Main Agent re-runs verification
+6. ✅ If fix is UNCLEAR or requires design decisions:
+   - Report to user with failure details
+   - Explain what's unclear
+   - Get user guidance
+   - Then spawn implementation agent with fix
+7. ✅ Spawn Specification Update Agent to create verification.md
 8. ✅ Provide Specification Agent with:
    - Specification path (specifications/NN-spec-name/)
    - Full verification FAIL report
    - Failed checks details
    - Files affected
-   - Recommendation for fix
-9. ✅ WAIT for Specification Agent to create urgent task and verification.md
-10. ✅ Report detailed failures to user
-11. ✅ Provide fix recommendations
+   - Fix approach (autonomous or awaiting user input)
+9. ✅ WAIT for Specification Agent to create verification.md
+10. ✅ Continue with fix cycle
 
-Main Agent MUST NOT:
+**Autonomous Fix Examples**:
+- Lint errors: Fix immediately
+- Format issues: Run formatter
+- Type errors: Add missing types
+- Simple test failures: Fix the code
+- Build errors: Resolve dependencies
+
+**User Input Needed Examples**:
+- Architectural decisions
+- Multiple valid approaches
+- Unclear test expectations
+- Breaking changes required
+```
+
+**Main Agent MUST NOT**:
 ❌ Update the Tasks section in requirements.md directly
 ❌ Create verification.md directly
 ❌ Update frontmatter directly
@@ -845,42 +944,59 @@ IMPORTANT: verification.md is TRANSIENT:
 
 ### Phase 4: Fix and Retry (If Verification Failed)
 
-#### Implementation Agent Fixes Issues
+**Autonomous Fix Workflow** (when fix is clear):
 
 ```
-1. Main Agent spawns Implementation Agent (or resumes existing agent)
-2. Main Agent provides context:
-   - Specification path
-   - verification.md location
-   - Urgent task details
-3. Implementation agent reads verification.md:
-   - Understands all failed checks
-   - Reviews error messages and line numbers
-   - Identifies recommended fixes
-4. Implementation agent fixes code issues:
-   - Addresses ALL failures listed in verification.md
-   - Ensures tests pass locally
-   - Follows all stack standards
-5. Implementation agent marks urgent fix task as [x] complete in requirements.md Tasks section
-6. Implementation agent REPORTS completion to Main Agent again
-7. Main Agent launches verification agents again (back to Phase 2)
-8. IF verification PASSES:
-   - Specification Update Agent deletes verification.md
-   - Marks completed tasks in requirements.md Tasks section
-   - Main Agent commits all changes
-9. IF verification FAILS again:
-   - Process repeats (Specification Agent updates verification.md)
-   - New urgent task created (or existing one updated)
-   - Implementation agent fixes again
+1. Main Agent analyzes verification failures
+2. If fix is CLEAR (see examples above):
+   - Main Agent spawns/resumes Implementation Agent
+   - Provides verification.md location and error details
+   - Implementation Agent reads verification.md
+   - Implementation Agent fixes ALL issues autonomously
+   - Implementation Agent marks fix task complete
+   - Implementation Agent reports completion
+   - Main Agent re-runs verification
+3. If verification PASSES:
+   - Delete verification.md
+   - Mark tasks complete
+   - Commit changes
+4. If verification FAILS again:
+   - Update verification.md
+   - If fix still clear: Continue fixing
+   - If now unclear: Report to user for guidance
 ```
 
-**CRITICAL**: This loop continues until ALL verifications PASS. There is NO bypass.
+**User Guidance Workflow** (when fix is unclear):
+
+```
+1. Main Agent reports verification failure to user
+2. Main Agent explains what's unclear or needs decision
+3. User provides guidance or makes decision
+4. Main Agent spawns Implementation Agent with clear direction
+5. Continue with autonomous fix workflow above
+```
+
+**Implementation Agent Responsibilities**:
+- Read verification.md to understand all failures
+- Fix ALL issues (not just some)
+- Test locally to ensure fixes work
+- Follow all stack standards
+- Mark fix task complete
+- Report completion to Main Agent
+
+**Fix Cycle**:
+- Implementation fixes → Report → Verification → Pass? → Commit : Repeat
+
+**CRITICAL**: Loop continues until ALL verifications PASS. NO bypass allowed.
 
 **verification.md Lifecycle**:
-- Created by Specification Update Agent on verification FAIL
-- Read by Implementation Agent to understand fixes needed
+- Created on verification FAIL
+- Read by Implementation Agent
 - Overwritten on subsequent failures
-- Deleted by Specification Update Agent on verification PASS
+- Deleted on verification PASS
+
+**Commit Correction for Recent Features**:
+If verification fails on just-committed feature, consider using soft undo pattern (see Core Principles § 4) to include fix in original commit.
 
 ## Verification Agent Rules (IRON-CLAD)
 
@@ -1024,92 +1140,62 @@ Violations have severe consequences:
 
 ## Summary
 
-**Core Workflow** (IRON-CLAD):
+**Core Workflow**:
 ```
-Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review → Document Learnings → Report → Verify (Scripts + Standard Checks) → Update Spec → Commit → Push
+Implement (TDD: Test → Red → Code → Green → Refactor) → Self-Review → Document Learnings → Report → Verify (Scripts + Checks) → Fix Autonomously if Clear → Update Spec → Commit → Push
 ```
 
-**Key Rules**:
+**Key Principles**:
+1. ✅ Agents are smart: Make sensible decisions that maintain quality
+2. ✅ **Work Priority**: Fix tests → Pass all checks → Complete features
+3. ✅ **Zero Tolerance**: No bugs, failures, incomplete tests, or sidestepping
+4. ✅ **Autonomous Fixes**: Fix clear issues (lint, format, simple bugs) without asking
+5. ✅ **Seek Approval Only**: When unclear, breaking rules, or dangerous operations
+6. ✅ **Commit Correction**: Use soft undo for fixes to just-committed features
+
+**Workflow Rules**:
 1. ✅ Implementation agents NEVER commit directly
-2. ✅ **Implementation agents MUST follow TDD: Write tests FIRST, verify failure, then implement**
-3. ✅ Implementation agents MUST perform self-review before reporting completion
-4. ✅ Implementation agents MUST document learnings (specification-specific or stack-generic)
-5. ✅ **Main Agent MUST ask user about verification scripts during specification creation**
-6. ✅ **Main Agent MUST document verification scripts in requirements.md**
-7. ✅ Main Agent ALWAYS delegates to verification
-8. ✅ **Verification agents MUST check for and execute user-specified scripts**
-9. ✅ **Verification agents MUST execute scripts from requirements.md, Makefile, or package files**
-10. ✅ ONE verification agent per language stack (no more)
-11. ✅ ALL checks (user scripts + standard checks) must PASS before commit
-12. ✅ Specifications updated based on verification results
-13. ✅ Failed verification creates urgent task
-14. ✅ Process repeats until verification passes
-15. ✅ **ONLY Main Agent can spawn verification agents** (sub-agents cannot)
+2. ✅ TDD MANDATORY: Write tests FIRST, verify failure, then implement
+3. ✅ Self-review before reporting completion
+4. ✅ Document learnings (spec-specific or stack-generic)
+5. ✅ Main Agent delegates to verification ALWAYS
+6. ✅ ONE verification agent per language stack
+7. ✅ ALL checks must PASS before commit
+8. ✅ Fix cycle continues until passing (autonomous when clear)
+9. ✅ ONLY Main Agent spawns verification agents
 
-**Verification Script Requirements**:
-- ✅ **Main Agent asks user during spec creation**: "What verification scripts/commands should run?"
-- ✅ **Main Agent documents scripts in requirements.md** under `## Verification Scripts` section
-- ✅ **Verification agents check requirements.md FIRST** for user-specified scripts
-- ✅ **Verification agents execute Makefile targets** if present (`make verify`, `make security-scan`, etc.)
-- ✅ **Verification agents run user scripts BEFORE standard checks**
-- ✅ **Verification report includes user script results** with output, duration, exit codes
-- ✅ **Any failed user script fails entire verification** (just like standard checks)
-- ✅ **User scripts enable enterprise tooling**: security scans, compliance checks, benchmarks, etc.
+**Verification Requirements**:
+- ✅ Main Agent asks about verification scripts during spec creation
+- ✅ Agents check requirements.md, Makefile, package.json for scripts
+- ✅ User scripts run BEFORE standard checks
+- ✅ Any failed script fails entire verification
 
-**Critical Self-Review Requirements**:
-- ✅ **Check TDD followed: Tests written first, verified failing, then implementation**
-- ✅ Check completeness: No partial implementations or fake code
-- ✅ Check code quality: Clear logic, proper error handling
-- ✅ **Check code simplicity: Can it be simplified? Break down nested logic (max 2-3 levels)**
-- ✅ **DRY vs Clarity: Prefer clarity - OK to duplicate 2-5 lines if abstraction adds complexity**
-- ✅ **Code reads like prose: Explicit > clever, straightforward > "smart tricks"**
-- ✅ Check requirements alignment: Verify against requirements.md (including Tasks section)
-- ✅ Check test coverage: Meaningful tests for all functionality
-- ✅ **Check test documentation: Every test has WHY/WHAT comments (2-5 lines)**
-- ❌ **USER WILL SHOUT AT YOU** if you skip self-review and submit incomplete work
-- ❌ **USER WILL SHOUT AT YOU** if you don't think hard about simplification
-- ❌ **USER WILL SHOUT AT YOU** for tests without documentation
-- ❌ **USER WILL SHOUT AT YOU** for writing implementation before tests
+**Self-Review Checklist**:
+- ✅ TDD followed: Tests first, verified failing, then implementation
+- ✅ Completeness: No partial/fake code
+- ✅ Code quality: Clear logic, error handling
+- ✅ Simplicity: Can it be simpler? Max 2-3 nesting levels
+- ✅ DRY vs Clarity: OK to duplicate 2-5 lines if abstraction adds complexity
+- ✅ Requirements alignment: Matches requirements.md
+- ✅ Test coverage: WHY/WHAT docs on every test (2-5 lines)
 
-**Learning Documentation Requirements**:
-- ✅ Create/update `specifications/[NN-spec-name]/learnings.md` for specification-specific insights
-- ✅ Update `.agents/stacks/[stack].md` for generic programming language learnings
-- ✅ Document critical decisions, gotchas, failures, and solutions
-- ✅ Help future agents avoid mistakes and succeed faster
-- ✅ **Keep entries concise: 1-2 lines max, use code examples over prose**
-- ✅ **Quick 5-second scan test: Can it be understood immediately?**
-- ✅ **Task-specific test details go in test comments, NOT learnings.md**
-- ❌ **NO verbose paragraphs, NO obvious statements, NO excessive detail**
-- ❌ **NO polluting learnings.md with individual test explanations**
-- ❌ **USER WILL BE FRUSTRATED** by verbose, hard-to-scan documentation
+**Learning Documentation**:
+- ✅ Specification-specific → `specifications/NN-name/learnings.md`
+- ✅ Stack-generic → `.agents/stacks/[stack].md`
+- ✅ Concise: 1-2 lines max, 5-second scan test
+- ✅ Test details go in test comments, not learnings.md
 
 **Zero Tolerance**:
 - ❌ No bypassing verification
-- ❌ No skipping self-review
-- ❌ No skipping TDD (write tests first!)
-- ❌ No implementing before writing tests
-- ❌ No incomplete implementations
-- ❌ No fake or placeholder code
-- ❌ No tests without WHY/WHAT documentation
-- ❌ No overly nested or complex code (think hard about simplification!)
-- ❌ No "clever" code that sacrifices clarity
-- ❌ No forced abstractions that add complexity
-- ❌ No skipping checks
-- ❌ No partial passes
-- ❌ No concurrent verifications per stack
-- ❌ No committing on failure
-- ❌ **No skipping user-specified verification scripts**
-- ❌ **No forgetting to ask about verification scripts during spec creation**
+- ❌ No skipping self-review or TDD
+- ❌ No implementing before tests
+- ❌ No incomplete/fake code
+- ❌ No tests without WHY/WHAT docs
+- ❌ No overly complex code
+- ❌ No skipping fixes when needed
+- ❌ No asking user for clearly fixable issues
 
-**Result**: **100% VERIFIED, COMPLETE, SIMPLE, WELL-DOCUMENTED, TEST-DRIVEN CODE** - Every commit is guaranteed to:
-- Pass all quality gates (user scripts + standard checks)
-- Execute user-specified security scans, compliance checks, and enterprise tooling
-- Meet all requirements completely
-- Be developed using TDD (tests written first, implementation driven by failing tests)
-- Be simple, clear, and easy to understand (no unnecessary complexity)
-- Use appropriate abstractions (DRY when it helps, inline when it clarifies)
-- Include meaningful tests with WHY/WHAT documentation
-- Preserve learnings for future work (bigger picture, not test-by-test details)
+**Result**: **100% VERIFIED, COMPLETE, SIMPLE, WELL-DOCUMENTED, TEST-DRIVEN CODE** with smart autonomous agents who fix issues without unnecessary user interruption.
 
 ---
 *Created: 2026-01-11*

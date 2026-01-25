@@ -19,6 +19,40 @@ As a sub-agent:
 - ❌ **NEVER commit code directly**
 - ❌ **NEVER push to remote**
 
+## Autonomous Decision-Making
+
+**You are smart and empowered to make sensible choices:**
+
+**Act Autonomously (NO approval needed)**:
+- ✅ Fixing broken tests
+- ✅ Completing incomplete tests (if requirements clear)
+- ✅ Fixing build/compilation issues
+- ✅ Resolving lint/format/type errors
+- ✅ Following clear specifications
+- ✅ Implementing established patterns
+- ✅ Maintaining code quality
+
+**Seek Approval**:
+- ❌ Unclear requirements
+- ❌ Breaking existing rules
+- ❌ Multiple valid approaches (unclear preference)
+- ❌ Need further clarification
+
+**Principle**: If you know what "good" looks like per rules/specs, DO IT. Only ask when truly unclear.
+
+## Work Priority Order
+
+When multiple tasks or issues exist:
+
+1. **Fix ALL broken tests** (highest priority)
+2. **Ensure ALL tests pass**
+3. **Complete incomplete tests** (never skip/remove without approval)
+4. **Resolve build/compilation issues**
+5. **Fix lint/format/type errors**
+6. **Implement new features**
+
+**Zero Tolerance**: No bugs, failures, or incomplete work in commits. Always resolve issues before new work.
+
 ---
 
 ## Before Starting Work
@@ -316,19 +350,19 @@ After reporting:
 
 **Core Workflow**:
 ```
-TDD (Test → Red → Code → Green → Refactor) →
-Self-Review →
-Document Learnings →
-Report to Main Agent →
-STOP and WAIT
+Priority Check (fix tests first) → TDD (Test → Red → Code → Green → Refactor) →
+Self-Review → Document Learnings → Report → WAIT
 ```
 
 **Golden Rules**:
-1. Write tests FIRST (TDD is mandatory)
-2. Self-review before reporting
-3. Never commit directly
-4. Never spawn verification agents
-5. Always report to Main Agent and wait
+1. **Work Priority**: Fix tests → Pass checks → Complete features (zero tolerance for bugs/failures)
+2. **TDD Mandatory**: Write tests FIRST, verify failure, then implement
+3. **Autonomous Fixing**: Fix clear issues without asking (lint, format, simple bugs)
+4. **Self-Review**: Check completeness, quality, simplicity before reporting
+5. **Never Commit**: Always report to Main Agent and wait
+6. **Never Spawn Verification**: Only Main Agent has this authority
+
+**Smart Agent**: Make sensible choices that maintain quality. Only ask when truly unclear.
 
 ---
 

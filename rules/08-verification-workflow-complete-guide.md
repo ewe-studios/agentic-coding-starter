@@ -245,43 +245,53 @@ Task/Feature Complete → Report → Verify → Pass? → Commit → Push
 
 ### Phase 4: Fix and Retry (If Verification Failed)
 
-**What Happens:**
-1. Main Agent spawns Implementation Agent (or resumes existing agent)
-2. Main Agent provides context:
-   - Specification path
-   - **verification.md location** (key file to read)
-   - Urgent task to complete
-3. Implementation Agent reads **verification.md** to understand:
-   - All failed checks with details
-   - Error messages and line numbers
-   - Recommended fixes
-4. Implementation agent fixes code issues:
-   - Addresses ALL failures listed in verification.md
-   - Ensures tests pass locally
-   - Follows all stack standards
-5. Implementation agent marks urgent fix task as `[x]` complete in tasks.md
-6. Implementation agent **REPORTS completion to Main Agent again**
-7. Main Agent launches verification agents again (back to Phase 2)
-8. **IF verification PASSES**:
-   - Main Agent spawns Specification Update Agent
-   - Specification Agent **deletes verification.md** (no longer needed)
-   - Specification Agent marks completed tasks in tasks.md
-   - Specification Agent reports completion
-   - Main Agent commits all changes (code + specification)
-9. **IF verification FAILS again**:
-   - Main Agent spawns Specification Update Agent
-   - Specification Agent **overwrites verification.md** with new report
-   - Specification Agent updates or adds urgent task
-   - Process repeats from step 1
+**Autonomous Fix Workflow** (when fix is clear):
 
-**CRITICAL**: This loop continues indefinitely until all checks pass. There is NO bypass.
+1. Main Agent analyzes verification failures
+2. **If fix is CLEAR** (lint, format, type errors, simple test failures):
+   - Spawn/resume Implementation Agent
+   - Agent reads verification.md
+   - Agent fixes ALL issues autonomously (NO user approval)
+   - Agent marks fix task complete
+   - Agent reports completion
+   - Main Agent re-runs verification
+3. **If verification PASSES**:
+   - Delete verification.md
+   - Mark tasks complete
+   - Commit changes
+4. **If verification FAILS again**:
+   - Update verification.md
+   - Continue fix cycle if still clear
+   - Report to user if now unclear
+
+**User Guidance Workflow** (when fix is unclear):
+
+1. Main Agent reports failures to user
+2. Explains what's unclear or needs decision
+3. User provides guidance
+4. Spawn Implementation Agent with clear direction
+5. Continue autonomous fix workflow
+
+**Clear Fixes** (autonomous):
+- Lint errors
+- Format issues
+- Type errors
+- Simple test failures
+- Build/dependency errors
+
+**Unclear Fixes** (need user):
+- Architectural decisions
+- Multiple valid approaches
+- Unclear test expectations
+- Breaking changes
+
+**CRITICAL**: Loop continues until ALL checks pass. NO bypass.
 
 **verification.md Lifecycle**:
-- **Created** by Specification Update Agent on verification FAIL
-- **Read** by Implementation Agent to understand fixes needed
-- **Overwritten** by Specification Agent on subsequent failures
-- **Deleted** by Specification Update Agent on verification PASS
-- **Lives** in specification directory beside tasks.md (`specifications/NN-name/verification.md`)
+- Created on FAIL
+- Read by Implementation Agent
+- Overwritten on subsequent failures
+- Deleted on PASS
 
 ---
 
@@ -641,15 +651,17 @@ Violations have severe consequences:
 
 ## Summary
 
-**100% VERIFIED CODE**: Every commit is guaranteed to pass all quality gates.
+**100% VERIFIED CODE**: Every commit passes all quality gates.
+
+**AUTONOMOUS FIXING**: Agents fix clear issues (lint, format, tests) without user interruption.
+
+**SMART ESCALATION**: Only involve user when fix is genuinely unclear or needs decisions.
 
 **IRON-CLAD ENFORCEMENT**: No exceptions, no bypasses, zero tolerance.
 
-**SELF-IMPROVING SYSTEM**: Learning Logs capture mistakes and improve standards over time.
-
 **RACE CONDITION FREE**: ONE verification agent per stack prevents conflicts.
 
-**COMPLETE INTEGRATION**: Rules 03, 04, 05, 07 and all stack files work together seamlessly.
+**FIX-FIRST WORKFLOW**: Broken tests → Fix immediately → Pass all checks → Then proceed.
 
 ---
 

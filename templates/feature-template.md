@@ -138,15 +138,34 @@ cargo build --package [package]
 
 ## Notes for Agents
 
-### Before Starting
-- **MUST READ** parent specification's requirements.md
-- **MUST VERIFY** dependent features are complete
-- **MUST READ** any templates referenced
+### Before Starting (MANDATORY)
+
+**CRITICAL**: Main Agent MUST spawn Review Agent before starting this feature.
+
+**Review Agent Responsibilities**:
+1. ✅ Read parent specification's requirements.md
+2. ✅ Read this feature.md file completely
+3. ✅ **VERIFY in code** that dependent features are ACTUALLY complete:
+   - Check that code exists (not just documentation claims)
+   - Verify tests pass for dependencies
+   - Validate types/functions this feature needs are present
+4. ✅ Read any templates referenced in templates/ directory
+5. ✅ Analyze current codebase state vs claimed completion status
+6. ✅ Assess readiness: GO / STOP / CLARIFY
+
+**Why This Matters**:
+- Documentation may claim features complete when they're not
+- Previous work may have gaps or issues
+- Prevents building on broken foundations
+- **USER EXPECTS verification before implementation starts**
 
 ### Implementation Guidelines
 - Follow existing patterns in codebase
 - Use types from dependent features
 - Update Tasks section and frontmatter counts as work progresses
+- Follow TDD: Write tests FIRST, verify they fail, then implement
+- Self-review before reporting completion
+- Document learnings in ../LEARNINGS.md
 
 ---
 *Created: YYYY-MM-DD*

@@ -216,5 +216,60 @@ Implementation agents MUST read before changes:
 
 ---
 
+## Pre-Work Review (MANDATORY)
+
+**CRITICAL**: Main Agent MUST spawn Review Agent before ANY feature work begins.
+
+### When Review Required
+
+Review Agent MUST be spawned:
+- ✅ Before starting ANY feature (even if documentation says previous features complete)
+- ✅ When resuming work after pause/break
+- ✅ When switching between features
+- ✅ At start of each work session
+
+### Review Agent Responsibilities
+
+Review Agent MUST:
+1. ✅ Read specification thoroughly (requirements.md, features/*/feature.md)
+2. ✅ Analyze current codebase state (actual code, not just documentation)
+3. ✅ Compare reality vs documentation:
+   - Verify completed features are ACTUALLY complete (code exists, tests pass)
+   - Check if claimed tasks are really done
+   - Validate dependency chains
+4. ✅ Verify accuracy of:
+   - PROGRESS.md status claims
+   - Feature.md task checkboxes
+   - requirements.md feature completion counts
+5. ✅ Assess readiness for next work:
+   - Dependencies truly complete?
+   - Code quality acceptable?
+   - Tests actually passing?
+   - Any blockers or issues?
+
+### Review Agent Assessment
+
+Review Agent returns one of:
+- **GO**: Ready to proceed with [specific feature] - all dependencies verified complete
+- **STOP**: Issues found - list specific problems that must be fixed first
+- **CLARIFY**: Need user input - specify what needs clarification
+
+### Main Agent Response to Review
+
+Based on Review Agent assessment:
+- **GO**: Proceed with implementation of specified feature
+- **STOP**: Fix issues before proceeding, may need to re-verify previous work
+- **CLARIFY**: Ask user for needed clarifications
+
+**Why This Matters**:
+- Documentation can be inaccurate (tasks marked done but not actually complete)
+- Previous agents may have made mistakes
+- Code may not match claimed completion status
+- Dependencies might not actually work
+- Prevents wasted implementation effort on wrong assumptions
+- **USER EXPECTS thorough review before starting work**
+
+---
+
 _Created: YYYY-MM-DD_
 _Last Updated: YYYY-MM-DD_

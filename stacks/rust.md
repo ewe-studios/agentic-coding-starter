@@ -2451,6 +2451,111 @@ pub fn safe_wrapper(input: &str) -> Result<i32, Error> {
 **Corrective Action**: None (initial creation).
 **New Standard**: All Rust code must follow these expert-level standards with zero tolerance for deviations.
 
+### Testing Failures - False Positive Test Results
+**Date**: January 27, 2026
+
+#### Issue: Tests with Zero Actual Validation Passing Falsely
+
+Tests that create variables but never validate their actual content or output are a critical anti-pattern:
+
+```rust
+// BAD ❌ - Creates variable without validation
+#[test]
+fn test_something() {
+    let result = do_work();
+    // Variable created, work done... but NEVER checked!
+}
+
+// GOOD ✅ - Validates all outputs and invariants
+#[test]
+fn test_something_validated() {
+    let expected_output = "expected value";
+    let actual_result = produce_value();
+
+    assert_eq!(actual_result, expected_output,
+        "Expected output should match");
+}
+```
+
+**Why This Is Critical:**
+- Tests that don't validate anything cannot detect bugs
+- False sense of security when CI/CD reports green tests
+- Bugs remain hidden until production failures occur
+
+#### Issue: Missing Infrastructure Initialization in Multi-Threading Contexts
+
+Tests fail to initialize critical infrastructure (execution pools, thread pools, resource managers) yet report passing:
+
+```rust
+// BAD ❌ - Creates test but pool never initialized
+#[test]
+fn test_threaded_operation() {
+    let mut executor = ThreadPool::new(4);
+    // MISSING: No initialization call!
+    assert!(executor.is_ready());
+}
+
+// GOOD ✅ - Properly initializes and validates
+#[test]
+fn test_threaded_operation_validated() {
+    let pool_size = 4;
+    let mut thread_pool = ExecutorPool::with_capacity(pool_size);
+
+    // MANDATORY: Initialize the resource before testing
+    assert!(thread_pool.initialize().is_ok(),
+        "Executor pool must initialize successfully");
+
+    // Now validate actual behavior...
+}
+```
+
+**Required Pattern for Pool/Resource Initialization Tests:**
+1. **Create instance**: `let mut pool = ExecutorPool::new(4);`
+2. **Initialize explicitly**: Call initialization method
+3. **Validate success**: Assert result is Ok()
+4. **Test actual functionality**: Verify the resource works correctly
+
+#### Issue: Misleading Success Claims Without Verification
+
+Making claims that "all tests pass" when they don't actually validate anything:
+
+```rust
+// BAD ❌ - False confidence in passing tests
+pub fn run_all_tests() -> bool {
+    // Creates variables without validation...
+    let a = perform_operation();
+    let b = process_data();
+
+    // Never checks if a or b are correct!
+    true  // FALSE CLAIM: Tests "pass" but didn't validate anything
+}
+```
+
+**Required Standard for Test Reporting:**
+- **NEVER**: Claim tests pass unless they've validated specific outputs/invariants
+- **ALWAYS**: Each test must assert on at least one concrete value or behavior
+- **Explicitly document validation strategy** in comments when property-based testing is used
+
+#### Corrective Action Required:
+
+When writing ANY Rust test:
+1. ✅ Every variable created by the system under test MUST be validated
+2. ✅ Execution pools, threads, async executors MUST be initialized before use
+3. ✅ Validation must assert on specific expected values or behaviors
+4. ❌ NEVER trust implicit success - always verify explicitly
+
+#### Anti-Pattern Checklist:
+
+Before marking a test as passing:
+- [ ] Did I create variables from the system under test?
+  - If YES → Do they have explicit assertions against expectations?
+- [ ] Is there an execution pool/thread manager involved?
+  - If YES → Was it initialized and result validated?
+- [ ] Am I making any claim about success/failure of tests?
+  - If YES → Can I point to specific assertion that confirms this?
+
+**New Standard**: All unit integration tests must have at least one explicit assertion per test function. Zero-validation "pass" claims are forbidden.
+
 ### 2026-01-23: no_std/std Implementation Strategy (MANDATORY)
 **Issue**: Need clear guidelines for implementing libraries that support both `no_std` and `std` environments.
 **Learning**: Established standard approach for hybrid std/no_std libraries based on Specification 04 experience.
@@ -2657,7 +2762,27 @@ pub fn process<D: Data>(&self, data: D) -> Result<()> { }
 
 ---
 *Created: 2026-01-11*
-*Last Updated: 2026-01-24*
+*Last Updated: 2026-01-27*
+
+## Skill References
+
+#### Rust Clean Implementation
+For guidance on implementing clean, clear code with proper WHY/WHAT/HOW documentation patterns:
+- **Skill**: `.agents/skills/rust-clean-implementation/`
+- **When to use**: Implementing new Rust modules/functions or refactoring unclear documentation.
+- **Key focus**: Proper doc comment structure (Purpose/Args/Returns/Panics), result-based error handling, explicit panic scenarios.
+
+#### Rust Testing Excellence
+For guidance on writing proper, clear and correct tests:
+- **Skill**: `.agents/skills/rust-testing/`
+- **When to use**: Writing new unit/integration/benchmark tests or reviewing existing test quality.
+- **Key focus**: Validating both valid AND invalid inputs, avoiding muted variables without assertions, testing observable behavior not implementation details.
+
+#### Rust with Async Code
+For guidance on writing robust futures and async logic:
+- **Skill**: `.agents/skills/rust-with-async-code/`
+- **When to use**: Implementing asynchronous APIs or deciding between sync vs async code paths.
+- **Key focus**: Using tokio as primary runtime, offloading blocking work with `spawn_blocking`, non-blocking I/O patterns.
 
 ### Feature-Gated Type Architecture Pattern (2026-01-24)
 
@@ -2724,3 +2849,30 @@ use foundation_nostd::comp::{Mutex, RwLock};  // Which Mutex?
 ```
 
 This makes it clear which compatibility layer (basic vs specialized) is being used.
+
+### Skill References
+
+#### Rust Clean Implementation
+For guidance on implementing clean, clear code with proper WHY/WHAT/HOW documentation patterns:
+- **Skill**: `.agents/skills/rust-clean-implementation/`
+- **When to use**: Implementing new Rust modules/functions or refactoring unclear documentation.
+- **Key focus**: Proper doc comment structure (Purpose/Args/Returns/Panics), result-based error handling, explicit panic scenarios.
+
+#### Rust Testing Excellence
+For guidance on writing proper, clear and correct tests:
+- **Skill**: `.agents/skills/rust-testing/`
+- **When to use**: Writing new unit/integration/benchmark tests or reviewing existing test quality.
+- **Key focus**: Validating both valid AND invalid inputs, avoiding muted variables without assertions, testing observable behavior not implementation details.
+
+#### Rust with Async Code
+For guidance on writing robust futures and async logic:
+- **Skill**: `.agents/skills/rust-with-async-code/`
+- **When to use**: Implementing asynchronous APIs or deciding between sync vs async code paths.
+- **Key focus**: Using tokio as primary runtime, offloading blocking work with `spawn_blocking`, non-blocking I/O patterns.
+
+---
+
+*Created: 2026-01-11*
+*Last Updated: 2026-01-27*
+
+### Feature-Gated Type Architecture Pattern (2026-01-24)

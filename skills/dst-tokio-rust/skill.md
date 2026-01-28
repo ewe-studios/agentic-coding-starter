@@ -1,7 +1,7 @@
 ---
 name: "Deterministic Simulation Testing (Tokio/Rust)"
 description: "Test distributed systems with reproducible deterministic simulation using turmoil"
-approved: No
+approved: Yes
 created: 2026-01-19
 license: "MIT"
 metadata:

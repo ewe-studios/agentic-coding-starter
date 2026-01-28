@@ -1,7 +1,7 @@
 ---
 name: "Rust with Async Code"
 description: "Write robust async/await code using tokio with proper non-blocking patterns"
-approved: No
+approved: Yes
 created: 2026-01-27
 license: "MIT"
 metadata:

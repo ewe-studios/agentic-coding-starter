@@ -1,7 +1,7 @@
 ---
 name: "Rust Directory and Configuration"
 description: "Install Rust toolchain, configure projects, and set up proper directory structure"
-approved: No
+approved: Yes
 created: 2026-01-27
 license: "MIT"
 metadata:

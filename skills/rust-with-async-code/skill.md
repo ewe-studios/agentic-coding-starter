@@ -6,7 +6,7 @@ created: 2026-01-27
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "3.0-restructured"
+  version: "3.1-approved"
   last_updated: "2026-01-28"
 tags:
   - rust
@@ -455,4 +455,4 @@ See `examples/` directory for working code:
 ---
 
 *Last Updated: 2026-01-28*
-*Version: 3.0-restructured*
+*Version: 3.1-approved*

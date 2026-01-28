@@ -15,7 +15,7 @@ tags:
   - error-handling
   - no_std
 files:
-  - examples/documentation-patterns.md: WHY/WHAT/HOW doc comment patterns
+  - examples/documentation-patterns.md: WHY/WHAT/HOW doc patterns with mandatory panic documentation
   - examples/error-handling-guide.md: Error handling with derive_more
   - examples/security-guide.md: Security best practices
   - examples/iterator-patterns.md: Iterator and trait implementation patterns
@@ -44,10 +44,11 @@ Read this skill when **implementing new Rust code** (not tests or async). This c
 
 ### 1. Documentation: WHY/WHAT/HOW Pattern
 
-Every public function should explain:
+**MANDATORY:** Every public function must document:
 - **WHY** it exists (purpose/business reason)
 - **WHAT** it does (summary of behavior)
 - **HOW** to use it (arguments, returns, errors, examples)
+- **PANICS** when it can panic (conditions that cause panics)
 
 ```rust
 /// # Purpose (WHY)
@@ -68,10 +69,74 @@ Every public function should explain:
 ///
 /// * `ValidationError::UsernameTooShort` - Username < 3 characters
 /// * `ValidationError::InvalidEmailFormat` - Email doesn't match pattern
+///
+/// # Panics
+///
+/// Panics if the internal database connection pool is poisoned.
 pub fn register_user(username: &str, email: &str) -> Result<u64, ValidationError> {
     // Implementation...
 }
 ```
+
+**Documentation Checklist for Every Public Function/Method:**
+
+- [ ] `/// Summary` - One-line description
+- [ ] `/// # Purpose (WHY)` - Business/design reason (optional but recommended)
+- [ ] `/// # Arguments` - Document each parameter (if any)
+- [ ] `/// # Returns` - What the function returns
+- [ ] `/// # Errors` - What errors can occur (for Result returns)
+- [ ] `/// # Panics` - **MANDATORY** - When/why function panics
+- [ ] `/// # Safety` - Safety requirements (for unsafe functions only)
+- [ ] `/// # Examples` - Code examples showing usage
+
+**Panic Documentation Examples:**
+
+```rust
+/// Retrieves a user by ID.
+///
+/// # Panics
+///
+/// Panics if `user_id` is 0 or exceeds the maximum valid ID.
+pub fn get_user(&self, user_id: u64) -> User {
+    assert!(user_id > 0, "user_id must be positive");
+    assert!(user_id < MAX_USER_ID, "user_id exceeds maximum");
+    // Implementation...
+}
+
+/// Processes a slice of data.
+///
+/// # Panics
+///
+/// Panics if the slice is empty or if any element is negative.
+pub fn process_data(data: &[i32]) -> i32 {
+    if data.is_empty() {
+        panic!("data cannot be empty");
+    }
+    // Implementation...
+}
+
+/// Divides two numbers.
+///
+/// # Panics
+///
+/// Panics if `divisor` is zero.
+pub fn divide(dividend: i32, divisor: i32) -> i32 {
+    dividend / divisor  // Panics on division by zero
+}
+```
+
+**When a function cannot panic:**
+
+```rust
+/// Adds two numbers.
+///
+/// This function cannot panic.
+pub fn add(a: i32, b: i32) -> i32 {
+    a.wrapping_add(b)
+}
+```
+
+**Or simply omit the Panics section if the function genuinely cannot panic.**
 
 ### 2. Error Handling: Use derive_more
 
@@ -1009,7 +1074,7 @@ use foundation_nostd::comp::{Mutex, RwLock};  // Which Mutex?
 
 See `examples/` directory for detailed guides:
 
-- `documentation-patterns.md` - WHY/WHAT/HOW patterns
+- `documentation-patterns.md` - WHY/WHAT/HOW patterns with mandatory panic documentation
 - `error-handling-guide.md` - Error types with derive_more
 - `security-guide.md` - Input validation, secrets, SQL/command injection
 - `iterator-patterns.md` - Iterator combinators and custom iterators

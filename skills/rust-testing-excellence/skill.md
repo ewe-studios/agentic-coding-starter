@@ -255,9 +255,21 @@ mod tests {
 
 ---
 
-## Property-Based Testing
+## Property-Based Testing (Recommended)
 
-Use `proptest` for testing properties across many inputs:
+**Use `proptest` to test invariants across hundreds of generated inputs automatically.**
+
+### Why Property-Based Testing?
+
+Property-based testing is **highly recommended** for:
+- ✅ Testing invariants (properties that should always hold)
+- ✅ Finding edge cases you didn't think of
+- ✅ Serialization/deserialization roundtrips
+- ✅ Parsers and data transformations
+- ✅ Mathematical operations (commutativity, associativity, etc.)
+- ✅ State machines and protocols
+
+### Basic Usage
 
 ```rust
 use proptest::prelude::*;
@@ -284,6 +296,60 @@ proptest! {
             "Hash computation should be deterministic");
     }
 }
+```
+
+### Common Property Testing Patterns
+
+**Roundtrip Properties** (serialization):
+```rust
+proptest! {
+    #[test]
+    fn test_json_roundtrip(user in any::<User>()) {
+        let json = serde_json::to_string(&user)?;
+        let decoded: User = serde_json::from_str(&json)?;
+        prop_assert_eq!(user, decoded);
+    }
+}
+```
+
+**Invariant Properties** (never panic):
+```rust
+proptest! {
+    #[test]
+    fn test_parser_never_panics(input in ".*") {
+        // Should never panic, regardless of input
+        let _ = parse_input(&input);
+    }
+}
+```
+
+**Relationship Properties** (commutativity):
+```rust
+proptest! {
+    #[test]
+    fn test_addition_commutative(a in 0i32..1000, b in 0i32..1000) {
+        prop_assert_eq!(add(a, b), add(b, a));
+    }
+}
+```
+
+### When to Use Property-Based Testing
+
+| Use Case | Example Property |
+|----------|------------------|
+| Serialization | `deserialize(serialize(x)) == x` |
+| Parsing | `parse` never panics on any input |
+| Encoding | `decode(encode(x)) == x` |
+| Sorting | Output is sorted and contains same elements |
+| Hashing | `hash(x) == hash(x)` (deterministic) |
+| Reversible operations | `reverse(reverse(x)) == x` |
+
+### Dependencies
+
+Add to `Cargo.toml`:
+```toml
+[dev-dependencies]
+proptest = "1.4"
 ```
 
 ---

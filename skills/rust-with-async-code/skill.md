@@ -101,6 +101,8 @@ async fn process_data(data: Vec<u8>) -> Result<Vec<u8>> {
 }
 ```
 
+**For CPU-bound algorithms and performance patterns, see [Performance Tips](../rust-clean-implementation/skill.md#performance-tips).**
+
 ### 3. Async Test Isolation - MANDATORY
 
 Use `current_thread` flavor to prevent test isolation issues:
@@ -334,6 +336,8 @@ async fn best_example(data: Arc<AsyncMutex<Data>>) {
     drop(guard);
 }
 ```
+
+**For synchronous mutex patterns, see [Smart Pointer Usage](../rust-clean-implementation/skill.md#smart-pointer-usage).**
 
 ### Pitfall 4: Using std::thread Instead of Spawning Tasks
 

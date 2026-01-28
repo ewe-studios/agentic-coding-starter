@@ -146,6 +146,8 @@ let idx = value.checked_sub(1)
     .expect("value is always > 0 per invariant");
 ```
 
+**See also:** [Test Helper Functions](../rust-testing-excellence/skill.md#test-helper-functions) for when `.unwrap()` is acceptable in test utilities.
+
 ---
 
 ## No_std / Std Support
@@ -792,23 +794,24 @@ fn process(s: &str) -> Cow<'_, str> {
 
 #### Pitfall 2: Mutex Deadlocks
 
+**For async code:** See [Pitfall 3: Holding Locks Across Await Points](../rust-with-async-code/skill.md#pitfall-3-holding-locks-across-await-points) for complete guidance on async-safe mutex usage.
+
+**For sync code:**
+
 ```rust
-// BAD: Holding lock across await
-let data = mutex.lock().unwrap();
-something_async().await;  // Still holding lock!
-drop(data);
+// BAD: Acquiring locks in wrong order (potential deadlock)
+fn process(mutex_a: &Mutex<Data>, mutex_b: &Mutex<Data>) {
+    let guard_a = mutex_a.lock().unwrap();
+    // If another thread locks b then a, deadlock!
+    let guard_b = mutex_b.lock().unwrap();
+}
 
-// GOOD: Drop lock before await
-let data = {
-    let guard = mutex.lock().unwrap();
-    guard.clone()
-};  // Lock dropped here
-something_async().await;
-
-// EXCELLENT: Use Tokio's async-aware Mutex
-let data = mutex.lock().await;
-something_async().await;
-drop(data);
+// GOOD: Always acquire locks in same order
+fn process(mutex_a: &Mutex<Data>, mutex_b: &Mutex<Data>) {
+    // Establish global lock ordering
+    let guard_a = mutex_a.lock().unwrap();
+    let guard_b = mutex_b.lock().unwrap();
+}
 ```
 
 #### Pitfall 3: Collecting Unnecessarily

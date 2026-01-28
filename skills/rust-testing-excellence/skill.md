@@ -252,28 +252,9 @@ mod tests {
 
 ## Async Test Isolation
 
-### MANDATORY: Use current_thread Flavor
+**MANDATORY:** See [Async Test Isolation](../rust-with-async-code/skill.md#3-async-test-isolation---mandatory) in rust-with-async-code for complete patterns.
 
-Use single-threaded executor to prevent test isolation issues with global state:
-
-```rust
-// GOOD ✅ - Each test gets isolated runtime
-#[tokio::test(flavor = "current_thread")]
-async fn test_async_operation() {
-    let result = process_async().await;
-    assert!(result.is_ok());
-}
-
-// With time control
-#[tokio::test(flavor = "current_thread", start_paused = true)]
-async fn test_with_timeout() {
-    let start = tokio::time::Instant::now();
-    tokio::time::sleep(Duration::from_secs(1)).await;
-    assert_eq!(start.elapsed(), Duration::from_secs(1));
-}
-```
-
-**Why:** Prevents flaky tests from shared global state across parallel test runs.
+**Quick reference:** Always use `flavor = "current_thread"` for async tests to prevent test isolation issues with global state.
 
 ---
 
@@ -481,6 +462,7 @@ See `examples/` directory for detailed guides:
 
 - [Rust Clean Implementation](../rust-clean-implementation/skill.md) - For implementation patterns
 - [Rust with Async Code](../rust-with-async-code/skill.md) - For async testing patterns
+- [DST Tokio Rust](../dst-tokio-rust/skill.md) - For deterministic testing of distributed systems
 
 ---
 

@@ -6,7 +6,7 @@ created: 2026-01-27
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "2.0-restructured"
+  version: "2.1-enhanced"
   last_updated: "2026-01-28"
 tags:
   - rust
@@ -57,6 +57,23 @@ rustup default 1.75.0
 rustc --version
 ```
 
+### 3. Install Additional Development Tools
+
+```bash
+# Essential components
+rustup component add rustfmt clippy rust-analyzer
+
+# Additional cargo tools for development
+cargo install cargo-audit       # Security vulnerability scanner
+cargo install cargo-deny        # Dependency license and advisory checker
+cargo install cargo-expand      # Macro expansion tool (debugging)
+cargo install cargo-nextest     # Fast test runner (recommended)
+cargo install cargo-flamegraph  # Profiling tool
+
+# Keep toolchain updated
+rustup update
+```
+
 ---
 
 ## Project Setup
@@ -83,6 +100,7 @@ cd my-rust-project
 name = "my-rust-project"
 version = "0.1.0"
 edition = "2021"  # Use latest edition
+rust-version = "1.75"  # MSRV (Minimum Supported Rust Version)
 
 [dependencies]
 # Add dependencies here
@@ -93,6 +111,34 @@ edition = "2021"  # Use latest edition
 [features]
 default = []
 # Optional feature flags
+
+# CRITICAL: Optimize for release builds
+[profile.release]
+opt-level = 3           # Maximum optimization
+lto = "fat"            # Full link-time optimization (slower compile, faster runtime)
+codegen-units = 1      # Better optimization, slower compile
+strip = true           # Strip symbols from binary
+panic = "abort"        # Smaller binary, no unwinding
+
+# IMPORTANT: Fast compilation for debug builds
+[profile.dev]
+opt-level = 0          # No optimization for fast compile
+debug = true           # Full debug info
+split-debuginfo = "unpacked"  # Faster on macOS/Linux
+
+# Optimize dependencies even in debug mode (faster debug experience)
+[profile.dev.package."*"]
+opt-level = 2
+
+# For testing with optimizations
+[profile.test]
+opt-level = 1
+
+# For benchmarking
+[profile.bench]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
 ```
 
 ---
@@ -213,7 +259,21 @@ struct Credentials {
 
 ## Configuration Files
 
+### rust-toolchain.toml (Recommended)
+
+Pins project to specific Rust version and components:
+
+```toml
+# rust-toolchain.toml
+[toolchain]
+channel = "stable"
+profile = "default"
+components = ["rustfmt", "clippy", "rust-analyzer"]
+```
+
 ### .rustfmt.toml (Optional)
+
+Professional-grade formatting configuration:
 
 ```toml
 # .rustfmt.toml - Code formatting
@@ -223,13 +283,63 @@ hard_tabs = false
 tab_spaces = 4
 newline_style = "Unix"
 use_small_heuristics = "Default"
+
+# Import organization
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
+reorder_imports = true
+reorder_modules = true
+
+# Code style
+match_block_trailing_comma = true
+trailing_comma = "Vertical"
+use_field_init_shorthand = true
+use_try_shorthand = true
+
+# Documentation
+format_code_in_doc_comments = true
+normalize_comments = true
 ```
 
-### .clippy.toml (Optional)
+### .clippy.toml (Recommended)
+
+Enforce error handling and code quality at configuration level:
 
 ```toml
 # .clippy.toml - Linter configuration
-# See: https://rust-lang.github.io/rust-clippy/master/
+msrv = "1.75"  # Minimum Supported Rust Version
+warn-on-all-wildcard-imports = true
+
+# Disallow unsafe error handling patterns
+disallowed-methods = [
+    { path = "std::option::Option::unwrap", reason = "use ? operator or proper error handling" },
+    { path = "std::option::Option::expect", reason = "use ? operator or proper error handling" },
+    { path = "std::result::Result::unwrap", reason = "use ? operator or proper error handling" },
+    { path = "std::result::Result::expect", reason = "use ? operator or proper error handling" },
+    { path = "std::result::Result::unwrap_err", reason = "use proper error handling" },
+    { path = "std::panic::panic", reason = "use Result for recoverable errors" },
+    { path = "std::unimplemented", reason = "implement the functionality or use todo!()" },
+]
+
+cognitive-complexity-threshold = 30
+```
+
+### .cargo/config.toml (Optional)
+
+Build performance optimization with faster linkers:
+
+```toml
+# .cargo/config.toml
+[build]
+# Use mold/lld for faster linking (requires clang/lld installed)
+
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+# For macOS, use zld or lld
+# [target.x86_64-apple-darwin]
+# rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld"]
 ```
 
 ### .gitignore
@@ -299,4 +409,4 @@ cargo audit              # Check for security vulnerabilities
 ---
 
 *Last Updated: 2026-01-28*
-*Version: 2.0-restructured*
+*Version: 2.1-enhanced*

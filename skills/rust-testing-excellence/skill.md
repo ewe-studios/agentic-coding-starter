@@ -462,7 +462,6 @@ See `examples/` directory for detailed guides:
 
 - [Rust Clean Implementation](../rust-clean-implementation/skill.md) - For implementation patterns
 - [Rust with Async Code](../rust-with-async-code/skill.md) - For async testing patterns
-- [DST Tokio Rust](../dst-tokio-rust/skill.md) - For deterministic testing of distributed systems
 
 ---
 

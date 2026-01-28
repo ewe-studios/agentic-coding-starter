@@ -14,8 +14,7 @@ tags:
   - async
   - concurrency
 files:
-  - examples/async-patterns.md: Async best practices and common patterns
-  - examples/async-pitfalls.md: Common async mistakes and how to avoid them
+  - examples/async-best-practices.rs: "Complete async/await patterns and examples"
 ---
 
 # Rust with Async Code
@@ -443,10 +442,9 @@ futures = "0.3"
 
 ## Examples
 
-See `examples/` directory for detailed guides:
+See `examples/` directory for working code:
 
-- `async-patterns.md` - Common async patterns and best practices
-- `async-pitfalls.md` - Common mistakes and how to avoid them
+- `async-best-practices.rs` - Complete async/await patterns with tokio, channels, select!, and common pitfalls
 
 ## Related Skills
 

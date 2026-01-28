@@ -14,6 +14,10 @@ tags:
   - configuration
   - toolchain
   - project-setup
+files:
+  - examples/rust-installation.md: "Complete Rust toolchain installation guide"
+  - examples/rust-project-setup.md: "Step-by-step project setup and structure"
+  - examples/cargo-config.md: "Cargo.toml and .cargo/config.toml examples"
 ---
 
 # Rust Directory and Configuration
@@ -400,6 +404,14 @@ cargo audit              # Check for security vulnerabilities
 ```
 
 ---
+
+## Examples
+
+See `examples/` directory for detailed guides:
+
+- `rust-installation.md` - Complete Rust toolchain installation guide
+- `rust-project-setup.md` - Step-by-step project setup and structure
+- `cargo-config.md` - Cargo.toml and .cargo/config.toml examples
 
 ## Related Skills
 

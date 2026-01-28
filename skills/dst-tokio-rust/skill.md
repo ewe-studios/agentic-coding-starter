@@ -20,8 +20,12 @@ tools:
   - madsim
   - proptest
 files:
-  - examples/dst-guide.md: Complete DST tutorial with turmoil/madsim
-  - examples/basic-dst-setup.md: Working example of DST test setup
+  - examples/basic-dst-setup.md: Working example of DST test setup with turmoil
+  - examples/basic-dst-setup.rs: Complete DST test example code
+assets:
+  - docs/dst-rust-guide.md: Comprehensive DST guide for Rust developers
+  - docs/dst-internals-guide.md: Deep dive into DST implementation details
+  - docs/README.md: DST documentation overview
 ---
 
 # Deterministic Simulation Testing (Rust)
@@ -363,10 +367,16 @@ TEST_SEED=42 cargo test test_survives_partition --features simulation
 
 ## Examples
 
-See `examples/` directory for complete guides:
+See `examples/` directory for working code:
 
-- `dst-guide.md` - Complete DST concepts and library usage tutorial
-- `basic-dst-setup.md` - Working example transformed from .rs to markdown
+- `basic-dst-setup.md` - Working DST test setup guide
+- `basic-dst-setup.rs` - Complete DST test example code
+
+See `docs/` directory for comprehensive guides:
+
+- `dst-rust-guide.md` - Complete DST concepts and turmoil/madsim usage
+- `dst-internals-guide.md` - Deep dive into DST implementation details
+- `README.md` - DST documentation overview
 
 ## Related Skills
 

@@ -20,6 +20,7 @@ files:
   - examples/security-guide.md: Security best practices
   - examples/iterator-patterns.md: Iterator and trait implementation patterns
   - examples/basic-template.md: Basic implementation template
+  - templates/basic-example.rs: Starter template for new Rust modules
 ---
 
 # Rust Clean Implementation
@@ -1079,6 +1080,10 @@ See `examples/` directory for detailed guides:
 - `security-guide.md` - Input validation, secrets, SQL/command injection
 - `iterator-patterns.md` - Iterator combinators and custom iterators
 - `basic-template.md` - Starting template for new code
+
+See `templates/` directory for starter code:
+
+- `basic-example.rs` - Starter template for new Rust modules
 
 ## Related Skills
 

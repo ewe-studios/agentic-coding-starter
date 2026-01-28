@@ -12,10 +12,7 @@ tags:
   - rust
   - testing
   - validation
-files:
-  - examples/test-patterns.md: Good and bad test patterns with examples
-  - examples/feature-gated-tests.md: Feature-gated test organization
-  - examples/property-based-testing.md: Property-based testing with proptest
+files: []
 ---
 
 # Rust Testing Excellence
@@ -449,14 +446,6 @@ Tests are considered valid when they:
 **Standard:** All tests must validate actual outputs, not just execute code paths.
 
 ---
-
-## Examples
-
-See `examples/` directory for detailed guides:
-
-- `test-patterns.md` - Good and bad test examples
-- `feature-gated-tests.md` - Feature-gated test organization
-- `property-based-testing.md` - Property testing with proptest
 
 ## Related Skills
 

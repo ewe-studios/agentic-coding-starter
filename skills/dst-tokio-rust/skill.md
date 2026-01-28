@@ -368,6 +368,11 @@ See `examples/` directory for complete guides:
 - `dst-guide.md` - Complete DST concepts and library usage tutorial
 - `basic-dst-setup.md` - Working example transformed from .rs to markdown
 
+## Related Skills
+
+- [Rust with Async Code](../rust-with-async-code/skill.md) - For async patterns in production code
+- [Rust Testing Excellence](../rust-testing-excellence/skill.md) - For general testing patterns
+
 ---
 
 *Last Updated: 2026-01-28*

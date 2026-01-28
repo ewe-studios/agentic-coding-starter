@@ -9,29 +9,65 @@
 
 ## Skill References (MANDATORY)
 
-### For Implementation Work ✅
+**ALL Rust skills MUST be consulted based on task type. Load skills selectively to optimize context.**
+
+### Project Setup & Configuration ⚙️
+
+**Read BEFORE setting up new Rust projects or configuring toolchain:**
+
+- [`rust-directory-and-configuration`](../skills/rust-directory-and-configuration/skill.md)
+  - Rust toolchain installation and configuration
+  - Project structure and module organization
+  - Cargo.toml profile optimizations (release, dev, test, bench)
+  - rust-toolchain.toml for version pinning
+  - Professional rustfmt and clippy configurations
+  - .cargo/config.toml for faster linking (lld/mold)
+  - Additional development tools (cargo-audit, cargo-deny, cargo-nextest, etc.)
+
+### Implementation Work 🔨
 
 **Read BEFORE implementing any new features:**
 
-1. [`rust-clean-implementation`](../skills/rust-clean-implementation/skill.md) - WHY/WHAT/HOW documentation, derive_more error patterns, no_std/std hybrid library strategies from Learning Log
-2. **Examples**: [`.agents/skills/rust-clean-implementation/examples/`](../skills/rust-clean-implementation/examples/)
-3. MANDATORY reading of [`rust-coding-practice-agent-guide.md`](./rules/05-coding-practice-agent-orchestration.md) for implementation agent guidance
+- [`rust-clean-implementation`](../skills/rust-clean-implementation/skill.md)
+  - WHY/WHAT/HOW documentation patterns with panic documentation
+  - derive_more error handling patterns
+  - no_std/std hybrid library strategies
+  - Naming conventions (RFC 430) for types, generics, lifetimes
+  - #[must_use] attribute patterns
+  - Performance patterns (SmallVec, inline hints, allocation reduction)
+  - Security best practices (input validation, secrets management)
+  - Iterator patterns and trait implementations
+  - Type system mastery (newtypes, builders, type states)
+  - **Examples**: [`.agents/skills/rust-clean-implementation/examples/`](../skills/rust-clean-implementation/examples/)
 
-### For Testing Work ✅
+### Testing Work 🧪
 
 **Read BEFORE writing or reviewing tests:**
 
-1. [`rust-testing-excellence`](../skills/rust-testing-excellence/skill.md) - Test location conventions, feature-gated modules, validation patterns from Learning Log
-2. **Examples**: [`.agents/skills/rust-testing-excellence/examples/`](../skills/rust-testing-excellence/examples/)
-3. MANDATORY reading of [`rust-verification-workflow-complete-guide.md`](./rules/08-verification-workflow-complete-guide.md) for testing verification
+- [`rust-testing-excellence`](../skills/rust-testing-excellence/skill.md)
+  - Test location conventions (unit, integration, benchmarks)
+  - Three test validations: input, output, error paths
+  - Feature-gated test modules (NOT individual attributes)
+  - Property-based testing with proptest
+  - Anti-pattern: muted variables without assertions
+  - Async test isolation with current_thread flavor
+  - Test helper functions and organization
+  - **Examples**: [`.agents/skills/rust-testing-excellence/examples/`](../skills/rust-testing-excellence/examples/)
 
-### For Async/Tokio Work ✅
+### Async/Tokio Work ⚡
 
 **Read BEFORE implementing async code:**
 
-1. [`rust-with-async-code`](../skills/rust-with-async-code/skill.md) - Non-blocking I/O patterns, task spawning with tokio channels, spawn_blocking usage
-2. **Examples**: [`.agents/skills/rust-with-async-code/examples/`](../skills/rust-with-async-code/examples/)
-3. MANDATORY reading of [`rust-coding-practice-agent-guide.md`](./rules/05-coding-practice-agent-orchestration.md) for async agent guidance
+- [`rust-with-async-code`](../skills/rust-with-async-code/skill.md)
+  - Core principle: Never block the event loop
+  - Non-blocking I/O with timeouts
+  - spawn_blocking for CPU-intensive work
+  - Async test isolation (MANDATORY: current_thread flavor)
+  - Channel patterns (unbounded, bounded, broadcast)
+  - Task management and select! patterns
+  - Common pitfalls (blocking, holding locks across await)
+  - Stream processing patterns
+  - **Examples**: [`.agents/skills/rust-with-async-code/examples/`](../skills/rust-with-async-code/examples/)
 
 ## Tooling Standards (Reference Only)
 
@@ -79,4 +115,4 @@ For managing complex feature combinations:
 ---
 
 *Created: 2026-01-11*
-*Last Updated: 2026-01-27 - Consolidated content into specialized skills (implementation/testing/async)*
+*Last Updated: 2026-01-28 - Enhanced with complete skill references and professional configuration patterns*

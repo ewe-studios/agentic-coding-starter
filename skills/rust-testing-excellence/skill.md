@@ -12,7 +12,8 @@ tags:
   - rust
   - testing
   - validation
-files: []
+files:
+  - examples/intro-to-property-based-testing.md: "Complete beginner to advanced guide on property-based testing with proptest"
 ---
 
 # Rust Testing Excellence
@@ -512,6 +513,12 @@ Tests are considered valid when they:
 **Standard:** All tests must validate actual outputs, not just execute code paths.
 
 ---
+
+## Examples
+
+See `examples/` directory for comprehensive guides:
+
+- `intro-to-property-based-testing.md` - **Complete beginner to advanced guide** on property-based testing with proptest, including exercises and real-world examples
 
 ## Related Skills
 

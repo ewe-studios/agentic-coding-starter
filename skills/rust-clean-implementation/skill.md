@@ -1,316 +1,1024 @@
 ---
 name: "Rust Clean Implementation"
-description: "Implement clean, clear Rust code with proper WHY/WHAT/HOW documentation patterns, panic handling that articulates behaviors and exceptions, preferring result-based returns over unwrap or expect."
+description: "Write clean, well-documented Rust code with proper error handling and no_std/std support"
 approved: No
 created: 2026-01-27
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "1.0"
-  last_updated: "2026-01-27"
-  tags:
-    - rust
-    - clean-code
-    - documentation
-    - error-handling
-tools:
-  - Rust
-  - Cargo
+  version: "3.0-restructured"
+  last_updated: "2026-01-28"
+tags:
+  - rust
+  - clean-code
+  - documentation
+  - error-handling
+  - no_std
 files:
-  - examples/writing-clear-docs.rs: "Example of WHY/WHAT/HOW doc comments and panic docs"
-assets:
+  - examples/documentation-patterns.md: WHY/WHAT/HOW doc comment patterns
+  - examples/error-handling-guide.md: Error handling with derive_more
+  - examples/security-guide.md: Security best practices
+  - examples/iterator-patterns.md: Iterator and trait implementation patterns
+  - examples/basic-template.md: Basic implementation template
 ---
-# Clean Implementation in Rust
 
-## Overview
-
-This skill guides the implementation of clean, clear Rust code with proper documentation patterns. Every function must articulate its **WHY** (purpose), **WHAT** (behavior/responsibilities), and **HOW** (implementation approach) through comprehensive doc comments.
-
-The goal is to produce self-documenting code where behavior expectations are explicit before reading any logic details.
+# Rust Clean Implementation
 
 ## When to Use This Skill
 
-- Implementing new Rust modules or functions
-- Refactoring existing code with unclear documentation
-- Writing public APIs that need clear contracts
-- Creating libraries intended for reuse by others
-- Any situation requiring precise specification of error conditions and panic behaviors
+Read this skill when **implementing new Rust code** (not tests or async). This covers:
 
-## Prerequisites
+- Writing new modules and functions
+- Documenting code with WHY/WHAT/HOW pattern
+- Error handling with `derive_more`
+- Supporting both `no_std` and `std` environments
+- Security best practices
 
-- Basic understanding of Rust ownership, borrowing, and lifetimes
-- Familiarity with the `rust.md` stack file conventions (mandatory)
-- Understanding of Result<T, E> vs Option<T> patterns in idiomatic Rust
-
-## Core Concepts
-
-### WHY/WHAT/HOW Documentation Pattern
-
-Every public function must contain three clear sections:
-
-1. **WHY** - Why does this exist? What problem does it solve?
-2. **WHAT** - What behavior is expected? Inputs, outputs, side effects
-3. **HOW** - How does it work internally? Key algorithmic decisions or design choices
-
-### Panic Documentation Standards
-
-Panic scenarios must be documented with explicit preconditions:
-
-```rust
-/// # Panics
-///
-/// * When `index >= self.len()` when accessing by index
-/// * When the underlying resource has been invalidated (see [Self::validate] for details)
-```
-
-This articulates:
-- The exact precondition that will cause panic
-- Any additional conditions related to external state
-
-### Result-Based Error Handling
-
-**MANDATORY**: Never use `unwrap()` or `expect()` in production code. All error paths must be handled explicitly.
-
-For libraries: Use **thiserror** for deriving custom error types with proper messages.
-```rust
-use thiserror::Error;
-
-#[derive(Error, Debug)]
-pub enum MyError {
-    #[error("Invalid input length: expected {expected}, got {actual}")]
-    InvalidLength { expected: usize, actual: usize },
-}
-```
-
-For applications: Use **anyhow** for context-rich error propagation.
-```rust
-use anyhow::{Context, Result};
-
-fn process() -> Result<()> {
-    let data = fs::read_to_string("config.toml")
-        .context("Failed to read configuration file")?;
-    // ...
-    Ok(())
-}
-```
-
-## Step-by-Step Guide
-
-### Step 1: Write the WHY/WHAT/HOW Documentation First
-
-Before writing any implementation, draft doc comments:
-
-```rust
-/// # Purpose (WHY)
-///
-/// This function validates user input before database insertion. It ensures data integrity by
-/// checking format constraints and business rules.
-impl DataValidator {
-    /// Validates a username according to system policy requirements.
-
-    /// Args:
-    ///
-    /// * `username` - The username string to validate, must be non-empty ASCII text
-
-    /// Returns:
-    ///
-    /// A validated Username struct if all checks pass; error otherwise
-    pub fn validate_username(&self, username: &str) -> Result<Username> {
-        // Implementation...
-    }
-}
-```
-
-### Step 2: Document Panic Scenarios Explicitly
-
-Identify every panic point and document it:
-
-```rust
-/// # Panics
-///
-/// This function will panic if:
-///
-/// * `username` is empty - usernames must contain at least one character per [USERNAME_FORMAT]
-fn validate_required_field(value: &str) -> Result<&str> {
-    value.parse().map_err(|_| ValidationError::EmptyField)?
-}
-```
-
-### Step 3: Use Result<T, E> for All Error Paths
-
-Never silently ignore errors. Either handle or propagate:
-
-```rust
-// BAD - Silent error suppression
-fn process(input: &str) -> Option<bool> {
-    let parsed = input.parse::<i64>().unwrap(); // PANIC if parse fails!
-    Some(parsed > 0)
-}
-
-// GOOD - Explicit handling with Result
-fn process(input: &str) -> Result<bool, ParseError> {
-    let parsed = input.parse::<i64>()
-        .map_err(|_| ParseError::InvalidFormat)?;
-    Ok(parsed > 0)
-}
-```
-
-### Step 4: Explain Error Variants Clearly
-
-```rust
-#[derive(Debug)]
-pub enum ValidationError {
-    /// Input contains invalid characters (per [SPECIFICATION_REGEX])
-    InvalidCharacters { input: String, pattern: &'static str },
-
-    /// Length exceeds maximum allowed size
-    TooLong { max_length: usize, actual_length: usize },
-
-    /// Required field is missing or empty after trimming whitespace
-    EmptyField,
-}
-```
-
-### Step 5: Document Edge Cases and Assumptions
-
-```rust
-/// # Errors
-///
-/// * `index` out of bounds - returns [None] rather than panicking (see behavior note)
-fn get_or_default(index: usize) -> Option<&T> {
-    self.data.get(index).or(Some(&self.default_value))
-}
-
-/// Note: This function never panics for invalid indices, always returning None.
-```
-
-## Common Patterns
-
-### Pattern 1: Result Propagation with Context
-
-```rust
-use anyhow::{Context, Result};
-
-pub async fn fetch_config() -> Result<Config> {
-    let content = tokio::fs::read_to_string("config.yaml")
-        .await
-        .context("Failed to read configuration file")?;
-
-    serde_yaml::from_str(&content)
-        .context("Configuration YAML is malformed and cannot be parsed")
-}
-```
-
-### Pattern 2: Panic Documentation Template
-
-```rust
-/// # Panics
-///
-/// This function will panic if:
-///
-/// * `index` >= `self.len()` when accessing by index - caller must validate bounds first
-/// * The underlying database transaction has been rolled back externally (see [Self::validate] for details)
-fn get_at_index(&self, index: usize) -> T {
-    // Implementation that assumes valid input per precondition docs above
-}
-```
-
-### Pattern 3: Builder Pattern with Clear Error Messages
-
-```rust
-impl ConfigBuilder {
-    /// Creates a new builder instance.
-    ///
-    /// Args:
-    ///
-    /// * `default_port` - Default port to use if not specified (must be >= 1 and <= 65535)
-    pub fn new(default_port: u16) -> Self {
-        // Implementation...
-    }
-
-    /// Sets the server bind address.
-    ///
-    /// Must be a valid IPv4 or IPv6 address string. Invalid addresses will produce
-    /// an error via [Self::error] indicating which parsing step failed (address vs port).
-    pub fn with_address(mut self, addr: SocketAddr) -> Result<Self> {
-        // Implementation...
-    }
-}
-```
-
-## Pitfalls to Avoid
-
-### ❌ Bad Documentation - Missing WHY/WHAT/HOW Structure
-```rust
-/// Returns the user by id.
-fn get_user(id: u32) -> User { /* ... */ }
-// What? How? Why?
-```
-
-**✓ Good**: Explicit sections for each aspect.
-
-### ❌ Silent Error Ignoration with unwrap()
-```rust
-let result = some_operation().unwrap(); // PANIC if error!
-if let Ok(value) = parse(input) {
-    return value;
-}
-return None; // Lost the error info entirely
-```
-
-**✓ Good**: Explicit handling:
-```rust
-match parse(input)? {  // Propagate with ?
-    Some(v) => v,
-    None => Err(ParseError::InvalidFormat),
-}
-```
-
-### ❌ Vague Panic Documentation
-
-Panic docs must be precise, not vague.
-
-❌ `// Panics if invalid input`
-✓: `"Panics when the underlying file handle is closed externally (see [Self::validate] for details)"`
-
-## Examples
-
-```rust
-use thiserror::Error;
-use std::path::PathBuf;
-
-/// # Purpose (WHY)
-///
-/// Validates and loads a configuration file from disk. Ensures all required fields are present,
-/// values follow business rules, and the structure is consistent with [CONFIG_SCHEMA].
-impl ConfigLoader {
-    /// Loads application configuration.
-
-    /// Args:
-    ///
-    /// * `config_path` - Path to YAML configuration file; must exist on filesystem
-
-    /// Returns:
-    ///
-    /// Parsed Configuration struct if validation passes
-    pub fn load(&self, config_path: &Path) -> Result<Configuration> {
-        // Implementation...
-    }
-}
-
-/// # Errors
-///
-/// * `config_path` does not exist - see [std::fs::read_to_string] for file system errors
-/// * File is empty or contains only whitespace
-impl ConfigLoader {}
-```
-
-## References
-
-- [`rust.md`](../stacks/rust.md) - Comprehensive Rust conventions (MANDATORY reading)
-- The `thiserror` crate documentation: https://docs.rs/thiserror/latest/thiserror/
-- The `anyhow` crate documentation: https://docs.rs/anyhow/latest/anyhow/
+**Do NOT read this for:**
+- Testing → See [rust-testing-excellence](../rust-testing-excellence/skill.md)
+- Async code → See [rust-with-async-code](../rust-with-async-code/skill.md)
 
 ---
 
-*Created: 2026-01-27*
+## Core Principles
+
+### 1. Documentation: WHY/WHAT/HOW Pattern
+
+Every public function should explain:
+- **WHY** it exists (purpose/business reason)
+- **WHAT** it does (summary of behavior)
+- **HOW** to use it (arguments, returns, errors, examples)
+
+```rust
+/// # Purpose (WHY)
+///
+/// Validates user input before database insertion to prevent invalid state
+/// from entering persistent storage.
+///
+/// # Arguments (WHAT)
+///
+/// * `username` - Unique username (must be 3+ chars per USERNAME_POLICY)
+/// * `email` - User email for notifications (RFC 5322 format)
+///
+/// # Returns (HOW)
+///
+/// User ID on success
+///
+/// # Errors
+///
+/// * `ValidationError::UsernameTooShort` - Username < 3 characters
+/// * `ValidationError::InvalidEmailFormat` - Email doesn't match pattern
+pub fn register_user(username: &str, email: &str) -> Result<u64, ValidationError> {
+    // Implementation...
+}
+```
+
+### 2. Error Handling: Use derive_more
+
+**MANDATORY:** Use `derive_more::From` for error types. Never use `thiserror` or `anyhow` in libraries.
+
+```rust
+use derive_more::From;
+
+/// Application errors with automatic From conversions
+#[derive(Debug, From)]
+pub enum AppError {
+    /// Configuration file not found at path
+    ConfigNotFound(std::path::PathBuf),
+
+    /// I/O error (automatic From<std::io::Error>)
+    Io(#[from] std::io::Error),
+
+    /// Invalid configuration format
+    InvalidConfig(String),
+}
+
+impl std::fmt::Display for AppError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Self::ConfigNotFound(path) => write!(f, "config not found: {:?}", path),
+            Self::Io(e) => write!(f, "I/O error: {}", e),
+            Self::InvalidConfig(msg) => write!(f, "invalid config: {}", msg),
+        }
+    }
+}
+
+impl std::error::Error for AppError {}
+
+// Usage with ? operator
+fn load_config(path: &Path) -> Result<Config, AppError> {
+    let content = std::fs::read_to_string(path)?; // Automatic conversion
+    parse_config(&content)
+}
+```
+
+### 3. No Unwrap in Production
+
+**FORBIDDEN:** Never use `.unwrap()` or `.expect()` in production code paths.
+
+```rust
+// BAD ❌
+let value = option.unwrap();
+let result = operation().expect("should never fail");
+
+// GOOD ✅
+let value = option.ok_or(Error::NotFound)?;
+let result = operation()?;
+let value = match result {
+    Ok(v) => v,
+    Err(e) => {
+        log::error!("operation failed: {}", e);
+        return Err(Error::OperationFailed);
+    }
+};
+```
+
+**Exception:** Tests and truly impossible cases only.
+
+```rust
+#[cfg(test)]
+fn test_something() {
+    let value = result.unwrap(); // OK in tests
+}
+
+// Only when mathematically impossible
+let idx = value.checked_sub(1)
+    .expect("value is always > 0 per invariant");
+```
+
+---
+
+## No_std / Std Support
+
+### Strategy for Hybrid Libraries
+
+Use Cargo features to support both environments:
+
+```toml
+# Cargo.toml
+[features]
+default = []
+std = []
+
+[dependencies]
+# no_std compatible dependencies
+```
+
+### Implementation Decision Tree
+
+1. **For no_std-specific features:**
+   - ✅ Always implement from scratch using `core` and atomics
+   - Use `#[cfg(not(feature = "std"))]`
+
+2. **For std-available features:**
+   - ✅ **If std type sufficient:** Re-export it directly
+   - ✅ **If custom methods needed:** Wrap std type
+   - ❌ **Don't reimplement** unless explicitly required
+
+### Pattern 1: Re-export std Type
+
+```rust
+// GOOD: Use std type when it does everything needed
+#[cfg(feature = "std")]
+pub use std::sync::Mutex;
+
+#[cfg(not(feature = "std"))]
+pub struct Mutex<T> {
+    // Custom no_std implementation using atomics
+}
+```
+
+### Pattern 2: Wrap std Type for Additional Methods
+
+```rust
+#[cfg(feature = "std")]
+pub struct EnhancedMutex<T> {
+    inner: std::sync::Mutex<T>,
+}
+
+#[cfg(feature = "std")]
+impl<T> EnhancedMutex<T> {
+    pub fn try_lock_for(&self, duration: Duration) -> Option<MutexGuard<T>> {
+        // Custom method not in std::sync::Mutex
+    }
+
+    // Delegate standard methods
+    pub fn lock(&self) -> LockResult<MutexGuard<T>> {
+        self.inner.lock()
+    }
+}
+
+#[cfg(not(feature = "std"))]
+pub struct EnhancedMutex<T> {
+    // Custom no_std implementation
+}
+```
+
+### Compatibility Layers (Advanced)
+
+For complex type interactions (e.g., Mutex + CondVar), create compatibility modules:
+
+```rust
+// In foundation_nostd/src/comp/condvar_comp.rs
+#[cfg(feature = "std")]
+pub use std::sync::{Mutex, Condvar as CondVar};
+
+#[cfg(not(feature = "std"))]
+pub use crate::primitives::condvar::{CondVarMutex as Mutex, CondVar};
+
+// Consuming code - simple, no feature gates
+use foundation_nostd::comp::condvar_comp::{Mutex, CondVar};
+```
+
+**Key Principle:** Move complexity to dependencies, keep consuming code simple.
+
+---
+
+## Security Best Practices
+
+### Input Validation
+
+Always validate untrusted input:
+
+```rust
+const MAX_INPUT_LENGTH: usize = 1024;
+
+pub fn process_user_input(input: &str) -> Result<String, SecurityError> {
+    // Length check (DoS prevention)
+    if input.len() > MAX_INPUT_LENGTH {
+        return Err(SecurityError::InputTooLong);
+    }
+
+    // Character whitelist (not blacklist!)
+    const VALID_CHARS: &[u8] = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
+    for &byte in input.as_bytes() {
+        if !VALID_CHARS.contains(&byte) {
+            return Err(SecurityError::InvalidCharacter(byte));
+        }
+    }
+
+    Ok(input.trim().to_string())
+}
+```
+
+### Secrets Management
+
+Use `secrecy` crate to prevent secrets from appearing in logs:
+
+```rust
+use secrecy::{Secret, ExposeSecret};
+
+struct Config {
+    api_key: Secret<String>,
+}
+
+impl Config {
+    fn make_request(&self) -> Result<Response> {
+        let key = self.api_key.expose_secret(); // Explicit exposure
+        // Use key...
+        Ok(Response::default())
+    }
+}
+// Secret won't appear in Debug output
+```
+
+### SQL Injection Prevention
+
+Always use parameterized queries:
+
+```rust
+// GOOD ✅ Parameterized query
+async fn get_user_safe(pool: &PgPool, user_id: i64) -> Result<User> {
+    sqlx::query_as::<_, User>("SELECT * FROM users WHERE id = $1")
+        .bind(user_id)
+        .fetch_one(pool)
+        .await
+}
+
+// BAD ❌ String interpolation
+async fn get_user_unsafe(pool: &PgPool, username: &str) -> Result<User> {
+    let query = format!("SELECT * FROM users WHERE name = '{}'", username);
+    // VULNERABLE TO INJECTION!
+}
+```
+
+### Command Injection Prevention
+
+Use argument arrays, not shell:
+
+```rust
+// GOOD ✅ Safe command execution
+fn run_safe(file_path: &Path) -> Result<Vec<u8>> {
+    let output = Command::new("process")
+        .arg(file_path) // Safe: passed directly, no shell
+        .output()?;
+    Ok(output.stdout)
+}
+
+// BAD ❌ Shell injection
+fn run_unsafe(cmd: &str, arg: &str) -> Result<Vec<u8>> {
+    Command::new("sh")
+        .arg("-c")
+        .arg(format!("{} {}", cmd, arg)) // VULNERABLE!
+        .output()?;
+}
+```
+
+---
+
+## Iterator Best Practices
+
+### Avoid Unnecessary Collections
+
+```rust
+// BAD ❌ Unnecessary allocation
+let has_even = numbers.iter()
+    .filter(|&&x| x % 2 == 0)
+    .collect::<Vec<_>>() // Allocates!
+    .len() > 0;
+
+// GOOD ✅ Short-circuits, no allocation
+let has_even = numbers.iter().any(|&x| x % 2 == 0);
+
+// BAD ❌ Collect just to iterate again
+let uppercase: Vec<_> = names.iter()
+    .map(|s| s.to_uppercase())
+    .collect(); // Unnecessary
+for name in uppercase {
+    println!("{}", name);
+}
+
+// GOOD ✅ Iterate directly
+for name in names.iter().map(|s| s.to_uppercase()) {
+    println!("{}", name);
+}
+```
+
+### Common Combinators
+
+```rust
+let result: Vec<_> = numbers
+    .iter()
+    .filter(|&&x| x > 0)        // Keep positive only
+    .map(|&x| x * 2)             // Double each
+    .take(10)                    // First 10 only
+    .collect();
+
+// Side effects without collection
+numbers.iter()
+    .filter(|&&x| x > 100)
+    .for_each(|x| println!("{}", x));
+
+// Accumulation
+let sum = numbers.iter().fold(0, |acc, &x| acc + x);
+
+// Partition
+let (evens, odds): (Vec<_>, Vec<_>) =
+    numbers.iter().partition(|&&x| x % 2 == 0);
+```
+
+### Custom Iterators
+
+```rust
+pub struct Fibonacci {
+    curr: u64,
+    next: u64,
+}
+
+impl Iterator for Fibonacci {
+    type Item = u64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let current = self.curr;
+        self.curr = self.next;
+        self.next += current;
+        Some(current)
+    }
+}
+
+// Usage
+for num in Fibonacci::new().take(10) {
+    println!("{}", num);
+}
+```
+
+---
+
+## Trait Implementation
+
+### Standard Traits
+
+Always implement when applicable:
+
+```rust
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct User {
+    pub id: UserId,
+    pub name: String,
+}
+
+// Display for user-facing output
+impl fmt::Display for User {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "User(id={}, name={})", self.id, self.name)
+    }
+}
+
+// From for convenient conversions
+impl From<UserDto> for User {
+    fn from(dto: UserDto) -> Self {
+        Self {
+            id: UserId::from(dto.id),
+            name: dto.name,
+        }
+    }
+}
+
+// TryFrom for fallible conversions
+impl TryFrom<&str> for UserId {
+    type Error = ParseError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        uuid::Uuid::parse_str(s)
+            .map(UserId)
+            .map_err(|_| ParseError::InvalidUuid)
+    }
+}
+```
+
+### Trait Bounds
+
+Use `where` clauses for complex bounds:
+
+```rust
+fn process<T>(item: T) -> Result<Output>
+where
+    T: Serialize + DeserializeOwned + Send + Sync + 'static,
+{
+    // Implementation
+}
+```
+
+### Avoid Over-Generic Code
+
+```rust
+// BAD ❌ Too generic
+fn do_thing<T, U, V, F, G>(t: T, f: F, g: G) -> Result<V>
+where
+    T: Into<U>,
+    U: SomeTrait,
+    F: Fn(U) -> V,
+    G: Fn(Error) -> Error,
+{
+    // Hard to understand
+}
+
+// GOOD ✅ Concrete types
+fn transform_user(
+    user_dto: UserDto,
+    transformer: impl Fn(UserDto) -> User,
+) -> Result<User, ValidationError> {
+    let user = transformer(user_dto);
+    validate_user(&user)?;
+    Ok(user)
+}
+```
+
+---
+
+## Performance Tips
+
+### Allocation Reduction
+
+```rust
+// BAD ❌ Many allocations
+fn build_message(parts: &[&str]) -> String {
+    let mut msg = String::new();
+    for part in parts {
+        msg = msg + part; // Reallocates each time!
+    }
+    msg
+}
+
+// GOOD ✅ Pre-allocate
+fn build_message(parts: &[&str]) -> String {
+    let total_len: usize = parts.iter().map(|s| s.len()).sum();
+    let mut msg = String::with_capacity(total_len);
+    for part in parts {
+        msg.push_str(part);
+    }
+    msg
+}
+
+// BEST ✅ Use join
+fn build_message(parts: &[&str]) -> String {
+    parts.join("")
+}
+```
+
+### Stack vs Heap
+
+```rust
+// Stack for small arrays
+let buffer: [u8; 1024] = [0; 1024];
+
+// Heap for dynamic/large data
+let large_buffer = vec![0u8; 1024 * 1024];
+
+// Box for large structs
+let large_struct = Box::new(VeryLargeStruct::default());
+```
+
+---
+
+## Advanced Topics
+
+### Type System Mastery
+
+#### Newtype Pattern for Type Safety
+
+Use newtypes to prevent mixing up similar types:
+
+```rust
+// EXCELLENT: Use newtypes to prevent mixing up similar types
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct UserId(uuid::Uuid);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct SessionId(uuid::Uuid);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct ProductId(uuid::Uuid);
+
+impl UserId {
+    pub fn new() -> Self {
+        Self(uuid::Uuid::new_v4())
+    }
+
+    pub fn from_str(s: &str) -> Result<Self, uuid::Error> {
+        Ok(Self(uuid::Uuid::parse_str(s)?))
+    }
+}
+
+// Now this won't compile (type safety!):
+fn get_user(id: UserId) -> User { /* ... */ }
+let product_id = ProductId::new();
+// get_user(product_id);  // Compile error! Can't mix types
+```
+
+#### Builder Pattern for Complex Construction
+
+```rust
+pub struct ServerConfig {
+    host: String,
+    port: u16,
+    max_connections: usize,
+    timeout: Duration,
+    tls_config: Option<TlsConfig>,
+}
+
+impl ServerConfig {
+    pub fn builder() -> ServerConfigBuilder {
+        ServerConfigBuilder::default()
+    }
+}
+
+#[derive(Default)]
+pub struct ServerConfigBuilder {
+    host: Option<String>,
+    port: Option<u16>,
+    max_connections: Option<usize>,
+    timeout: Option<Duration>,
+    tls_config: Option<TlsConfig>,
+}
+
+impl ServerConfigBuilder {
+    pub fn host(mut self, host: impl Into<String>) -> Self {
+        self.host = Some(host.into());
+        self
+    }
+
+    pub fn port(mut self, port: u16) -> Self {
+        self.port = Some(port);
+        self
+    }
+
+    pub fn build(self) -> Result<ServerConfig, ConfigError> {
+        Ok(ServerConfig {
+            host: self.host.ok_or(ConfigError::MissingHost)?,
+            port: self.port.unwrap_or(8080),
+            max_connections: self.max_connections.unwrap_or(100),
+            timeout: self.timeout.unwrap_or(Duration::from_secs(30)),
+            tls_config: self.tls_config,
+        })
+    }
+}
+
+// Usage
+let config = ServerConfig::builder()
+    .host("localhost")
+    .port(3000)
+    .max_connections(500)
+    .build()?;
+```
+
+#### State Machines with Type States
+
+```rust
+// EXCELLENT: Use type states to make invalid states unrepresentable
+pub struct Connection<State> {
+    socket: TcpStream,
+    state: PhantomData<State>,
+}
+
+pub struct Disconnected;
+pub struct Connected;
+pub struct Authenticated;
+
+impl Connection<Disconnected> {
+    pub fn new(addr: &str) -> Result<Self, Error> {
+        Ok(Self {
+            socket: TcpStream::connect(addr)?,
+            state: PhantomData,
+        })
+    }
+
+    pub fn connect(self) -> Result<Connection<Connected>, Error> {
+        // Perform connection handshake
+        Ok(Connection {
+            socket: self.socket,
+            state: PhantomData,
+        })
+    }
+}
+
+impl Connection<Connected> {
+    pub fn authenticate(
+        self,
+        credentials: &Credentials,
+    ) -> Result<Connection<Authenticated>, Error> {
+        // Perform authentication
+        Ok(Connection {
+            socket: self.socket,
+            state: PhantomData,
+        })
+    }
+}
+
+impl Connection<Authenticated> {
+    pub fn send_message(&mut self, msg: &Message) -> Result<(), Error> {
+        // Only authenticated connections can send messages
+        Ok(())
+    }
+}
+
+// Usage - compile-time state checking!
+let conn = Connection::<Disconnected>::new("localhost:8080")?;
+// conn.send_message(&msg)?;  // Compile error! Not authenticated
+let conn = conn.connect()?;
+let mut conn = conn.authenticate(&creds)?;
+conn.send_message(&msg)?;  // OK!
+```
+
+### Ownership, Borrowing, and Lifetimes
+
+#### Smart Pointer Usage
+
+```rust
+use std::rc::Rc;
+use std::sync::Arc;
+use std::cell::{RefCell, Cell};
+
+// Arc for thread-safe shared ownership
+let data = Arc::new(expensive_data);
+let data_clone = Arc::clone(&data);
+thread::spawn(move || {
+    process(data_clone);
+});
+
+// Rc for single-threaded shared ownership
+let config = Rc::new(Config::load()?);
+let service1 = Service::new(Rc::clone(&config));
+let service2 = Service::new(Rc::clone(&config));
+
+// RefCell for interior mutability (single-threaded)
+let cache = RefCell::new(HashMap::new());
+cache.borrow_mut().insert(key, value);
+let val = cache.borrow().get(&key).cloned();
+
+// Cell for Copy types
+let counter = Cell::new(0);
+counter.set(counter.get() + 1);
+```
+
+#### Lifetime Elision and Complex Lifetimes
+
+```rust
+// No lifetime annotations needed - elision rule 1
+fn first_word(s: &str) -> &str {
+    s.split_whitespace().next().unwrap_or("")
+}
+
+// Explicit lifetimes for multiple inputs
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() { x } else { y }
+}
+
+// Complex lifetime relationships
+fn parse_header<'input, 'headers>(
+    input: &'input [u8],
+    headers: &'headers mut HeaderMap,
+) -> Result<&'input [u8], Error>
+where
+    'input: 'headers,  // 'input outlives 'headers
+{
+    Ok(input)
+}
+```
+
+#### Avoiding Unnecessary Clones
+
+```rust
+// BAD: Cloning everything
+fn process_data(data: Vec<String>) -> Vec<String> {
+    data.iter()
+        .map(|s| s.clone().to_uppercase())  // Unnecessary clone!
+        .collect()
+}
+
+// GOOD: Use references
+fn process_data(data: &[String]) -> Vec<String> {
+    data.iter()
+        .map(|s| s.to_uppercase())  // No clone needed
+        .collect()
+}
+
+// EXCELLENT: Use Cow for conditional cloning
+use std::borrow::Cow;
+
+fn normalize<'a>(input: &'a str) -> Cow<'a, str> {
+    if input.chars().all(|c| c.is_lowercase()) {
+        Cow::Borrowed(input)  // No allocation!
+    } else {
+        Cow::Owned(input.to_lowercase())  // Allocate only when needed
+    }
+}
+```
+
+### Common Pitfalls
+
+#### Pitfall 1: String Handling Inefficiency
+
+```rust
+// BAD
+fn process(s: String) -> String {
+    s.to_uppercase()  // Takes ownership, caller must clone
+}
+
+// GOOD
+fn process(s: &str) -> String {
+    s.to_uppercase()  // Borrows, no clone needed
+}
+
+// EXCELLENT: Return Cow for zero-copy when possible
+fn process(s: &str) -> Cow<'_, str> {
+    if s.is_empty() {
+        Cow::Borrowed(s)
+    } else {
+        Cow::Owned(s.to_uppercase())
+    }
+}
+```
+
+#### Pitfall 2: Mutex Deadlocks
+
+```rust
+// BAD: Holding lock across await
+let data = mutex.lock().unwrap();
+something_async().await;  // Still holding lock!
+drop(data);
+
+// GOOD: Drop lock before await
+let data = {
+    let guard = mutex.lock().unwrap();
+    guard.clone()
+};  // Lock dropped here
+something_async().await;
+
+// EXCELLENT: Use Tokio's async-aware Mutex
+let data = mutex.lock().await;
+something_async().await;
+drop(data);
+```
+
+#### Pitfall 3: Collecting Unnecessarily
+
+```rust
+// BAD
+let sum = numbers
+    .iter()
+    .map(|x| x * 2)
+    .collect::<Vec<_>>()  // Unnecessary allocation!
+    .iter()
+    .sum();
+
+// GOOD
+let sum: i32 = numbers
+    .iter()
+    .map(|x| x * 2)
+    .sum();  // Direct sum, no allocation
+```
+
+#### Pitfall 4: Large Stack Allocations
+
+```rust
+// BAD: Can cause stack overflow
+let big_array = [0u8; 1024 * 1024];  // 1MB on stack!
+
+// GOOD: Use Vec for large data
+let big_array = vec![0u8; 1024 * 1024];  // Heap allocated
+
+// GOOD: Use Box for large structs
+let large_struct = Box::new(VeryLargeStruct::default());
+```
+
+### Macros (When Needed)
+
+```rust
+// Declarative macros for repetitive code
+macro_rules! impl_id_type {
+    ($name:ident) => {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        pub struct $name(uuid::Uuid);
+
+        impl $name {
+            pub fn new() -> Self {
+                Self(uuid::Uuid::new_v4())
+            }
+        }
+
+        impl Default for $name {
+            fn default() -> Self {
+                Self::new()
+            }
+        }
+    };
+}
+
+impl_id_type!(UserId);
+impl_id_type!(SessionId);
+impl_id_type!(ProductId);
+```
+
+### Unsafe Code (Use Sparingly)
+
+```rust
+// Only use unsafe when absolutely necessary
+// MUST document invariants and safety guarantees
+
+/// # Safety
+///
+/// The caller must ensure that:
+/// - `ptr` is valid for reads of `len` bytes
+/// - `ptr` is properly aligned
+/// - The memory referenced by `ptr` is initialized
+/// - No other threads are accessing this memory
+pub unsafe fn read_raw_bytes(ptr: *const u8, len: usize) -> Vec<u8> {
+    // SAFETY: Caller guarantees pointer validity
+    unsafe {
+        std::slice::from_raw_parts(ptr, len).to_vec()
+    }
+}
+```
+
+### FFI (Foreign Function Interface)
+
+```rust
+// When interfacing with C code
+use std::ffi::{CStr, CString};
+use std::os::raw::c_char;
+
+#[link(name = "mylib")]
+extern "C" {
+    fn external_function(input: *const c_char) -> i32;
+}
+
+pub fn safe_wrapper(input: &str) -> Result<i32, Error> {
+    let c_string = CString::new(input)?;
+
+    // SAFETY: c_string is valid C string, external_function expects C string
+    let result = unsafe { external_function(c_string.as_ptr()) };
+
+    Ok(result)
+}
+```
+
+---
+
+## Learning Log
+
+### 2026-01-28: Skill Restructuring
+
+**Issue:** Original skill.md was 2271 lines with massive duplication and mixed concerns.
+
+**Learning:** Separated concerns into focused sections. Removed 1500+ lines of duplicated verification workflow and learning log content. Created dedicated example markdown files.
+
+**New Standard:** Skills should be concise (< 500 lines), focused, and reference separate example files.
+
+### 2026-01-27: Testing Anti-Patterns
+
+**Issue:** Tests creating variables without validation.
+
+**Learning:** Every test must assert on outputs. Tests without assertions provide false confidence.
+
+**Standard:** All tests must validate actual behavior, not just call functions.
+
+### 2026-01-23: no_std/std Strategy
+
+**Issue:** Needed clear guidelines for hybrid libraries.
+
+**Learning:** Re-export std types when sufficient; only implement from scratch for no_std-specific features.
+
+**Standard:** Move complexity to compatibility layers; keep consuming code simple.
+
+### 2026-01-24: Feature-Gated Type Architecture Pattern
+
+**Issue:** Managing complex feature combinations in no_std/std hybrid libraries.
+
+**Problem:** Mixing std and no_std types directly in consuming modules creates complex feature gates everywhere.
+
+**Solution:** Create compatibility layers in higher-level dependencies.
+
+#### Pattern: Compatibility Module Approach
+
+1. Move types to higher-level dependency
+2. Implement std and no_std variants with **same API**
+3. Create compatibility module with feature-gated exports
+4. Lower modules use simple imports
+
+**Example - CondVar + Mutex Pairing:**
+
+```rust
+// BAD ❌ - Feature gates in consuming code
+#[cfg(feature = "std")]
+use std::sync::{Mutex, Condvar};
+#[cfg(not(feature = "std"))]
+use foundation_nostd::primitives::condvar::{CondVarMutex as Mutex, CondVar};
+
+// GOOD ✅ - Compatibility layer in foundation_nostd/src/comp/condvar_comp.rs
+#[cfg(feature = "std")]
+pub use std::sync::{Mutex, Condvar as CondVar};
+#[cfg(not(feature = "std"))]
+pub use crate::primitives::condvar::{CondVarMutex as Mutex, CondVar};
+
+// Consuming code - SIMPLE
+use foundation_nostd::comp::condvar_comp::{Mutex, CondVar};
+```
+
+**Benefits:**
+- Simple consuming code (no feature gates in business logic)
+- Centralized feature complexity
+- Type safety (ensures compatible types paired)
+- API consistency across std/no_std
+
+**When to Use:**
+- ✅ Types that must work together (Mutex + CondVar)
+- ✅ Complex feature combinations (ssl backends)
+- ✅ Platform-specific implementations
+- ❌ Simple single types (regular comp::Mutex fine)
+
+**Key Principle:** Move complexity up to dependency, keep consuming code simple.
+
+**Explicit Imports Requirement:** Always use explicit submodule paths, never wildcard re-exports:
+
+```rust
+// GOOD ✅ - Explicit
+use foundation_nostd::comp::basic::{Mutex, RwLock};
+use foundation_nostd::comp::condvar_comp::{Mutex, CondVar};
+
+// BAD ❌ - Ambiguous (removed)
+use foundation_nostd::comp::{Mutex, RwLock};  // Which Mutex?
+```
+
+---
+
+## Examples
+
+See `examples/` directory for detailed guides:
+
+- `documentation-patterns.md` - WHY/WHAT/HOW patterns
+- `error-handling-guide.md` - Error types with derive_more
+- `security-guide.md` - Input validation, secrets, SQL/command injection
+- `iterator-patterns.md` - Iterator combinators and custom iterators
+- `basic-template.md` - Starting template for new code
+
+## Related Skills
+
+- [Rust Testing Excellence](../rust-testing-excellence/skill.md) - For writing tests
+- [Rust with Async Code](../rust-with-async-code/skill.md) - For async/await patterns
+- [Rust Directory Setup](../rust-directory-and-configuration/skill.md) - For project setup
+
+---
+
+*Last Updated: 2026-01-28*
+*Version: 3.0-restructured*

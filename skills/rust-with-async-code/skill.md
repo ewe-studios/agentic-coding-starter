@@ -1,347 +1,456 @@
 ---
 name: "Rust with Async Code"
-description: "Writing robust futures and logic in Rust using tokio as the primary runtime, understanding when to use async vs sync code patterns."
+description: "Write robust async/await code using tokio with proper non-blocking patterns"
 approved: No
 created: 2026-01-27
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "1.0"
-  last_updated: "2026-01-27"
-  tags:
-    - rust
-    - tokio
-    - async-await
-    - futures
-tools:
-  - Rust
-  - Cargo (tokio, async-std)
+  version: "3.0-restructured"
+  last_updated: "2026-01-28"
+tags:
+  - rust
+  - tokio
+  - async
+  - concurrency
 files:
-  - examples/async-best-practices.rs: "Examples of proper async patterns and anti-patterns"
-assets:
+  - examples/async-patterns.md: Async best practices and common patterns
+  - examples/async-pitfalls.md: Common async mistakes and how to avoid them
 ---
-# Async Code in Rust
 
-## Overview
-
-This skill guides the implementation of robust asynchronous code using tokio as the primary runtime. It covers when to use async vs synchronous paths, how futures work internally, and common pitfalls like blocking operations that should be offloaded.
-
-The key principle: **async for I/O-bound operations**, **sync for CPU-intensive computation** (spawn_blocking or parallelize).
+# Rust with Async Code
 
 ## When to Use This Skill
 
-- Implementing asynchronous APIs with tokio runtime
-- Writing handlers in async web frameworks
-- Designing systems with concurrent task management
-- Deciding between synchronous and asynchronous code paths based on workload type
+Read this when **writing async/await code with tokio** (not sync or tests). This covers:
 
-## Prerequisites
+- Using tokio as async runtime
+- Non-blocking I/O patterns
+- Task spawning and coordination
+- Avoiding blocking the event loop
+- Async testing with proper isolation
 
-- Understanding of Rust ownership, borrowing, lifetimes (from `rust.md`)
-- Basic knowledge of futures trait (`Future`, `poll` conceptually)
-- Familiarity with tokio runtime concepts: single-threaded vs multi-threaded executors
-- Mandatory reading of [`rust.md`](../stacks/rust.md) for async conventions
+**Do NOT read this for:**
+- Synchronous code → See [rust-clean-implementation](../rust-clean-implementation/skill.md)
+- Testing patterns → See [rust-testing-excellence](../rust-testing-excellence/skill.md)
 
-## Core Concepts
+---
 
-### The Async/Sync Decision Matrix
+## Core Principle: Never Block the Event Loop
 
-| Operation Type | Synchronous Approach | Asynchronous (Tokio) |
-|----------------|----------------------|---------------------|
-| Blocking I/O operations | `std::fs`, blocking sockets | `tokio::net` APIs, non-blocking IO |
-| CPU-intensive work | Direct execution in sync context | Spawn via `spawn_blocking` or parallelize with rayon/loom |
-| Waiting for timers/events | Poll loops, busy-waiting | Tokio timers: `sleep()`, interval(), select! macro |
+**Use async for I/O-bound operations. Use sync or `spawn_blocking` for CPU-intensive work.**
 
-### Why tokio is the First Choice
+### Async/Sync Decision Matrix
 
-- **Mature ecosystem**: Most async Rust crates are built against tokio
-- **Non-blocking by default**: Designed to avoid blocking event loop threads
-- **Tooling support**: Strong debugging and observability tools (tokio-console, tracing)
-- **Flexibility**: Single-threaded executor for tests (`flavor = "current_thread"`), multi-threaded for production
+| Operation Type | Approach |
+|---------------|----------|
+| **I/O-bound** (network, files) | Tokio async APIs (`tokio::fs`, `tokio::net`) |
+| **CPU-intensive** (parsing, crypto) | `tokio::task::spawn_blocking` |
+| **Waiting** (timers, events) | `tokio::time::sleep`, `tokio::select!` |
+| **Blocking APIs** (std::fs, blocking sockets) | `tokio::task::spawn_blocking` |
 
-## Step-by-Step Guide
+---
 
-### Step 1: Add tokio Dependency Correctly
+## Essential Patterns
 
-```toml
-[dependencies]
-tokio = { version = "1", features = ["full"] }
+### 1. Non-Blocking I/O with Timeouts
 
-# For CPU-bound work in async contexts (alternative to spawn_blocking)
-rayon = "1.8"
-
-# Async runtime alternative for specific needs
-async-std = { version = "1.12", optional = true }
-```
-
-### Step 2: Use Single-Threaded Executor in Tests
+Always use tokio's non-blocking APIs with timeouts:
 
 ```rust
-// MANDATORY pattern for async tests - prevents test isolation issues with global state
-#[tokio::test(flavor = "current_thread")]
-async fn my_async_test() {
-    // Time doesn't advance automatically (use start_paused if needed)
-}
+use tokio::net::TcpStream;
+use tokio::time::{timeout, Duration};
 
-// With time-dependent behavior:
-#[tokio::test(flavor = "current_thread", start_paused = true)]
-async fn test_with_manual_time_advance() {
-    let before_sleep = tokio::time::Instant::now();
-    tokio::time::sleep(Duration::from_millis(100)).await;
+async fn fetch_with_timeout(url: &str) -> Result<Vec<u8>> {
+    // Non-blocking connect with timeout
+    let stream = timeout(
+        Duration::from_secs(30),
+        TcpStream::connect(url)
+    ).await??;
 
-    // Manually advance time if needed for deterministic tests
+    let mut buf = vec![0u8; 4096];
+
+    // Non-blocking read with timeout
+    let n = timeout(
+        Duration::from_secs(30),
+        stream.readable()
+    ).await?;
+
+    stream.try_read(&mut buf)?;
+
+    Ok(buf)
 }
 ```
 
-### Step 3: Offload Blocking Work to `spawn_blocking`
+### 2. Offload CPU Work with spawn_blocking
+
+**CRITICAL:** Never block the event loop with CPU-intensive work.
 
 ```rust
-// BAD - Blocks the event loop thread!
-async fn process_data_sync(data: &[u8]) -> Vec<u8> {
-    std::process::data_processing(data) // CPU-intensive, blocks everything else!
+// BAD ❌ - Blocks event loop
+async fn process_data(data: Vec<u8>) -> Vec<u8> {
+    expensive_computation(&data) // Blocks all other tasks!
+}
 
-#[tokio::test]
-async fn test_with_spawn_blocking() {
-    let result = tokio::task::spawn_blocking(|| {
-        expensive_computation()
+// GOOD ✅ - Offloads to thread pool
+async fn process_data(data: Vec<u8>) -> Result<Vec<u8>> {
+    tokio::task::spawn_blocking(move || {
+        expensive_computation(&data)
     })
-    .await
-    .expect("Task failed");
-
-    assert!(result == expected);
+    .await?
 }
 ```
 
-### Step 4: Use Non-Blocking I/O APIs
+### 3. Async Test Isolation - MANDATORY
+
+Use `current_thread` flavor to prevent test isolation issues:
 
 ```rust
-use tokio::net::{TcpListener, TcpStream};
+// GOOD ✅ - Each test gets isolated runtime
+#[tokio::test(flavor = "current_thread")]
+async fn test_async_operation() {
+    let result = process_async().await;
+    assert!(result.is_ok());
+}
 
-async fn handle_client(mut stream: TcpStream) -> Result<()> {
-    // Good - non-blocking connect with timeout
-    let addr = "127.0.0.1:8080";
-    match tokio::time::timeout(Duration::from_secs(5), stream.connect(addr)).await {
-        Ok(stream) => { /* successful connection */ }
-        Err(_) => return Err(Error::ConnectionTimeout),
-    }
-
-    // Good - read with timeout
-    let mut buf = vec![0u8; 1024];
-    match tokio::time::timeout(Duration::from_secs(30), stream.read(&mut buf)).await {
-        Ok(n) if *n > 0 => { /* successful read */ }
-        _ => return Err(Error::ReadTimeout),
-    }
-
-    // Good - write with timeout
-    let data = b"response";
-    tokio::time::timeout(Duration::from_secs(10), stream.write_all(data)).await?;
+// With manual time control
+#[tokio::test(flavor = "current_thread", start_paused = true)]
+async fn test_with_timeout() {
+    let start = tokio::time::Instant::now();
+    tokio::time::sleep(Duration::from_secs(3600)).await;
+    // An hour passed instantly in simulation!
+    assert_eq!(start.elapsed(), Duration::from_secs(3600));
 }
 ```
 
-### Step 5: Use Channels for Message Passing
+---
+
+## Channel Patterns
+
+### Unbounded Channels (No Backpressure)
+
+Use for low-frequency messages:
 
 ```rust
-use tokio::sync::{mpsc, broadcast, oneshot};
+use tokio::sync::mpsc;
 
-// Unbounded channel for producer-consumer patterns
 let (tx, mut rx) = mpsc::unbounded_channel::<Message>();
 
+// Producer - never blocks on send
 tokio::spawn(async move {
-    while let Some(msg) = rx.recv().await {  // Blocks only when empty!
-        process_message(msg).await;
+    for msg in messages {
+        tx.send(msg).ok(); // Fire and forget
     }
 });
 
-// Bounded channel with backpressure
-let (tx, mut rx) = mpsc::channel(100);  // Max 100 messages in flight
-
+// Consumer
 tokio::spawn(async move {
-    while let Some(msg) = rx.recv().await {  // Blocks when full!
-        process_message(msg).await;
+    while let Some(msg) = rx.recv().await {
+        process(msg).await;
     }
 });
 ```
 
-## Common Patterns
+### Bounded Channels (With Backpressure)
 
-### Pattern 1: Task Spawning with Join Handles
+Use for high-frequency messages to prevent memory issues:
 
 ```rust
-async fn parallel_processing(items: Vec<Item>) -> Result<Vec<Result>> {
-    use futures::future::join_all;
+// Max 100 messages in flight
+let (tx, mut rx) = mpsc::channel::<Message>(100);
 
-    let handles = items.into_iter().map(|item| async move {
-        process_item(item).await
-    });
+// Producer - blocks when channel is full (backpressure!)
+tokio::spawn(async move {
+    for msg in messages {
+        tx.send(msg).await.ok(); // Waits if full
+    }
+});
 
-    // Run up to N tasks concurrently (N determined by executor)
-    join_all(handles).await
-
-// Using rayon for true parallelism across CPU cores:
-use rayon::prelude::*;
-
-let results: Vec<_> = items.into_par_iter()
-    .map(|item| process_item(item))
-    .collect();
+// Consumer
+tokio::spawn(async move {
+    while let Some(msg) = rx.recv().await {
+        process(msg).await;
+    }
+});
 ```
 
-### Pattern 2: Select! Macro for Multiple Futures
+### Broadcast Channels (One-to-Many)
 
 ```rust
-async fn wait_for_multiple<F1, F2>(
-    fut1: F1,
-    fut2: F2) -> Result<(OutcomeA, OutcomeB)>
+use tokio::sync::broadcast;
+
+let (tx, mut rx1) = broadcast::channel::<Event>(10);
+let mut rx2 = tx.subscribe();
+
+// Publisher
+tokio::spawn(async move {
+    tx.send(Event::Started).ok();
+});
+
+// Multiple subscribers
+tokio::spawn(async move {
+    while let Ok(event) = rx1.recv().await {
+        println!("Sub1: {:?}", event);
+    }
+});
+
+tokio::spawn(async move {
+    while let Ok(event) = rx2.recv().await {
+        println!("Sub2: {:?}", event);
+    }
+});
+```
+
+---
+
+## Task Management
+
+### Spawning Concurrent Tasks
+
+```rust
+use futures::future::join_all;
+
+async fn process_all(items: Vec<Item>) -> Vec<Result<Output>> {
+    let tasks: Vec<_> = items
+        .into_iter()
+        .map(|item| {
+            tokio::spawn(async move {
+                process_item(item).await
+            })
+        })
+        .collect();
+
+    // Wait for all tasks to complete
+    join_all(tasks)
+        .await
+        .into_iter()
+        .map(|r| r.expect("task panicked"))
+        .collect()
+}
+```
+
+### Using select! for Multiple Futures
+
+```rust
+use tokio::select;
+
+async fn fetch_with_timeout(url: &str) -> Result<Response> {
+    select! {
+        result = fetch(url) => result,
+        _ = tokio::time::sleep(Duration::from_secs(30)) => {
+            Err(Error::Timeout)
+        }
+    }
+}
+
+async fn wait_for_first<A, B>(fut_a: A, fut_b: B) -> Result<()>
 where
-    F1: Future<Output = A> + Unpin,
-    F2: Future<Output = B> + Unpin,
+    A: Future<Output = Result<()>>,
+    B: Future<Output = Result<()>>,
 {
-    use futures::future::{select, Either};
-
-    let (a_result, remaining_fut) = select(fut1, fut2).await;
-
-    match a_result {
-        Either::Left(a) => Ok((a, remaining_fut.await)),  // F1 finished first
-        Either::Right(b) => Err(Error::UnexpectedB),      // Shouldn't happen here!
+    select! {
+        result = fut_a => result,
+        result = fut_b => result,
     }
 }
 ```
 
-### Pattern 3: Stream Processing
+---
+
+## Common Pitfalls
+
+### Pitfall 1: Blocking the Event Loop
 
 ```rust
-use tokio_stream::{StreamExt, StreamMap};
+// BAD ❌ - Blocks all other tasks
+async fn bad_example() {
+    let data = std::fs::read_to_string("file.txt"); // Blocks!
+    process(&data).await;
+}
 
-async fn process_events() -> Result<()> {
+// GOOD ✅ - Use async I/O
+async fn good_example() -> Result<()> {
+    let data = tokio::fs::read_to_string("file.txt").await?;
+    process(&data).await?;
+    Ok(())
+}
+
+// GOOD ✅ - Or use spawn_blocking for blocking I/O
+async fn good_example_blocking() -> Result<()> {
+    let data = tokio::task::spawn_blocking(|| {
+        std::fs::read_to_string("file.txt")
+    })
+    .await??;
+    process(&data).await?;
+    Ok(())
+}
+```
+
+### Pitfall 2: Forgetting to Await
+
+```rust
+// BAD ❌ - Future never executes
+async fn bad_example() {
+    let future = expensive_operation();
+    // Forgot .await! Future is never polled.
+    handle_result(future); // BUG!
+}
+
+// GOOD ✅ - Always await futures
+async fn good_example() -> Result<()> {
+    let result = expensive_operation().await?;
+    handle_result(result);
+    Ok(())
+}
+```
+
+### Pitfall 3: Holding Locks Across Await Points
+
+```rust
+use std::sync::Mutex;
+
+// BAD ❌ - Holding lock across await
+async fn bad_example(data: Arc<Mutex<Data>>) {
+    let guard = data.lock().unwrap();
+    something_async().await; // Still holding lock!
+    drop(guard);
+}
+
+// GOOD ✅ - Drop lock before await
+async fn good_example(data: Arc<Mutex<Data>>) {
+    let value = {
+        let guard = data.lock().unwrap();
+        guard.clone()
+    }; // Lock dropped here
+    something_async().await;
+}
+
+// BEST ✅ - Use tokio's async Mutex
+use tokio::sync::Mutex as AsyncMutex;
+
+async fn best_example(data: Arc<AsyncMutex<Data>>) {
+    let mut guard = data.lock().await;
+    something_async().await; // OK with async Mutex
+    drop(guard);
+}
+```
+
+### Pitfall 4: Using std::thread Instead of Spawning Tasks
+
+```rust
+// BAD ❌ - Creates OS thread instead of async task
+async fn bad_example() {
+    std::thread::spawn(|| {
+        std::thread::sleep(Duration::from_secs(1)); // Doesn't use async!
+    });
+}
+
+// GOOD ✅ - Use tokio::spawn for async work
+async fn good_example() {
+    tokio::spawn(async {
+        tokio::time::sleep(Duration::from_secs(1)).await;
+    });
+}
+
+// GOOD ✅ - Use spawn_blocking for blocking work
+async fn good_example_blocking() {
+    tokio::task::spawn_blocking(|| {
+        std::thread::sleep(Duration::from_secs(1)); // OK in spawn_blocking
+    })
+    .await
+    .ok();
+}
+```
+
+---
+
+## Stream Processing
+
+```rust
+use tokio_stream::StreamExt;
+
+async fn process_event_stream() -> Result<()> {
     let mut stream = event_source().await?;
 
-    while let Some(event) = stream.next().await {  // Non-blocking when no events!
+    // Process events as they arrive
+    while let Some(event) = stream.next().await {
         match handle_event(event).await {
             Ok(_) => continue,
-            Err(e) => log::error!("Failed to process: {}", e),
+            Err(e) => log::error!("Event error: {}", e),
         }
     }
 
     Ok(())
 }
-```
 
-## Pitfalls to Avoid
-
-### ❌ Bad: Blocking the Event Loop with `std` I/O in async code
-```rust
-// BAD - Blocks all other tasks!
-async fn read_file_sync(path: &str) -> Vec<u8> {
-    std::fs::read_to_string(path).unwrap()  // This blocks!
-
-#[tokio::test]
-async fn test_async_with_blocker() { /* ... */ }
-```
-
-**✓ Good:** Use tokio file APIs or spawn_blocking.
-
-### ❌ Bad: Using `std::thread` instead of `spawn_blocking`
-```rust
-// BAD - Creates OS threads, not task-local resources!
-tokio::task::spawn(|| {
-    std::thread::sleep(Duration::from_secs(1));  // Doesn't integrate with tokio runtime!
-
-#[tokio::test]
-async fn test_with_std_thread() { /* ... */ }
-```
-
-**✓ Good:** Use `tokio::task::spawn_blocking` for CPU-bound work.
-
-### ❌ Bad: Not understanding async test isolation
-```rust
-// BAD - Shared mutable state causes flaky tests!
-static SHARED_STATE: std::sync::Arc<std::sync::Mutex<usize>> = ...;
-
-#[tokio::test]
-async fn concurrent_tests() {
-    // Multiple parallel runs of this same function will race on SHARED_STATE!
-
-#[tokio::test(flavor = "current_thread")]
-async fn isolated_async_test() {  // GOOD - Each test gets its own runtime!
-```
-
-### ❌ Bad: Forgetting to await futures
-```rust
-// BAD - Future is never polled, code won't execute as written
-let result = process().await;  // If this line was missing...
-
-#[tokio::test]
-async fn example() {
-    let future = expensive_operation();
-    handle_result(future);  // BUG: This doesn't await!
-}
-```
-
-**✓ Good:** Always `?` or `.await` futures.
-
-## Examples
-
-```rust
-use tokio::sync::mpsc;
-use std::time::Duration;
-
-/// # Async HTTP Handler Pattern
-async fn fetch_and_process(url: &str) -> Result<Response> {
-    // Step 1: Non-blocking timeout for connection
-    let stream = tokio::net::TcpStream::connect(url)
-        .await
-        .context("Failed to connect")?;
-
-    // Step 2: Read with separate timeout (per-request basis)
-    let mut buf = vec![0u8; 4096];
-    match tokio::time::timeout(Duration::from_secs(30), stream.read(&mut buf)).await {
-        Ok(n) if *n > 0 => { /* success */ }
-        _ => return Err(Error::ReadTimeout),
-    }
-
-    // Step 3: Process with spawn_blocking for CPU work
-    let processed = tokio::task::spawn_blocking(|| {
-        parse_response(buf)
-    }).await?;
-
-    match processed {
-        Ok(data) if data.is_valid() => Ok(Response::new(data)),
-        Err(e) | _ => return Err(Error::ParseError),
-    }
-}
-
-/// # Channel-Based Task Coordinator
-async fn task_coordinator(num_workers: usize, tasks: Vec<Task>) -> Result<()> {
-    let (tx, mut rx) = mpsc::channel::<TaskResult>(num_workers * 2);
-
-    // Spawn worker pool
-    for i in 0..num_workers {
-        let tx_clone = tx.clone();
-        tokio::spawn(async move {
-            while let Some(task) = rx.recv().await {  // Blocks when empty, not full!
-                match process_task(&task).await {
-                    Ok(result) => drop(tx_clone.send(Ok((i, result)))),
-                    Err(e) => drop(tx_clone.send(Err((i, e)))),
-                }
+// With concurrent processing
+async fn process_concurrent(stream: impl Stream<Item = Event>) {
+    stream
+        .map(|event| process_event(event))
+        .buffer_unordered(10) // Process 10 concurrently
+        .for_each(|result| async move {
+            match result {
+                Ok(output) => handle_output(output).await,
+                Err(e) => log::error!("Error: {}", e),
             }
-        });
-    }
-
-    // Send tasks to pool
-    for task in tasks.into_iter() {  // Non-blocking send when channel not full!
-        tx.send(task).await?;
-    };
-
-    Ok(())
+        })
+        .await;
 }
 ```
-
-## References
-
-- [`rust.md`](../stacks/rust.md) - Comprehensive Rust async conventions (MANDATORY reading)
-- The `tokio` crate documentation: https://docs.rs/tokio/latest/
-- "Tokio for Real World Applications" book: https://tokio.rs/tokio/tutorial
-- Futures API reference: https://docs.rs/futures/latest/
 
 ---
 
-*Created: 2026-01-27*
+## Dependency Configuration
+
+```toml
+[dependencies]
+# Primary async runtime
+tokio = { version = "1", features = ["full"] }
+
+# For CPU-bound work (alternative to spawn_blocking)
+rayon = "1.8"
+
+# Stream utilities
+tokio-stream = "0.1"
+futures = "0.3"
+```
+
+---
+
+## Learning Log
+
+### 2026-01-28: Skill Restructuring
+
+**Issue:** Original skill had 368 lines with broken/incomplete code examples and pseudo-code mixed with Rust.
+
+**Learning:** Removed all pseudo-code, fixed broken examples, consolidated into clear patterns with working code.
+
+**New Standard:** All code examples must be valid Rust. Use comments to explain anti-patterns, not pseudo-code.
+
+### 2026-01-27: Event Loop Blocking
+
+**Issue:** Code blocking event loop by using std::fs and blocking I/O.
+
+**Learning:** Always use tokio APIs for I/O or offload blocking work to `spawn_blocking`.
+
+**Standard:** Never use `std::fs`, `std::net`, or blocking operations directly in async code.
+
+---
+
+## Examples
+
+See `examples/` directory for detailed guides:
+
+- `async-patterns.md` - Common async patterns and best practices
+- `async-pitfalls.md` - Common mistakes and how to avoid them
+
+## Related Skills
+
+- [Rust Clean Implementation](../rust-clean-implementation/skill.md) - For sync implementation patterns
+- [Rust Testing Excellence](../rust-testing-excellence/skill.md) - For testing async code
+- [DST Tokio Rust](../dst-tokio-rust/skill.md) - For deterministic testing of async systems
+
+---
+
+*Last Updated: 2026-01-28*
+*Version: 3.0-restructured*

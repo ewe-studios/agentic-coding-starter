@@ -20,6 +20,7 @@ files:
   - examples/good-test-structure.rs: "Example of proper test structure and validation"
 assets:
 ---
+
 # Testing Excellence in Rust
 
 ## Overview
@@ -27,6 +28,7 @@ assets:
 Good testing requires more than just calling functions with arguments. This skill covers how to write **meaningful, validated** tests that actually verify behavior rather than just asserting side effects.
 
 A useless test has one or more of these flaws:
+
 - No actual assertions (just calls a function and checks it doesn't panic)
 - Uses hardcoded/muted variables without validating inputs
 - Tests implementation details instead of observable behavior
@@ -116,9 +118,10 @@ mod input_validation_tests {
 
 // Use a module-level gate instead of cluttering each test:
 impl MyModule {
-    #[cfg(feature = "validation-tests")]
-    mod validation_suite { /* ... */ }
 }
+
+#[cfg(feature = "validation-tests")]
+mod validation_suite { /* ... */ }
 ```
 
 ### Step 3: Test Both Valid and Invalid Inputs
@@ -155,7 +158,7 @@ fn test_user_validation_invalid_cases() {
 }
 ```
 
-### Step 4: Use Property-Based Testing for Edge Cases
+### Step 4: Use Property-Based Testing
 
 ```rust
 #[cfg(test)]
@@ -376,4 +379,4 @@ mod input_validation_tests {
 
 ---
 
-*Created: 2026-01-27*
+_Created: 2026-01-27_

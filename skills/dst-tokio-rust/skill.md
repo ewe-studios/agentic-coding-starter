@@ -1,84 +1,45 @@
 ---
 name: "Deterministic Simulation Testing (Tokio/Rust)"
-description: "Implement DST for distributed systems in Rust - controlling time, entropy, network, and execution for reproducible testing"
+description: "Test distributed systems with reproducible deterministic simulation using turmoil"
 approved: No
 created: 2026-01-19
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "1.1"
-  last_updated: "2026-01-20"
-  tags:
-    - rust
-    - tokio
-    - testing
-    - distributed-systems
-    - simulation
-    - determinism
+  version: "2.0-restructured"
+  last_updated: "2026-01-28"
+tags:
+  - rust
+  - tokio
+  - testing
+  - distributed-systems
+  - simulation
+  - determinism
 tools:
-  - Rust
-  - Cargo
   - turmoil
   - madsim
   - proptest
 files:
-  - examples/basic-dst-setup.rs: "Complete working example of DST test setup"
-assets:
-  - docs/README.md: "Overview and navigation"
-  - docs/dst-rust-guide.md: "Main tutorial on DST concepts and using existing libraries"
-  - docs/dst-internals-guide.md: "Deep dive on building your own DST framework from scratch"
+  - examples/dst-guide.md: Complete DST tutorial with turmoil/madsim
+  - examples/basic-dst-setup.md: Working example of DST test setup
 ---
 
 # Deterministic Simulation Testing (Rust)
 
-## Overview
-
-Deterministic Simulation Testing (DST) is a testing methodology where distributed systems run in a fully controlled, reproducible environment. Every source of non-determinism (time, randomness, network, I/O) is replaced with simulated, seedable alternatives.
-
-This skill covers both using existing DST libraries (turmoil, madsim) and building your own DST infrastructure from scratch.
-
-**Key insight**: If you control all sources of non-determinism and use a seed, running the same test twice with the same seed produces identical behavior - making distributed system bugs reproducible.
-
 ## When to Use This Skill
 
-- **Testing distributed systems** with complex failure modes
-- **Reproducing intermittent failures** that are hard to debug
-- **Verifying consensus protocols** under network partitions
-- **Running thousands of test scenarios** quickly (simulated time)
-- **Building custom simulation infrastructure** for non-standard I/O patterns
+Read this when testing distributed systems that need:
+- Reproducible failure scenarios
+- Network partition testing
+- Consensus protocol verification
+- Fast simulation of time-dependent behavior
+- Reproducing intermittent bugs
 
-## Prerequisites
+**Key insight:** Control all non-determinism (time, randomness, network, I/O) with a seed = identical behavior every run.
 
-- **Rust knowledge**: async/await, futures, traits
-- **Tokio familiarity**: Runtime, spawning tasks, channels
-- **Distributed systems basics**: CAP theorem, consensus, replication
+---
 
-## Attached Scripts and Code
-
-### Skill Usage Type
-
-**EDUCATIONAL** - Study the examples and patterns, implement fresh in your project. The code examples are reference implementations.
-
-### File Documentation
-
-#### Guide: docs/dst-rust-guide.md
-**Purpose**: Main tutorial covering DST concepts, four pillars of determinism, and using existing libraries
-**Language**: Markdown with Rust examples
-**Usage**: STUDY for understanding, apply patterns to your project
-
-#### Guide: docs/dst-internals-guide.md
-**Purpose**: Deep dive into building your own DST framework from scratch
-**Language**: Markdown with complete Rust implementations
-**Usage**: STUDY to understand internals, copy patterns when building custom infrastructure
-
-#### Example: examples/basic-dst-setup.rs
-**Purpose**: Working example of a complete DST test setup
-**Language**: Rust
-**Usage**: REFERENCE implementation, adapt to your specific needs
-
-## Core Concepts
-
-### The Four Pillars of Determinism
+## The Four Pillars of Determinism
 
 | Pillar | Problem | Solution |
 |--------|---------|----------|
@@ -87,7 +48,9 @@ This skill covers both using existing DST libraries (turmoil, madsim) and buildi
 | **Time** | Real clocks advance unpredictably | Simulated clock, manual advancement |
 | **I/O** | Network has variable latency/loss | In-memory simulated network |
 
-### Key Libraries
+---
+
+## Key Libraries
 
 | Library | Purpose | Use When |
 |---------|---------|----------|
@@ -95,9 +58,11 @@ This skill covers both using existing DST libraries (turmoil, madsim) and buildi
 | **madsim** | Full libc interception | Need to catch all entropy/time sources |
 | **proptest** | Property-based input generation | Generating test scenarios |
 
-## Step-by-Step Guide
+---
 
-### Step 1: Add Dependencies
+## Quick Start
+
+### 1. Add Dependencies
 
 ```toml
 [features]
@@ -112,38 +77,40 @@ rand = "0.8"
 turmoil = "0.6"
 ```
 
-### Step 2: Configure Single-Threaded Runtime
-
-```rust
-// For Tokio tests
-#[tokio::test(flavor = "current_thread", start_paused = true)]
-async fn my_simulation_test() {
-    // Time doesn't advance automatically
-    // Single thread eliminates scheduler noise
-}
-```
-
-### Step 3: Basic Turmoil Setup
+### 2. Basic Turmoil Test
 
 ```rust
 use turmoil::Builder;
 use std::time::Duration;
 
 #[test]
-fn test_with_turmoil() {
+fn test_echo_server() {
     let mut sim = Builder::new()
         .simulation_duration(Duration::from_secs(60))
         .build();
 
+    // Server
     sim.host("server", || async {
         let listener = turmoil::net::TcpListener::bind("0.0.0.0:8080").await?;
-        // Server logic...
+        let (mut socket, _) = listener.accept().await?;
+
+        let mut buf = [0u8; 1024];
+        loop {
+            let n = socket.read(&mut buf).await?;
+            if n == 0 { break; }
+            socket.write_all(&buf[..n]).await?;
+        }
         Ok(())
     });
 
+    // Client
     sim.client("client", async {
-        let stream = turmoil::net::TcpStream::connect("server:8080").await?;
-        // Client logic...
+        let mut socket = turmoil::net::TcpStream::connect("server:8080").await?;
+        socket.write_all(b"hello").await?;
+
+        let mut buf = [0u8; 1024];
+        let n = socket.read(&mut buf).await?;
+        assert_eq!(&buf[..n], b"hello");
         Ok(())
     });
 
@@ -151,7 +118,7 @@ fn test_with_turmoil() {
 }
 ```
 
-### Step 4: Seed Management
+### 3. Seed Management
 
 ```rust
 fn run_with_seed<F>(test_fn: F)
@@ -174,21 +141,7 @@ where
 }
 ```
 
-### Step 5: Fault Injection
-
-```rust
-// Network partition
-sim.partition("node-a", "node-b");
-
-// Heal partition
-sim.repair("node-a", "node-b");
-
-// Latency injection
-let mut sim = Builder::new()
-    .min_message_latency(Duration::from_millis(100))
-    .max_message_latency(Duration::from_millis(500))
-    .build();
-```
+---
 
 ## Common Patterns
 
@@ -197,6 +150,25 @@ let mut sim = Builder::new()
 ```rust
 use std::collections::HashMap;
 use std::hash::{BuildHasher, Hasher};
+
+#[derive(Clone, Default)]
+pub struct DeterministicHasher {
+    state: u64,
+}
+
+impl Hasher for DeterministicHasher {
+    fn finish(&self) -> u64 {
+        self.state
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        const FNV_PRIME: u64 = 1099511628211;
+        for &byte in bytes {
+            self.state ^= byte as u64;
+            self.state = self.state.wrapping_mul(FNV_PRIME);
+        }
+    }
+}
 
 #[derive(Clone, Default)]
 pub struct DeterministicBuildHasher;
@@ -211,14 +183,14 @@ impl BuildHasher for DeterministicBuildHasher {
 type DetHashMap<K, V> = HashMap<K, V, DeterministicBuildHasher>;
 ```
 
-### Pattern 2: Simulated Time Only
+### Pattern 2: Simulated Time (Tokio-only)
 
 ```rust
 #[tokio::test(flavor = "current_thread", start_paused = true)]
-async fn test_timeout_behavior() {
+async fn test_timeout() {
     let start = tokio::time::Instant::now();
 
-    // This doesn't actually wait
+    // This doesn't actually wait - time is simulated
     tokio::time::sleep(Duration::from_secs(3600)).await;
 
     // But an hour has "passed"
@@ -236,65 +208,82 @@ pub use tokio::net::{TcpListener, TcpStream};
 pub use turmoil::net::{TcpListener, TcpStream};
 ```
 
+### Pattern 4: Fault Injection
+
+```rust
+let mut sim = Builder::new()
+    .min_message_latency(Duration::from_millis(100))
+    .max_message_latency(Duration::from_millis(500))
+    .build();
+
+// Network partition
+sim.partition("node-a", "node-b");
+
+// Run during partition
+sim.run_until(Duration::from_secs(30));
+
+// Heal partition
+sim.repair("node-a", "node-b");
+
+sim.run().unwrap();
+```
+
+---
+
 ## Pitfalls to Avoid
 
-### Pitfall 1: Using std::time instead of tokio::time
+### Pitfall 1: Using std::time
+
 ```rust
-// BAD - bypasses simulated time
+// BAD ❌ - Bypasses simulated time
 std::time::Instant::now()
 std::thread::sleep(duration)
 
-// GOOD - uses simulated time
+// GOOD ✅ - Uses simulated time
 tokio::time::Instant::now()
 tokio::time::sleep(duration).await
 ```
 
-### Pitfall 2: HashMap iteration order dependencies
+### Pitfall 2: HashMap Iteration Order
+
 ```rust
-// BAD - order is non-deterministic
+// BAD ❌ - Order is non-deterministic
 for (k, v) in hashmap.iter() {
-    process_in_order(k, v); // Order affects result
+    process_in_order(k, v); // Order affects result!
 }
 
-// GOOD - use BTreeMap or sort first
+// GOOD ✅ - Use BTreeMap or sort first
 let mut items: Vec<_> = hashmap.iter().collect();
 items.sort_by_key(|(k, _)| *k);
 ```
 
-### Pitfall 3: Third-party crate entropy
+### Pitfall 3: Third-Party Crate Entropy
+
 ```rust
-// BAD - uuid uses system entropy internally
+// BAD ❌ - uuid uses system entropy
 let id = uuid::Uuid::new_v4();
 
-// GOOD - generate from seeded RNG
+// GOOD ✅ - Generate from seeded RNG
 let id = uuid::Uuid::from_u128(rng.gen());
 ```
 
+---
+
 ## Examples
 
-### Example 1: Complete DST Test
+### Network Partition Test
 
 ```rust
-use turmoil::Builder;
-use std::time::Duration;
-use rand::{SeedableRng, Rng};
-use rand::rngs::StdRng;
-
 #[test]
-fn test_consensus_under_partition() {
-    let seed: u64 = std::env::var("TEST_SEED")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(42);
-
-    println!("TEST_SEED={}", seed);
+fn test_survives_partition() {
+    let seed = 42u64;
     let mut rng = StdRng::seed_from_u64(seed);
 
     let mut sim = Builder::new()
         .simulation_duration(Duration::from_secs(120))
         .build();
 
-    // Create 3-node consensus cluster
+    // Create 3-node cluster
     for i in 0..3 {
         let node_name = format!("node-{}", i);
         sim.host(&node_name, || async move {
@@ -303,25 +292,31 @@ fn test_consensus_under_partition() {
         });
     }
 
-    // Run for 10 seconds normally
+    // Run normally
     sim.run_until(Duration::from_secs(10));
 
     // Random partition
     let victim = rng.gen_range(0..3);
-    sim.partition(&format!("node-{}", victim), &format!("node-{}", (victim + 1) % 3));
+    sim.partition(
+        &format!("node-{}", victim),
+        &format!("node-{}", (victim + 1) % 3)
+    );
 
     // Run during partition
     sim.run_until(Duration::from_secs(30));
 
     // Heal
-    sim.repair(&format!("node-{}", victim), &format!("node-{}", (victim + 1) % 3));
+    sim.repair(
+        &format!("node-{}", victim),
+        &format!("node-{}", (victim + 1) % 3)
+    );
 
     // Verify recovery
     sim.run().unwrap();
 }
 ```
 
-### Example 2: Determinism Verification
+### Determinism Verification
 
 ```rust
 #[test]
@@ -336,20 +331,27 @@ fn verify_determinism() {
 }
 
 fn run_and_capture(seed: u64) -> Vec<Event> {
-    let events = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
     // Run simulation, capture events
     // Return events for comparison
-    events.lock().unwrap().clone()
 }
 ```
 
-## Script Reference
+---
 
-| File | Location | Usage Type | Purpose |
-|------|----------|------------|---------|
-| dst-rust-guide.md | `docs/` | EDUCATIONAL | Main DST concepts and library usage |
-| dst-internals-guide.md | `docs/` | EDUCATIONAL | Building custom DST infrastructure |
-| basic-dst-setup.rs | `examples/` | EDUCATIONAL | Working reference implementation |
+## Running Simulation Tests
+
+```bash
+# With random seed
+cargo test --features simulation
+
+# With specific seed for reproduction
+TEST_SEED=12345 cargo test --features simulation
+
+# Run specific test
+TEST_SEED=42 cargo test test_survives_partition --features simulation
+```
+
+---
 
 ## References
 
@@ -359,6 +361,19 @@ fn run_and_capture(seed: u64) -> Vec<Event> {
 - [madsim GitHub](https://github.com/madsim-rs/madsim)
 - [FoundationDB Testing Talk](https://www.youtube.com/watch?v=4fFDFbi3toc)
 
+## Examples
+
+See `examples/` directory for complete guides:
+
+- `dst-guide.md` - Complete DST concepts and library usage tutorial
+- `basic-dst-setup.md` - Working example transformed from .rs to markdown
+
+## Related Skills
+
+- [Rust with Async Code](../rust-with-async-code/skill.md) - For async patterns in production code
+- [Rust Testing Excellence](../rust-testing-excellence/skill.md) - For general testing patterns
+
 ---
-*Created: 2026-01-19*
-*Last Updated: 2026-01-19*
+
+*Last Updated: 2026-01-28*
+*Version: 2.0-restructured*

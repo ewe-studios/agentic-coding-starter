@@ -8,6 +8,48 @@ So reading the code, I find it interesting in how it implements the following:
   - Output expectations
 - Interesting YAML based specifications for the different things it will have the LLM create, see below section [Prompts][#prompts].
 
+---
+
+## HTTP Client Implementation Learnings (2026-03-03)
+
+### Proxy Support Implementation
+
+**Key Insight**: When implementing proxy support, always trace through ALL connection creation paths, not just the obvious ones.
+
+**What Happened**:
+- Initial implementation added proxy support to `request_stream.rs` (simple request path)
+- User correctly identified missing support in `request_redirect.rs` (redirect path)
+- This would have caused redirected requests to bypass proxy configuration
+
+**Critical Learning**: HTTP client has multiple connection creation paths:
+1. **Direct requests**: `GetHttpRequestStreamTask` → uses pool connection
+2. **Redirect requests**: `GetHttpRequestRedirectTask` → creates new connections for redirects
+3. Both paths must support the same features (proxy, timeouts, auth, etc.)
+
+**Architecture Pattern Discovered**:
+```rust
+// Task state tuples must carry ClientConfig through entire chain:
+type InitData = Box<(Request, Timeout, Pool, MaxRedirects, Config)>;
+type TryingData = Box<(Request, Timeout, Pool, Descriptor, Redirects, Config)>;
+
+// Both simple and redirect tasks need config parameter:
+GetHttpRequestStreamTask::new(request, timeout, pool, config)
+GetHttpRequestRedirectTask::new(request, timeout, pool, redirects, config)
+```
+
+**Validation Importance**:
+- Comprehensive validation agent caught all three features were complete
+- 65 tests across cookie-jar, middleware, proxy-support (100% passing)
+- Feature specifications updated to reflect 14/14 complete (100%)
+
+**Best Practice**: When adding infrastructure features (proxy, auth, timeouts), always:
+1. Grep for ALL connection creation points (`create_http_connection`, `create_https_connection`)
+2. Check both simple request AND redirect task implementations
+3. Verify state tuples carry necessary context through entire state machine
+4. Run validation to confirm completeness across all code paths
+
+---
+
 ## Prompts
 
 ### TDD Development Workflow

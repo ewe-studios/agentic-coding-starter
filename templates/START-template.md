@@ -26,12 +26,6 @@ created: YYYY-MM-DD
 3. Navigate to `features/[feature-name]/start.md` and follow that feature's workflow
 4. Read `LEARNINGS.md` (past discoveries and mistakes)
 5. **ALWAYS UPDATE LEARNINGS.md** after each completed task/milestone
-6. **MANDATORY**: Generate `compacted.md` with all info using `.agents/skills/context-compaction/skill.md`
-7. Clear context, reload from `compacted.md` only, start work
-8. **Work on ONE item at a time** - one test, one function, one file - finish it completely before next
-9. Report to Main Agent when done (DO NOT commit)
-10. Wait for verification to pass
-11. After commit: delete `compacted.md`, update `./PROGRESS.md`, move to next task
 
 ---
 

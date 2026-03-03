@@ -476,7 +476,25 @@ Reference: builds_on: "specifications/01-build-http-client"
 4. Immutable when complete (create new for changes)
 5. start.md in every spec and feature (workflow entry points)
 6. compacted.md for context optimization (ephemeral, delete after session)
+7. **ALWAYS UPDATE LEARNINGS.md** after each milestone/task completion
+
+## ⚠️ CRITICAL REMINDER ⚠️
+
+**NEVER FORGET TO UPDATE LEARNINGS.MD**
+
+After completing each milestone, phase, or significant task:
+1. Document what was learned
+2. Capture design decisions and rationale
+3. Note challenges and solutions
+4. Record patterns discovered
+5. Update `specifications/XX-spec-name/LEARNINGS.md`
+
+**This is MANDATORY** - learnings are critical for:
+- Future development
+- Knowledge transfer
+- Avoiding repeated mistakes
+- Pattern documentation
 
 ---
 
-_Version: 4.0 - Last Updated: 2026-02-28_
+_Version: 4.1 - Last Updated: 2026-03-03_

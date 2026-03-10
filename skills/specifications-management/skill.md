@@ -104,7 +104,7 @@ specifications/02-feature-spec/
 ```
 
 **Notes:**
-- Features may optionally have `IMPLEMENTATION_PLAN.md` (complex features)
+- Features markdown file should contain every detailed information and not be split into multiple files. 
 - Features may optionally have `templates/` directory
 - Features may optionally have `scripts/` directory
 - May temporarily have `PROGRESS.md` at spec level during active work (ephemeral)
@@ -336,13 +336,12 @@ Reference: builds_on: "specifications/01-build-http-client"
 
 ## Implementation Plans
 
-**Location**: `specifications/[spec]/features/[feature]/IMPLEMENTATION_PLAN.md`
+**Location**: `specifications/[spec]/features/[feature]/feature.md`
 
-**When to create:**
-- Non-trivial feature requiring design decisions
-- Complex feature affecting multiple files
-- Multiple valid approaches exist
-- User requests "create a plan"
+The feature.md should contain all and comprehensive details of what needs to be implemented.
+Instead we should add a section in it for the implementation plans.
+
+**NEVER create multiple files, the feature.md is the comprehensive documentation of whats needs to be done**.
 
 **Contents:**
 - Technical approach and architecture
@@ -378,7 +377,6 @@ Reference: builds_on: "specifications/01-build-http-client"
 - LEARNINGS.md
 - REPORT.md
 - VERIFICATION.md
-- IMPLEMENTATION_PLAN.md (if created)
 - scripts/ (if exists)
 - Makefile (if exists)
 - templates/ (if exists)
@@ -488,6 +486,7 @@ After completing each milestone, phase, or significant task:
 3. Note challenges and solutions
 4. Record patterns discovered
 5. Update `specifications/XX-spec-name/LEARNINGS.md`
+6. Each feature only has feature.md has the comprehensive documentation of everything. No splits.
 
 **This is MANDATORY** - learnings are critical for:
 - Future development

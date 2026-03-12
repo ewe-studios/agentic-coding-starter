@@ -74,10 +74,11 @@ See `.agents/skills/implementation-practices/skill.md` for complete workflow.
 2. Follow TDD cycle (test first, verify fails, implement, verify passes)
 3. Use retrieval-led reasoning (read code first)
 4. Prioritize work (fix failing tests first)
-5. Self-review (5 checks)
-6. Document learnings
-7. Report completion to Main Agent
-8. WAIT for Main Agent
+5. **Place tests in correct location** - follow language testing skill or project test structure
+6. Self-review (5 checks)
+7. Document learnings
+8. Report completion to Main Agent
+9. WAIT for Main Agent
 
 ## Boundaries
 

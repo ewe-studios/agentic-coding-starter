@@ -69,13 +69,70 @@ This specification was created through collaborative requirements gathering with
 
 ## High-Level Architecture
 
-Brief description of the architectural approach:
+**CRITICAL:** This section contains the complete architectural specification. Do NOT create separate architecture.md files. All technical decisions, component descriptions, and design rationale belong here or in feature.md files.
 
-1. **Layer 1**: Description
-2. **Layer 2**: Description
-3. **Layer 3**: Description
+**Use Mermaid diagrams** to visualize architecture and processes for clarity.
 
-Each layer is implemented as a separate feature with clear dependencies.
+### Architecture Overview
+
+**System Architecture:**
+```mermaid
+graph TD
+    A[Component/Layer A] --> B[Component/Layer B]
+    B --> C[Component/Layer C]
+    C --> D[(Data Store)]
+```
+
+1. **Layer/Component 1**: Description of purpose and responsibilities
+2. **Layer/Component 2**: Description of purpose and responsibilities
+3. **Layer/Component 3**: Description of purpose and responsibilities
+
+### Component Relationships
+
+**Component Interaction:**
+```mermaid
+graph LR
+    Client --> API
+    API --> Service
+    Service --> DB
+```
+
+Describe how components interact:
+- Component A → Component B: [interaction description]
+- Component B → Component C: [interaction description]
+
+### Data Flow
+
+**Request/Process Flow:**
+```mermaid
+sequenceDiagram
+    participant C as Client/External
+    participant A as API Gateway
+    participant S as Service/Processor
+    participant D as Database/Storage
+
+    C->>A: Request/Input
+    A->>S: Process
+    S->>D: Query/Read
+    D-->>S: Data
+    S-->>A: Response
+    A-->>C: Result
+```
+
+Describe key data flows through the system:
+1. [Flow 1 description]
+2. [Flow 2 description]
+
+### Technical Decisions and Trade-offs
+
+| Decision | Rationale | Alternatives Considered |
+|----------|-----------|------------------------|
+| Decision 1 | Why this approach | What was rejected and why |
+| Decision 2 | Why this approach | What was rejected and why |
+
+### Implementation Order
+
+Each layer/component is implemented as a separate feature with clear dependencies (see Feature Index).
 
 # Success Criteria (Spec-Wide)
 

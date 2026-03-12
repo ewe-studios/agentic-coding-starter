@@ -41,6 +41,65 @@ Before ANY work:
 
 **No exceptions**: No coding without documented requirements.
 
+### Single-File Architecture (CRITICAL)
+
+**MANDATORY:** All specification and architecture details MUST be contained in:
+- `requirements.md` - For simple specs (has_features: false) OR high-level spec architecture (has_features: true)
+- `feature.md` - For detailed feature-level architecture and requirements (has_features: true)
+
+**FORBIDDEN:** Never create separate architecture files like:
+- ❌ `architecture.md`
+- ❌ `design.md`
+- ❌ `technical-spec.md`
+- ❌ `system-design.md`
+
+**Rationale:** Splitting architecture across multiple files fragments context and makes specifications harder to maintain. All architectural decisions, diagrams, component descriptions, and technical details belong in the primary specification file (`requirements.md` or `feature.md`).
+
+**Architecture Content Requirements:**
+- `requirements.md` (spec-level): High-level architecture overview, layer descriptions, component relationships
+- `feature.md` (feature-level): Comprehensive, logically correct, cohesive deep architecture for the feature including:
+  - Technical approach and patterns
+  - Component structure and interfaces
+  - Data flow diagrams (text-based or mermaid)
+  - Interface definitions
+  - Error handling strategy
+  - Security considerations
+  - Performance considerations
+  - Trade-offs and decisions
+
+**Mermaid Diagrams (MANDATORY):**
+Agents MUST use Mermaid diagrams to visualize architecture and processes:
+- **Component diagrams** - Show component relationships
+- **Sequence diagrams** - Show data flow and interactions
+- **Flow charts** - Show decision logic and processes
+- **State diagrams** - Show state machines
+
+Example Mermaid in markdown:
+```mermaid
+graph TD
+    A[Client] --> B[API Gateway]
+    B --> C[Service A]
+    B --> D[Service B]
+    C --> E[(Database)]
+```
+
+```mermaid
+sequenceDiagram
+    Client->>API: Request
+    API->>Service: Process
+    Service->>Database: Query
+    Database-->>Service: Result
+    Service-->>API: Response
+    API-->>Client: Result
+```
+
+**When Creating/Updating Specifications:**
+1. Architecture details → `requirements.md` or `feature.md` ONLY
+2. Use Mermaid diagrams for visual clarity
+3. Never split architecture into separate files
+4. Keep architecture comprehensive, cohesive, and logically sound
+5. Update architecture during implementation if approach changes
+
 ### Socratic Requirements Conversation
 
 **Deep Thinking Approach:**
@@ -65,13 +124,15 @@ Before ANY work:
 ```
 specifications/01-simple-spec/
 ├── start.md                 # Agent workflow entry point (permanent)
-├── requirements.md          # Complete requirements + tasks (permanent)
+├── requirements.md          # Complete requirements + tasks + architecture (permanent)
 ├── LEARNINGS.md            # Permanent learnings
 ├── REPORT.md               # Permanent reports
 ├── PROGRESS.md             # Temporary progress report (deleted on completion or start)
 ├── VERIFICATION.md         # Verification signoff (permanent)
 └── compacted.md            # Temporary context file (ephemeral - delete after session)
 ```
+
+**CRITICAL:** All architecture and technical details MUST be in `requirements.md`. Never create `architecture.md`, `design.md`, or similar files.
 
 **Notes:**
 - May optionally have `scripts/`, `Makefile`, `templates/` directories
@@ -84,16 +145,16 @@ specifications/01-simple-spec/
 ```
 specifications/02-feature-spec/
 ├── start.md                 # Spec-level workflow entry point (permanent)
-├── requirements.md          # High-level overview + feature index ONLY (permanent)
+├── requirements.md          # High-level overview + architecture ONLY (permanent)
 ├── LEARNINGS.md            # Spec-wide learnings (permanent)
 ├── REPORT.md               # Spec-wide report (permanent)
 ├── VERIFICATION.md         # Spec-wide verification signoff (permanent)
 └── features/
     ├── 00-foundation/
     │   ├── start.md         # Feature workflow entry point (permanent)
-    │   ├── feature.md       # Detailed requirements + tasks (permanent)
+    │   ├── feature.md       # Detailed requirements + tasks + architecture (permanent)
     │   ├── VERIFICATION.md  # Feature verification (optional, permanent)
-    ├── ├── PROGRESS.md      # Temporary progress report (deleted on completion or start)
+    │   ├── PROGRESS.md      # Temporary progress report (deleted on completion or start)
     │   └── compacted.md     # Temporary context (ephemeral - delete after session)
     ├── 01-core-api/
     │   ├── start.md
@@ -103,8 +164,13 @@ specifications/02-feature-spec/
         └── feature.md
 ```
 
+**CRITICAL:**
+- `requirements.md` contains spec-level high-level architecture
+- `feature.md` contains comprehensive feature-level architecture
+- **NEVER** create separate `architecture.md`, `design.md`, or similar files
+
 **Notes:**
-- Features markdown file should contain every detailed information and not be split into multiple files. 
+- Features markdown file should contain every detailed information and not be split into multiple files.
 - Features may optionally have `templates/` directory
 - Features may optionally have `scripts/` directory
 - May temporarily have `PROGRESS.md` at spec level during active work (ephemeral)

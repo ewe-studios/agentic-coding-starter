@@ -23,6 +23,32 @@ tasks:
 
 Brief description of what this feature implements.
 
+## Language Stack
+
+**IMPORTANT:** Agents MUST identify languages used in this feature and read corresponding skills BEFORE implementation.
+
+### Languages for This Feature
+
+| Language | Purpose | Skill Location |
+|----------|---------|----------------|
+| [e.g., Rust] | [e.g., HTTP client implementation] | `.agents/skills/rust-clean-code/skill.md` |
+
+**If a skill for a language doesn't exist:**
+1. **STOP** - do not write code
+2. Launch agent to generate the missing language skill
+3. Read the generated skill completely
+4. Add this reminder to the workflow for future agents
+
+### Pre-Implementation Checklist
+
+- [ ] Identified all languages used in this feature
+- [ ] Read language skill for each language (`.agents/skills/[language]-clean-code/skill.md`)
+- [ ] Understood all coding standards and requirements
+- [ ] Noted tools and formatters required (rustfmt, black, prettier, etc.)
+- [ ] Noted linters required (clippy, ruff, eslint, etc.)
+
+---
+
 ## Requirements
 
 1. **Requirement 1**

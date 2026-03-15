@@ -44,6 +44,40 @@ Brief description of what this specification implements and why.
 
 None currently identified.
 
+## Language Stack
+
+**IMPORTANT:** Agents MUST identify the language stack below and read the corresponding skills BEFORE implementation.
+
+### Languages Used
+
+| Language | Purpose | Skill Location |
+|----------|---------|----------------|
+| [e.g., Rust] | [e.g., Backend API implementation] | `.agents/skills/rust-clean-code/skill.md` |
+| [e.g., Python] | [e.g., Data processing services] | `.agents/skills/python-clean-code/skill.md` |
+
+### Mandatory Pre-Implementation Steps
+
+1. **Identify languages** from this section
+2. **Read language skills** - for each language:
+   - Locate skill at `.agents/skills/[language]-clean-code/skill.md`
+   - If skill exists: read it completely before writing any code
+   - If skill missing: **STOP** - launch agent to generate the skill first, then read it
+3. **Document skills** - add this item to any start.md workflow so future agents remember
+4. **Follow standards strictly** - zero tolerance for deviations from documented standards
+
+### Language-Specific Requirements
+
+**[Language 1] Requirements:**
+- [Requirement 1: e.g., Run formatter before commit]
+- [Requirement 2: e.g., Zero linter warnings]
+- [Requirement 3: e.g., All public items documented]
+
+**[Language 2] Requirements:**
+- [Requirement 1]
+- [Requirement 2]
+
+---
+
 ## Feature Index
 
 The implementation is divided into features with clear dependencies. Each feature contains detailed requirements, tasks, and verification steps in its respective `feature.md` file.

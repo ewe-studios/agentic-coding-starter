@@ -22,10 +22,15 @@ created: YYYY-MM-DD
 ## Agent Workflow
 
 1. Read `requirements.md` (high-level overview + feature index)
-2. Identify which feature you're working on from the Feature Index
-3. Navigate to `features/[feature-name]/start.md` and follow that feature's workflow
+2. **Identify language stack** from requirements.md "Language Stack" section - document languages clearly
+3. **Read/generate language skills** - for each language in stack:
+   - If skill exists: `.agents/skills/[language]-clean-code/skill.md` → read it
+   - If skill missing: launch agent to generate one first, then read it
+   - Add this item to the workflow list so future agents remember
 4. Read `LEARNINGS.md` (past discoveries and mistakes)
-5. **ALWAYS UPDATE LEARNINGS.md** after each completed task/milestone
+5. Identify which feature you're working on from the Feature Index
+6. Navigate to `features/[feature-name]/start.md` and follow that feature's workflow
+7. **ALWAYS UPDATE LEARNINGS.md** after each completed task/milestone
 
 ---
 
@@ -57,25 +62,30 @@ created: YYYY-MM-DD
 ## Agent Workflow
 
 1. Read `feature.md` (detailed requirements + tasks)
-2. Read `../../LEARNINGS.md` (past discoveries and mistakes)
-3. Read `./VERIFICATION.md` (verification requirements)
-3. Read `./PROGRESS.md` (last progress of this feature if present)
-4. Read `.agents/AGENTS.md` to identify your agent type
-5. Read your agent file in `.agents/agents/[agent-name].md`
-6. Read skills specified in your agent documentation
-7. **MANDATORY**: Generate `compacted.md` with all info using `.agents/skills/context-compaction/skill.md`
-8. Clear context, reload from `compacted.md` only, start work
-9. **Work on ONE item at a time** - one test, one function, one file - finish it completely before next
-10. Implement following TDD (test first, then code) - **one test at a time**
-11. **Place tests in correct location** - follow language testing skill or project test structure
-12. Report to Main Agent when done (DO NOT commit)
-13. Wait for verification to pass
-14. After commit: delete `compacted.md`, update `./PROGRESS.md`, move to next task
-15. **ALWAYS UPDATE ../../LEARNINGS.md** after each completed task/milestone
+2. **Identify language stack** from feature.md or parent requirements.md - document languages clearly
+3. **Read/generate language skills** - for each language in stack:
+   - If skill exists: `.agents/skills/[language]-clean-code/skill.md` → read it
+   - If skill missing: launch agent to generate one first, then read it
+   - Add this item to the workflow list so future agents remember
+4. Read `../../LEARNINGS.md` (past discoveries and mistakes)
+5. Read `./VERIFICATION.md` (verification requirements)
+6. Read `./PROGRESS.md` (last progress of this feature if present)
+7. Read `.agents/AGENTS.md` to identify your agent type
+8. Read your agent file in `.agents/agents/[agent-name].md`
+9. Read skills specified in your agent documentation
+10. **MANDATORY**: Generate `compacted.md` with all info using `.agents/skills/context-compaction/skill.md`
+11. Clear context, reload from `compacted.md` only, start work
+12. **Work on ONE item at a time** - one test, one function, one file - finish it completely before next
+13. Implement following TDD (test first, then code) - **one test at a time**
+14. **Place tests in correct location** - follow language testing skill or project test structure
+15. Report to Main Agent when done (DO NOT commit)
+16. Wait for verification to pass
+17. After commit: delete `compacted.md`, update `./PROGRESS.md`, move to next task
+18. **ALWAYS UPDATE ../../LEARNINGS.md** after each completed task/milestone
 
 ---
 
-**Workflow:** Feature.md → Learnings → Verification → AGENTS.md → Agent Doc → Skills → **Compact → Clear → Reload** → **ONE ITEM AT A TIME** → Implement → Report → Verify → Commit → Delete compacted.md → Next
+**Workflow:** Requirements → **Language Stack → Skills** → Learnings → Verification → AGENTS.md → Agent Doc → Skills → **Compact → Clear → Reload** → **ONE ITEM AT A TIME** → Implement → Report → Verify → Commit → Delete compacted.md → Next
 
 ---
 
@@ -102,24 +112,29 @@ created: YYYY-MM-DD
 ## Agent Workflow
 
 1. Read `requirements.md` (complete requirements + tasks)
-2. Read `LEARNINGS.md` (past discoveries and mistakes)
-3. Read `VERIFICATION.md` (verification requirements)
-4. Read `.agents/AGENTS.md` to identify your agent type
-5. Read your agent file in `.agents/agents/[agent-name].md`
-6. Read skills specified in your agent documentation
-7. **MANDATORY**: Generate `compacted.md` with all info using `.agents/skills/context-compaction/skill.md`
-8. Clear context, reload from `compacted.md` only, start work
-9. **Work on ONE item at a time** - one test, one function, one file - finish it completely before next
-10. Implement following TDD (test first, then code) - **one test at a time**
-11. **Place tests in correct location** - follow language testing skill or project test structure
-12. Report to Main Agent when done (DO NOT commit)
-13. Wait for verification to pass
-14. After commit: delete `compacted.md`, update `PROGRESS.md`, move to next task
-15. **ALWAYS UPDATE LEARNINGS.md** after each completed task/milestone
+2. **Identify language stack** from requirements.md "Language Stack" section - document languages clearly
+3. **Read/generate language skills** - for each language in stack:
+   - If skill exists: `.agents/skills/[language]-clean-code/skill.md` → read it
+   - If skill missing: launch agent to generate one first, then read it
+   - Add this item to the workflow list so future agents remember
+4. Read `LEARNINGS.md` (past discoveries and mistakes)
+5. Read `VERIFICATION.md` (verification requirements)
+6. Read `.agents/AGENTS.md` to identify your agent type
+7. Read your agent file in `.agents/agents/[agent-name].md`
+8. Read skills specified in your agent documentation
+9. **MANDATORY**: Generate `compacted.md` with all info using `.agents/skills/context-compaction/skill.md`
+10. Clear context, reload from `compacted.md` only, start work
+11. **Work on ONE item at a time** - one test, one function, one file - finish it completely before next
+12. Implement following TDD (test first, then code) - **one test at a time**
+13. **Place tests in correct location** - follow language testing skill or project test structure
+14. Report to Main Agent when done (DO NOT commit)
+15. Wait for verification to pass
+16. After commit: delete `compacted.md`, update `PROGRESS.md`, move to next task
+17. **ALWAYS UPDATE LEARNINGS.md** after each completed task/milestone
 
 ---
 
-**Workflow:** Requirements → Learnings → Verification → AGENTS.md → Agent Doc → Skills → **Compact → Clear → Reload** → **ONE ITEM AT A TIME** → Implement → Report → Verify → Commit → Delete compacted.md → Next
+**Workflow:** Requirements → **Language Stack → Skills** → Learnings → Verification → AGENTS.md → Agent Doc → Skills → **Compact → Clear → Reload** → **ONE ITEM AT A TIME** → Implement → Report → Verify → Commit → Delete compacted.md → Next
 
 ---
 

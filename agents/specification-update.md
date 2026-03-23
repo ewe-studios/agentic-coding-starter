@@ -2,7 +2,7 @@
 name: "Specification Update Agent"
 type: "utility"
 language: "language-agnostic"
-purpose: "Update task status in requirements.md after verification, create/delete VERIFICATION.md"
+purpose: "Create and update specifications, update task status in requirements.md after verification, create/delete VERIFICATION.md"
 created: 2026-02-27
 author: "Main Agent"
 license: "MIT"

@@ -498,8 +498,10 @@ Applied **after** `execute()` — transforms the stream. Use these **between** o
 |--------|-------|
 | `find_map(\|s\| match s { Stream::Next(v) => Some(v), _ => None })` | Extract first result |
 | `.filter_map(...).collect::<Vec<_>>()` | Collect all results |
-| `collect_result(stream)` | Drain stream, collect all `Next` values into `Vec` |
-| `sync_one(task)` | Execute + collect first result (convenience) |
+| `collect_result(stream)` | Drain stream, collect all `Next` values into `Vec<D>` |
+| `collect_one(stream)` | Drain stream until first `Next`, return `Option<D>` |
+| `sync_collect_one(task)` | Execute + return single value as `Result<T::Ready>` |
+| `sync_one(task)` | Execute + collect all results as `Result<Vec<T::Ready>>` |
 | `sync_all(tasks)` | Execute all in parallel + collect all results |
 
 ## Decision Flowchart

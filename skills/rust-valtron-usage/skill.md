@@ -389,7 +389,7 @@ let final_stream = execute(make_task(transformed), None)?;
 // The first block prevented us from overlapping work
 ```
 
-### Anti-Pattern 3: Using loop {} in StreamIterator::next()
+### Anti-Pattern 3: Using loop {} in StreamIterator::next() or TaskIterator::next_status
 
 ```rust
 // BAD: Blocks the executor thread
@@ -477,9 +477,37 @@ Applied **before** `execute()` — transforms the task itself:
 | `map_ready(f)` | Transform Ready values |
 | `map_pending(f)` | Transform Pending values |
 | `filter_ready(f)` | Filter Ready values (filtered → Ignore) |
+| `filter_state(f)` | Filter based on full `TaskStatus` |
 | `stream_collect()` | Collect all Ready values into Vec |
-| `flatten_ready()` | Flatten Ready values that are IntoIterator |
+| `flatten_ready()` | Flatten Ready values that are `IntoIterator` |
+| `flatten_pending()` | Flatten Pending values that are `IntoIterator` |
+| `flat_map_ready(f)` | Map + flatten Ready in one operation |
+| `flat_map_pending(f)` | Map + flatten Pending in one operation |
+| `map_state(f)` | Transform any `TaskStatus` variant |
+| `inspect_state(f)` | Side-effect on any `TaskStatus` |
 | `map_circuit(f)` | Short-circuit on condition — return error and stop, or continue |
+| `map_iter(f)` | Flatten Ready into inner iterator |
+| `split_collector(pred, size)` | Fork into observer + continuation |
+| `split_collect_one(pred)` | Fork on first match |
+| `split_collect_until(pred, size)` | Fork until predicate signals close |
+| `split_collect_until_map(f, size)` | Fork with transformation until close |
+| `split_collector_map(f, size)` | Fork with transformation |
+| `take(n)` / `take_state(n, f)` | Take first n items (Ready / any state) |
+| `take_all(n)` | Take first n items of any state |
+| `take_while(f)` / `take_while_state(f)` | Take while predicate holds |
+| `take_while_any(f)` | Take while predicate holds on any state |
+| `skip(n)` / `skip_state(n, f)` | Skip first n items (Ready / any state) |
+| `skip_all(n)` | Skip first n items of any state |
+| `skip_while(f)` / `skip_while_state(f)` | Skip while predicate holds |
+| `skip_while_any(f)` | Skip while predicate holds on any state |
+| `enumerate()` | Add index to each item |
+| `find(f)` | Find first item matching predicate |
+| `find_map(f)` | Find first item mapping to Some |
+| `fold(init, f)` | Fold/accumulate values |
+| `all(f)` | Check if all Ready items satisfy predicate |
+| `any(f)` | Check if any Ready item satisfies predicate |
+| `count()` | Count Ready items |
+| `count_all()` | Count all items (any state) |
 
 **Quick examples:**
 
@@ -495,6 +523,12 @@ let task = task.map_circuit(|status| match status {
     TaskStatus::Ready(Err(e)) => TaskShortCircuit::ReturnAndStop(TaskStatus::Ready(Err(e))),
     _ => TaskShortCircuit::Continue(status),
 });
+
+// Flat map Ready values
+let task = task.flat_map_ready(|vec| vec.into_iter().map(TaskStatus::Ready));
+
+// Split stream to observe first match while continuing
+let (observer, continuation) = task.split_collect_one(|item| item.is_success());
 ```
 
 **Why `map_circuit` for error handling:**
@@ -535,10 +569,40 @@ Applied **after** `execute()` — transforms the stream. Use these **between** o
 |------------|---------|
 | `map_done(f)` | Transform Next values |
 | `map_pending(f)` | Transform Pending values |
-| `filter_done(f)` | Filter Next values |
+| `map_pending_and_done(f)` | Transform both Pending and Next with single function |
+| `map_delayed(f)` | Transform Delayed durations |
+| `filter_done(f)` | Filter Next values (filtered → Ignore) |
+| `filter_state(f)` | Filter based on full `Stream` state |
 | `collect()` | Accumulate all Next values, yield as single Vec |
-| `split_collector(pred, size)` | Fork stream into observer + continuation |
+| `flatten_next()` | Flatten Next values that are `IntoIterator` |
+| `flatten_pending()` | Flatten Pending values that are `IntoIterator` |
+| `flat_map_next(f)` | Map + flatten Next in one operation |
+| `flat_map_pending(f)` | Map + flatten Pending in one operation |
+| `map_state(f)` | Transform any `Stream` variant |
+| `map_iter(f)` | Flatten Next into inner iterator |
+| `inspect_state(f)` | Side-effect on any `Stream` state |
 | `map_circuit(f)` | Short-circuit on condition — return value and stop, or continue |
+| `split_collector(pred, size)` | Fork into observer + continuation |
+| `split_collect_one(pred)` | Fork on first match |
+| `split_collect_until(pred, size)` | Fork until predicate signals close |
+| `split_collector_map(f, size)` | Fork with transformation |
+| `split_collect_one_map(f, size)` | Fork with transformation on first match |
+| `take(n)` / `take_state(n, f)` | Take first n items (Next / any state) |
+| `take_all(n)` | Take first n items of any state |
+| `take_while(f)` / `take_while_state(f)` | Take while predicate holds |
+| `take_while_any(f)` | Take while predicate holds on any state |
+| `skip(n)` / `skip_state(n, f)` | Skip first n items (Next / any state) |
+| `skip_all(n)` | Skip first n items of any state |
+| `skip_while(f)` / `skip_while_state(f)` | Skip while predicate holds |
+| `skip_while_any(f)` | Skip while predicate holds on any state |
+| `enumerate()` | Add index to each item |
+| `find(f)` | Find first item matching predicate |
+| `find_map(f)` | Find first item mapping to Some |
+| `fold(init, f)` | Fold/accumulate values |
+| `all(f)` | Check if all Next items satisfy predicate |
+| `any(f)` | Check if any Next item satisfies predicate |
+| `count()` | Count Next items |
+| `count_all()` | Count all items (any state) |
 
 **Quick examples:**
 
@@ -559,6 +623,12 @@ let stream = stream.map_circuit(|item| match item {
 let stream = stream
     .filter_done(|v| v.is_ok())
     .map_done(|v| v.unwrap());
+
+// Flat map Next values
+let stream = stream.flat_map_next(|vec| vec.into_iter().map(Stream::Next));
+
+// Split stream to observe first match while continuing
+let (observer, continuation) = stream.split_collect_one(|item| matches!(item, Stream::Next(v) if v > 10));
 ```
 
 **Why `map_circuit` after `execute()`:**

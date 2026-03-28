@@ -497,6 +497,36 @@ let task = task.map_circuit(|status| match status {
 });
 ```
 
+**Why `map_circuit` for error handling:**
+
+When a task should fail immediately on error, you need to communicate that error to the caller while stopping iteration. Without `map_circuit`, you'd need wrapper enums or lose the error:
+
+```rust
+// WITHOUT map_circuit — verbose, creates wrapper states
+enum ResultWithDone<T> {
+    Continue(T),
+    Done(T),  // Need a separate variant just to signal "stop with this value"
+}
+
+let task = task.map_ready(|result| match result {
+    Err(e) => ResultWithDone::Done(Err(e)),  // Custom enum needed
+    Ok(v) => ResultWithDone::Continue(Ok(v)),
+});
+
+// WITH map_circuit — clear, succinct, no wrapper types
+let task = task.map_circuit(|status| match status {
+    TaskStatus::Ready(Err(e)) => TaskShortCircuit::ReturnAndStop(TaskStatus::Ready(Err(e))),
+    _ => TaskShortCircuit::Continue(status),
+});
+```
+
+The key insight: `ReturnAndStop(value)` returns the value AND stops — the caller receives the error via `Stream::Next(error)` and knows iteration is done. This preserves the error without inventing wrapper types.
+
+Use `map_circuit` **before `execute()`** when:
+- The task should terminate early on error
+- You want to propagate the error to the stream consumer
+- You need to stop immediately without creating wrapper enums
+
 ### Post-Execute Combinators (StreamIteratorExt)
 
 Applied **after** `execute()` — transforms the stream. Use these **between** operations, not at boundaries:
@@ -519,7 +549,7 @@ let stream = stream.map_done(|v| v.to_string());
 // Filter Next values (filtered items become Ignore)
 let stream = stream.filter_done(|v| !v.is_empty());
 
-// Stop immediately when seeing an error, preserving it
+// Stop immediately when seeing an error, preserving it for the caller
 let stream = stream.map_circuit(|item| match item {
     Stream::Next(Err(e)) => ShortCircuit::ReturnAndStop(Stream::Next(Err(e))),
     _ => ShortCircuit::Continue(item),
@@ -530,6 +560,33 @@ let stream = stream
     .filter_done(|v| v.is_ok())
     .map_done(|v| v.unwrap());
 ```
+
+**Why `map_circuit` after `execute()`:**
+
+When consuming a stream, you often want to stop on error while preserving the error for the caller. Without `map_circuit`, you'd need to return `None` and lose the error, or wrap results in custom enums:
+
+```rust
+// WITHOUT map_circuit — error is lost, caller can't distinguish
+let stream = stream.filter_done(|v| v.is_ok());  // Errors become Ignore, swallowed
+
+// OR: verbose wrapper enum
+enum StreamValue<T> {
+    More(T),
+    Last(T),  // Extra variant just to say "stop with this"
+}
+
+// WITH map_circuit — error preserved, iteration stops cleanly
+let stream = stream.map_circuit(|item| match item {
+    Stream::Next(Err(e)) => ShortCircuit::ReturnAndStop(Stream::Next(Err(e))),
+    Stream::Next(Ok(v)) => ShortCircuit::Continue(Stream::Next(Ok(v))),
+    _ => ShortCircuit::Stop,
+});
+```
+
+Use `map_circuit` **after `execute()`** when:
+- The stream should terminate early on error
+- You want to propagate errors to the final consumer
+- You need clean error handling without wrapper enums
 
 ### Boundary Collection (Standard Iterator — Use at Sync Points Only)
 

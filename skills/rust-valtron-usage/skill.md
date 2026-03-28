@@ -57,6 +57,97 @@ let stream = stream
 - Use the most specific combinator (`filter_done` vs `map_done` + conditional)
 - If a combinator doesn't change behavior, remove it
 
+## Combinator Usage: Prefer StreamIteratorExt Over Raw Iterator
+
+**Never manually match all `Stream` variants** — use `StreamIteratorExt` combinators that handle pass-through automatically.
+
+### Anti-Pattern: Manual Stream Matching
+
+```rust
+// BAD: Verbose, error-prone, manually handles all Stream variants
+let mapped = raw_stream.filter_map(|s| match s {
+    Stream::Next(Some(json_str)) => match serde_json::from_str::<V>(&json_str) {
+        Ok(v) => Some(Stream::Next(Some(v))),
+        Err(e) => {
+            tracing::error!("Deserialization error: {e}");
+            None
+        }
+    },
+    Stream::Next(None) => Some(Stream::Next(None)),
+    Stream::Pending(p) => Some(Stream::Pending(p)),      // boilerplate
+    Stream::Init => Some(Stream::Init),                   // boilerplate
+    Stream::Ignore => Some(Stream::Ignore),               // boilerplate
+    Stream::Delayed(d) => Some(Stream::Delayed(d)),       // boilerplate
+});
+```
+
+**Problems:**
+- 15+ lines of boilerplate just to transform `Next`
+- Must manually update if `Stream` adds new variants
+- Hard to read — logic buried in match arms
+
+### Correct: Use `map_done` Combinator
+
+```rust
+// GOOD: map_done automatically passes through Pending, Init, Ignore, Delayed
+let mapped = raw_stream.map_done(|opt_json| {
+    opt_json.and_then(|json_str| {
+        serde_json::from_str::<V>(&json_str)
+            .map_err(|e| tracing::error!("Deserialization error: {e}"))
+            .ok()
+    })
+});
+```
+
+**Benefits:**
+- 5 lines instead of 15+
+- Future-proof — new Stream variants handled automatically
+- Clear intent — "transform Next values, pass through rest"
+
+### When `map_pending` IS Necessary
+
+Only use `map_pending` when you need to **change the Pending type**:
+
+```rust
+// GOOD: Converting Pending type for type compatibility
+let stream = raw_stream
+    .map_done(|v| v * 2)
+    .map_pending(|p| MyPending::from(p));  // Type conversion needed
+
+// BAD: Unnecessary map_pending — Pending type doesn't matter
+let stream = raw_stream
+    .map_done(|v| v * 2)
+    .map_pending(|_| ());  // Useless unless type requires it
+```
+
+**Key insight:** At collection boundaries (`find_map`, `collect_result`), only `Stream::Next` values are extracted. Pending is progress information that gets discarded. Don't transform it unless the type signature requires it.
+
+### Common Transformations
+
+| Goal | Use |
+|------|-----|
+| Transform `Next` values | `map_done(f)` |
+| Filter `Next` values | `filter_done(f)` |
+| Transform `Pending` values (type change) | `map_pending(f)` |
+| Transform both with one function | `map_pending_and_done(f)` |
+| Deserialize/parse `Next` | `map_done` + `and_then` |
+| Stop on error, preserve it | `map_circuit` |
+
+```rust
+// Deserialize JSON in Next values
+let stream = stream.map_done(|json_opt| {
+    json_opt.and_then(|s| serde_json::from_str(&s).ok())
+});
+
+// Convert Result to Option, log errors
+let stream = stream.map_done(|result| {
+    result.map_err(|e| tracing::error!("Error: {e}")).ok()
+});
+
+// Extract field from Next value
+let stream = stream.map_done(|user| user.name);
+```
+
 ## The Execution Pipeline
 
 ```

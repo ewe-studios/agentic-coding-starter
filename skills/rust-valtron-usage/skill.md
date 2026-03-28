@@ -479,6 +479,23 @@ Applied **before** `execute()` — transforms the task itself:
 | `filter_ready(f)` | Filter Ready values (filtered → Ignore) |
 | `stream_collect()` | Collect all Ready values into Vec |
 | `flatten_ready()` | Flatten Ready values that are IntoIterator |
+| `map_circuit(f)` | Short-circuit on condition — return error and stop, or continue |
+
+**Quick examples:**
+
+```rust
+// Transform Ready values before execution
+let task = task.map_ready(|v| v * 2);
+
+// Filter out unwanted results (filtered items become Ignore)
+let task = task.filter_ready(|v| v > 10);
+
+// Stop immediately when seeing an error, returning it
+let task = task.map_circuit(|status| match status {
+    TaskStatus::Ready(Err(e)) => TaskShortCircuit::ReturnAndStop(TaskStatus::Ready(Err(e))),
+    _ => TaskShortCircuit::Continue(status),
+});
+```
 
 ### Post-Execute Combinators (StreamIteratorExt)
 
@@ -491,6 +508,28 @@ Applied **after** `execute()` — transforms the stream. Use these **between** o
 | `filter_done(f)` | Filter Next values |
 | `collect()` | Accumulate all Next values, yield as single Vec |
 | `split_collector(pred, size)` | Fork stream into observer + continuation |
+| `map_circuit(f)` | Short-circuit on condition — return value and stop, or continue |
+
+**Quick examples:**
+
+```rust
+// Transform Next values
+let stream = stream.map_done(|v| v.to_string());
+
+// Filter Next values (filtered items become Ignore)
+let stream = stream.filter_done(|v| !v.is_empty());
+
+// Stop immediately when seeing an error, preserving it
+let stream = stream.map_circuit(|item| match item {
+    Stream::Next(Err(e)) => ShortCircuit::ReturnAndStop(Stream::Next(Err(e))),
+    _ => ShortCircuit::Continue(item),
+});
+
+// Chain combinators for clean pipelines
+let stream = stream
+    .filter_done(|v| v.is_ok())
+    .map_done(|v| v.unwrap());
+```
 
 ### Boundary Collection (Standard Iterator — Use at Sync Points Only)
 

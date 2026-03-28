@@ -26,6 +26,37 @@ Valtron is a progress-driven execution engine. Operations produce `TaskIterator`
 
 Blocking should happen at **boundaries** — the outermost point where a concrete value is actually needed — not inside every individual operation.
 
+## Code Style: Clear, Simple, Succinct
+
+**Prefer direct, minimal combinator chains.** Each combinator should have a clear purpose:
+
+```rust
+// GOOD: Only transform what needs transforming
+let task = task
+    .map_ready(|v| v * 2)      // transforming Ready
+    .filter_ready(|v| v > 10); // filtering Ready
+
+// BAD: Unnecessary map_pending that does nothing
+let task = task
+    .map_pending(|p| p)        // useless - remove
+    .map_ready(|v| v * 2);
+
+// GOOD: Use specific combinators for clarity
+let stream = stream.filter_done(|v| v.is_ok());
+
+// BAD: Over-engineered with unnecessary maps
+let stream = stream
+    .map_done(|v| v)           // useless identity map
+    .map_pending(|p| p)        // useless identity map
+    .filter_done(|v| v.is_ok());
+```
+
+**Rules of thumb:**
+- Don't add `map_pending` unless you actually need to transform Pending values
+- Don't chain multiple maps when one would do
+- Use the most specific combinator (`filter_done` vs `map_done` + conditional)
+- If a combinator doesn't change behavior, remove it
+
 ## The Execution Pipeline
 
 ```

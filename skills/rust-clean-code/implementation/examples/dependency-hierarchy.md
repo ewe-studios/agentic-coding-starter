@@ -22,6 +22,64 @@ This document explains the critical principle of checking project modules before
 4. **Create project module** - Build on existing foundation if possible
 5. **External dependency** - Only when truly necessary
 
+## Import Ordering: Top-Level Only 🚨
+
+**MOST IMPORTANT RULE: All imports must be at the top level of the file.**
+
+**❌ BAD - Imports scattered throughout file:**
+```rust
+//! Module documentation.
+
+use std::path::Path;
+
+pub struct Foo { ... }
+
+impl Foo {
+    pub fn method(&self) {
+        use some::external::crate::Thing;  // BAD: inline import
+        Thing::new()
+    }
+}
+
+pub fn helper() {
+    use another::module::Helper;  // BAD: function-level import
+    Helper::run()
+}
+```
+
+**✅ GOOD - All imports at top:**
+```rust
+//! Module documentation.
+
+use another::module::Helper;
+use some::external::crate::Thing;
+use std::path::Path;
+
+pub struct Foo { ... }
+
+impl Foo {
+    pub fn method(&self) {
+        Thing::new()
+    }
+}
+
+pub fn helper() {
+    Helper::run()
+}
+```
+
+**Import Order Convention:**
+1. Project modules (`crate::`, `foundation_*::`)
+2. Rust stdlib (`std::`, `core::`)
+3. External crates (`serde::`, `tokio::`, etc.)
+
+**Why Top-Level Imports Matter:**
+- **Visibility**: All dependencies visible at a glance
+- **Consistency**: Matches Rust community conventions
+- **Maintainability**: Easy to spot unused imports
+- **Compilation**: Enables better compiler optimizations
+- **Code Review**: Clear understanding of dependencies
+
 ## Example: HTTP Test Server
 
 **❌ BAD - Immediate external dependency:**
@@ -104,3 +162,4 @@ fd -e rs | grep pattern
 - [ ] Verified external crate is truly necessary
 - [ ] Checked crate maintenance status and popularity
 - [ ] Reviewed transitive dependencies (`cargo tree`)
+- [ ] **All imports placed at top of file (no inline imports)**

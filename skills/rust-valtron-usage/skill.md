@@ -6,8 +6,8 @@ created: 2026-03-28
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "1.0"
-  last_updated: "2026-03-28"
+  version: "1.1"
+  last_updated: "2026-04-06"
   tags: [rust, valtron, async, task-iterator, stream-iterator, foundation-core, execution-model]
 tools: []
 assets:
@@ -25,6 +25,55 @@ Valtron is a progress-driven execution engine. Operations produce `TaskIterator`
 **The fundamental rule:** Do not turn async operations into sync operations at the leaf. Instead, schedule work via `execute()`, return the stream to the caller, and let them decide when to collect results. This preserves composability, parallelism, and progress observability.
 
 Blocking should happen at **boundaries** — the outermost point where a concrete value is actually needed — not inside every individual operation.
+
+### When Blocking Internally IS Acceptable
+
+**Exception to the fundamental rule:** For single-value operations where the result is required immediately for subsequent operations, blocking internally is acceptable:
+
+- **Authentication checks** — `auth_check()`, `whoami()` — need to know before proceeding
+- **Single-item lookups** — getting user/org info needed for subsequent requests
+- **CRUD operations** — `create_repo()`, `delete_repo()` — caller needs the result immediately
+
+**Pattern for single-value blocking:**
+
+```rust
+use foundation_core::valtron::{from_future, execute, collect_one};
+
+pub fn whoami(&self) -> Result<User> {
+    let future = from_future(async move {
+        // ... async work ...
+        Ok::<_, Error>(user)
+    });
+    
+    let stream = execute(future, None)?;
+    collect_one(stream).ok_or_else(|| Error::NoResult)
+}
+```
+
+**Pattern for multi-value streaming:**
+
+```rust
+pub fn list_models(&self) -> Result<impl StreamIterator<D = Result<ModelInfo>, P = ()> + Send> {
+    let future = from_future(async move {
+        // ... async work ...
+        Ok::<_, Error>(vec_of_models)
+    });
+    
+    let stream = execute(future, None)?;
+    Ok(stream.flat_map_next(|result| {
+        // Expand Vec into stream items
+    }))
+}
+```
+
+**Decision flowchart:**
+
+1. **Does the operation return multiple values?** → Return a stream
+2. **Is the result needed immediately for subsequent operations?** → Blocking internally is OK
+3. **Could the caller benefit from composing this with other operations?** → Return a stream
+4. **Is this a one-shot initialization or CLI tool?** → Blocking is acceptable
+
+**Default:** Return streams. Block internally only when there's a clear justification.
 
 ## Code Style: Clear, Simple, Succinct
 
@@ -847,6 +896,178 @@ Use `map_circuit` **after `execute()`** when:
 | `sync_collect_one(task)` | Execute + return single value as `Result<T::Ready>` |
 | `sync_one(task)` | Execute + collect all results as `Result<Vec<T::Ready>>` |
 | `sync_all(tasks)` | Execute all in parallel + collect all results |
+
+## simple_http + Valtron Integration
+
+When using `foundation_core::simple_http` with Valtron, follow the pattern from generated API clients:
+
+### Core Pattern: ClientRequestBuilder → SendRequestTask → StreamIterator
+
+The correct pattern uses `ClientRequestBuilder`, `build_send_request()`, and `RequestIntro` handling:
+
+```rust
+use foundation_core::valtron::{execute, Stream};
+use foundation_core::simple_http::client::SimpleHttpClient;
+use foundation_core::simple_http::{RequestIntro, body_reader};
+
+/// Single-value HTTP operation (blocking OK for auth/user info)
+pub fn whoami(client: &SimpleHttpClient, token: &str) -> Result<User> {
+    let client = client.clone();
+    let token = token.to_string();
+    let url = "https://huggingface.co/api/whoami-v2".to_string();
+    
+    // Start with ClientRequestBuilder
+    let builder = client.get(&url)?
+        .header("Authorization", format!("Bearer {}", token));
+    
+    // Build SendRequestTask and transform
+    let task = builder
+        .build_send_request()
+        .map_err(|e| Error::RequestBuildFailed(e.to_string()))?
+        .map_ready(|intro| match intro {
+            RequestIntro::Success { stream, status } => {
+                let headers = status.headers().clone();
+                if !status.is_success() {
+                    return Err(Error::HttpStatus {
+                        code: status.as_u16(),
+                        headers,
+                    });
+                }
+                // Read body using body_reader helper
+                let body = body_reader::collect_string(stream);
+                // Parse JSON inside map_ready
+                let user: User = serde_json::from_str(&body)
+                    .map_err(|e| Error::Json(e.to_string()))?;
+                Ok(user)
+            }
+            RequestIntro::Failed(e) => Err(Error::RequestSendFailed(e.to_string())),
+        })
+        .map_pending(|_| ());  // Discard progress info
+    
+    // Execute and collect single result
+    let stream = execute(task, None)
+        .map_err(|e| Error::Valtron(e.to_string()))?;
+    
+    // Use standard Iterator::find_map to extract first Next value
+    stream.find_map(|s| match s {
+        Stream::Next(result) => Some(result),
+        _ => None,
+    }).ok_or_else(|| Error::NoResult)
+}
+```
+
+### Multi-Value HTTP Operations (Return Stream)
+
+For listing endpoints, return a `StreamIterator` that yields individual items:
+
+```rust
+use foundation_core::valtron::{execute, Stream};
+use foundation_core::simple_http::{RequestIntro, body_reader};
+
+pub type ApiStream<T> = Box<dyn Iterator<Item = Stream<Result<T, Error>, ()>> + Send>;
+
+pub fn list_models(client: &SimpleHttpClient) -> Result<ApiStream<ModelInfo>> {
+    let client = client.clone();
+    let url = "https://huggingface.co/api/models".to_string();
+    
+    let builder = client.get(&url)?;
+    
+    let task = builder
+        .build_send_request()
+        .map_err(|e| Error::RequestBuildFailed(e.to_string()))?
+        .map_ready(|intro| match intro {
+            RequestIntro::Success { stream, status } => {
+                let headers = status.headers().clone();
+                if !status.is_success() {
+                    return Err(Error::HttpStatus {
+                        code: status.as_u16(),
+                        headers,
+                    });
+                }
+                let body = body_reader::collect_string(stream);
+                // Parse Vec<ModelInfo> from response
+                let models: Vec<ModelInfo> = serde_json::from_str(&body)
+                    .map_err(|e| Error::Json(e.to_string()))?;
+                Ok(models)
+            }
+            RequestIntro::Failed(e) => Err(Error::RequestSendFailed(e.to_string())),
+        })
+        .map_pending(|_| ());
+    
+    let stream = execute(task, None)
+        .map_err(|e| Error::Valtron(e.to_string()))?;
+    
+    // Expand Vec into individual stream items using flat_map_next
+    Ok(Box::new(stream.flat_map_next(|result| {
+        match result {
+            Ok(models) => models.into_iter().map(|m| Stream::Next(Ok(m))).collect::<Vec<_>>().into_iter(),
+            Err(e) => vec![Stream::Next(Err(e))].into_iter(),
+        }
+    })))
+}
+```
+
+### Reference Implementation Pattern
+
+From `backends/foundation_deployment/src/providers/prisma_postgres/clients/mod.rs`:
+
+```rust
+pub fn get_v1_compute_services_execute(
+    builder: ClientRequestBuilder<SystemDnsResolver>,
+) -> Result<
+    impl StreamIterator<D = Result<ApiResponse<T>, ApiError>, P = ApiPending> + Send + 'static,
+    ApiError,
+> {
+    let task = builder
+        .build_send_request()
+        .map_err(|e| ApiError::RequestBuildFailed(e.to_string()))?
+        .map_ready(|intro| match intro {
+            RequestIntro::Success { stream, intro, headers, .. } => {
+                let status_code: usize = intro.0.into();
+                if status_code < 200 || status_code >= 300 {
+                    let body = body_reader::collect_string(stream);
+                    return Err(ApiError::HttpStatus {
+                        code: status_code as u16,
+                        headers: headers.clone(),
+                        body: Some(body),
+                    });
+                }
+                let body = body_reader::collect_string(stream);
+                let parsed: T = serde_json::from_str(&body)
+                    .map_err(|e| ApiError::ParseFailed(e.to_string()))?;
+                Ok(ApiResponse { status: status_code as u16, headers, body: parsed })
+            }
+            RequestIntro::Failed(e) => Err(ApiError::RequestSendFailed(e.to_string())),
+        })
+        .map_pending(|_| ApiPending::Sending);
+    
+    execute(task, None).map_err(|e| ApiError::RequestBuildFailed(e.to_string()))
+}
+```
+
+### Key Points
+
+1. **Start with `ClientRequestBuilder`** — `client.get(url)?` or `client.post(url)?`
+2. **Call `build_send_request()`** — Returns `SendRequestTask`
+3. **Transform with `map_ready()`** — Handle `RequestIntro::Success { stream, status }` and `RequestIntro::Failed(e)`
+4. **Check status code** — Return error if `!status.is_success()`
+5. **Read body with `body_reader::collect_string(stream)`** — Helper to consume response stream
+6. **Parse JSON inside `map_ready`** — Transform `String` body to your type
+7. **Apply `map_pending()`** — Usually `map_pending(|_| ())` to discard progress
+8. **Call `execute(task, None)`** — Returns `StreamIterator`
+9. **For single-value ops** — Use `.find_map()` or `collect_one()` to extract result
+10. **For multi-value ops** — Use `.flat_map_next()` to expand `Vec<T>` into stream items
+
+### Pattern Comparison
+
+| Old (Incorrect) | New (Correct) |
+|-----------------|---------------|
+| `from_future(async { client.execute(req) })` | `client.get(url)?.build_send_request()` |
+| `response.body()?` | `RequestIntro::Success { stream, status }` |
+| Manual status check after send | Status check inside `map_ready` |
+| `SendSafeBody` parsing | `body_reader::collect_string(stream)` |
+
+The new pattern aligns with how `SimpleHttpClient` is actually used in the codebase.
 
 ## Decision Flowchart
 

@@ -6,8 +6,8 @@ created: 2026-01-27
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "4.0-streamlined"
-  last_updated: "2026-03-03"
+  version: "4.1-tracing-enforced"
+  last_updated: "2026-04-06"
 tags:
   - rust
   - clean-code
@@ -15,6 +15,8 @@ tags:
   - error-handling
   - no_std
   - abstraction
+  - tracing
+  - logging
 files:
   - examples/documentation-patterns.md: "WHY/WHAT/HOW doc patterns with mandatory panic documentation"
   - examples/error-handling-guide.md: "Error handling with derive_more"
@@ -25,6 +27,7 @@ files:
   - examples/performance-tips.md: "Performance optimization patterns and benchmarking"
   - examples/trait-patterns.md: "Trait implementation best practices"
   - examples/basic-template.md: "Basic implementation template"
+  - examples/tracing-logging.md: "Mandatory tracing crate usage for all logging"
 ---
 
 # Rust Clean Implementation
@@ -58,7 +61,70 @@ rg "enum.*Error" --type rust
 
 📖 **Read when adding dependencies:** [`dependency-hierarchy.md`](examples/dependency-hierarchy.md) - Complete examples and decision process
 
-### 2. Documentation: WHY/WHAT/HOW Pattern
+### 2. Iron Rule: Always Use `tracing` Crate for Logging 🚨
+
+**NON-NEGOTIABLE:** ALL logging MUST use the `tracing` crate macros. No exceptions.
+
+**Required dependencies in EVERY crate:**
+
+```toml
+[dependencies]
+tracing = { version = "0.1" }
+
+[dev-dependencies]
+tracing-test = { version = "0.2.5", features = ["no-env-filter"] }
+serial_test = "0.6.0"
+```
+
+**Use tracing macros for ALL logging:**
+```rust
+use tracing::{debug, error, info, trace, warn};
+
+// Info for important runtime events
+info!("Server started on port {}", port);
+info!("Model downloaded to: {}", path.display());
+
+// Debug for development/diagnostic info
+debug!("Processing request: {:?}", request);
+
+// Trace for fine-grained tracing
+trace!("Entering function with args: {:?}", args);
+
+// Warn for recoverable issues
+warn!("Retrying failed operation (attempt {}/{})", attempt, max_attempts);
+
+// Error for actual errors
+error!("Failed to connect: {}", error);
+```
+
+**Tests MUST use `#[traced_test]`:**
+```rust
+use tracing_test::traced_test;
+
+#[test]
+#[traced_test]
+fn test_something() {
+    info!("Test started");
+    // Test code - logs will appear in test output
+}
+```
+
+**Why tracing:**
+- Structured logging with spans for better debugging
+- Async-safe (unlike `println!` or `log`)
+- Zero overhead when not collecting traces
+- Integrates with observability tools
+- Project standard - consistency matters
+
+**Forbidden:**
+- ❌ `println!()` / `eprintln!()` (except for CLI output)
+- ❌ `dbg!()` in production code (fine for temporary debugging)
+- ❌ `log` crate macros (`log::info!`, etc.)
+- ❌ Any other logging crate
+
+📖 **Read for complete guide:** [`tracing-logging.md`](examples/tracing-logging.md)
+
+### 3. Documentation: WHY/WHAT/HOW Pattern
 
 **Every public item needs documentation:**
 
@@ -88,7 +154,7 @@ pub fn validate_input(input: &str) -> Result<(), Error> {
 
 📖 **Read for complete patterns:** [`documentation-patterns.md`](examples/documentation-patterns.md)
 
-### 3. Error Handling with derive_more
+### 4. Error Handling with derive_more
 
 **Use `derive_more` for clean error types:**
 
@@ -116,7 +182,7 @@ pub enum Error {
 
 📖 **Read for complete guide:** [`error-handling-guide.md`](examples/error-handling-guide.md)
 
-### 4. No_std Support (When Required)
+### 5. No_std Support (When Required)
 
 **Pattern for libraries:**
 
@@ -188,6 +254,10 @@ impl Iterator for MyType {
 
 Every new module/function must have:
 
+- [ ] `tracing` crate in dependencies (mandatory for ALL crates)
+- [ ] `tracing-test` and `serial_test` in dev-dependencies
+- [ ] All logging via tracing macros (`info!`, `debug!`, `error!`, `warn!`, `trace!`)
+- [ ] Tests annotated with `#[traced_test]`
 - [ ] WHY/WHAT/HOW documentation
 - [ ] Error types with `derive_more`
 - [ ] Errors section in docs
@@ -197,6 +267,9 @@ Every new module/function must have:
 - [ ] Tests (see [testing skill](../testing/skill.md))
 
 **Forbidden:**
+- ❌ `println!()` / `eprintln!()` for logging (except CLI output)
+- ❌ `dbg!()` in production code
+- ❌ `log` crate or other logging crates
 - ❌ Undocumented public items
 - ❌ Missing error documentation
 - ❌ Adding external deps without checking project first
@@ -209,17 +282,18 @@ Every new module/function must have:
 
 **Always check first:**
 1. ⭐ [`dependency-hierarchy.md`](examples/dependency-hierarchy.md) - Before adding ANY dependency
+2. ⭐ [`tracing-logging.md`](examples/tracing-logging.md) - Mandatory for ALL crates
 
 **Read when you need to:**
 
-2. **Documentation:** [`documentation-patterns.md`](examples/documentation-patterns.md) - WHY/WHAT/HOW patterns
-3. **Error handling:** [`error-handling-guide.md`](examples/error-handling-guide.md) - derive_more examples
-4. **Security:** [`security-guide.md`](examples/security-guide.md) - Input validation, crypto, unsafe
-5. **No_std:** [`no-std-support.md`](examples/no-std-support.md) - Supporting both std and no_std
-6. **Iterators:** [`iterator-patterns.md`](examples/iterator-patterns.md) - Custom iterator implementation
-7. **Traits:** [`trait-patterns.md`](examples/trait-patterns.md) - Trait implementation patterns
-8. **Performance:** [`performance-tips.md`](examples/performance-tips.md) - After profiling
-9. **Template:** [`basic-template.md`](examples/basic-template.md) - Starting a new module
+3. **Documentation:** [`documentation-patterns.md`](examples/documentation-patterns.md) - WHY/WHAT/HOW patterns
+4. **Error handling:** [`error-handling-guide.md`](examples/error-handling-guide.md) - derive_more examples
+5. **Security:** [`security-guide.md`](examples/security-guide.md) - Input validation, crypto, unsafe
+6. **No_std:** [`no-std-support.md`](examples/no-std-support.md) - Supporting both std and no_std
+7. **Iterators:** [`iterator-patterns.md`](examples/iterator-patterns.md) - Custom iterator implementation
+8. **Traits:** [`trait-patterns.md`](examples/trait-patterns.md) - Trait implementation patterns
+9. **Performance:** [`performance-tips.md`](examples/performance-tips.md) - After profiling
+10. **Template:** [`basic-template.md`](examples/basic-template.md) - Starting a new module
 
 ---
 

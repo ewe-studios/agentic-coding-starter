@@ -443,6 +443,62 @@ let task = from_future(async move {
 });
 ```
 
+### Using `run_future_iter` for Streaming !Send Iterators
+
+When you need to stream rows (not collect to Vec), use `run_future_iter` to spawn a worker thread that owns the `!Send` iterator forever:
+
+```rust
+use foundation_core::valtron::{run_future_iter, Stream, ThreadedValue};
+
+fn list(&self) -> Result<StateStoreStream<String>, StorageError> {
+    let conn = Arc::clone(&self.conn);
+
+    // run_future_iter spawns a worker thread that owns the !Send iterator
+    let iter = run_future_iter(
+        move || async move {
+            // !Send rows iterator is created and consumed inside this async block
+            let mut stmt = conn
+                .prepare("SELECT id FROM deployment_resources ORDER BY id")
+                .await
+                .map_err(|e| StorageError::Backend(e.to_string()))?;
+            let rows = stmt
+                .query([libsql::Value::Null; 0])
+                .await
+                .map_err(|e| StorageError::Backend(e.to_string()))?;
+            
+            // Wrap the !Send iterator with a transformation function
+            // The iterator stays on the worker thread forever
+            Ok::<_, StorageError>(LibsqlRowsIterator::new(rows, |row| {
+                row.get::<String>(0)
+                    .map_err(|e| StorageError::SqlConversion(e.to_string()))
+            }))
+        },
+        None,
+        None,
+    )
+    .map_err(|e| StorageError::Backend(e.to_string()))?;
+
+    // Transform ThreadedValue to Stream protocol
+    let stream = iter.map(|threaded_value| match threaded_value {
+        ThreadedValue::Value(result) => Stream::Next(result),
+    });
+
+    Ok(Box::new(stream))
+}
+```
+
+**Key pattern:**
+
+| Component | Role |
+|-----------|------|
+| `run_future_iter(future_factory, None, None)` | Spawns worker thread, owns !Send iterator forever |
+| Generic iterator (`LibsqlRowsIterator<T, F>`) | Consumes !Send rows, transforms to `T: Send` via closure `F` |
+| Transformation closure | Inline per-use-site logic: `FnMut(&Row) -> Result<T, Error>` |
+| `ThreadedValue<T>` | Crosses thread boundary from worker to main |
+| `.map(\|tv\| match tv { ... })` | Converts `ThreadedValue` to `Stream` protocol |
+
+**Why not `from_future` + collect?** For large result sets, collecting to `Vec` before streaming causes OOM. `run_future_iter` enables true streaming: rows are fetched, transformed, and yielded one at a time across the thread boundary.
+
 ## The `Send + 'static` Requirement
 
 All data captured by async blocks must be `Send + 'static` for Valtron scheduling:

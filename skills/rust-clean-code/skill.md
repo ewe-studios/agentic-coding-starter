@@ -19,6 +19,11 @@ files:
 
 # Rust Clean Code
 
+## ⚡ Fast Check Workflow
+
+**CRITICAL:** When doing Rust checks and you're not sure about something, use quick `cargo check` with `tee` to collect warnings rapidly. **5-6 minutes should be enough** for the initial pass. If after 5-6 minutes you see nothing, increase to 10 minutes on the next run. If it finishes with no issues — great. If you see issues early, collect enough in 5 minutes then go fix them. This increases iteration speed and reduces wasted wait time.
+
+---
 ## Overview
 
 This skill consolidates comprehensive Rust development practices into a modular structure. Each sub-skill focuses on a specific aspect of Rust development, providing detailed guidance, examples, and best practices.
@@ -107,3 +112,7 @@ Write robust async/await code using tokio with proper non-blocking patterns. Cov
 **Usage Type**: EDUCATIONAL
 
 This is a navigation skill. Load the specific sub-skills for actual implementation guidance.
+
+## ⚡ Rust Check Reminder
+
+When running Rust checks: use `cargo check 2>&1 | tee /tmp/cargo-check.log` with a **5-6 minute timeout** for quick scans. Only extend to 10 minutes if the first pass shows nothing. Fix issues as soon as they appear — don't wait for a full check to complete.

@@ -21,6 +21,11 @@ status: active
 
 # Rust Cleanup Agent
 
+## ⚡ Fast Check Workflow
+
+**CRITICAL:** When doing Rust checks and you're not sure about something, use quick `cargo check` with `tee` to collect warnings rapidly. **5-6 minutes should be enough** for the initial pass. If after 5-6 minutes you see nothing, increase to 10 minutes on the next run. If it finishes with no issues — great. If you see issues early, collect enough in 5 minutes then go fix them. This increases iteration speed and reduces wasted wait time.
+
+---
 n5. **`.agents/skills/context-work-ethic/skill.md`** - Context management and communication rules
 ## Skills to Read
 
@@ -98,3 +103,7 @@ Manual required: N
 ---
 
 _Version: 2.0 - Last Updated: 2026-02-27_
+
+## ⚡ Rust Check Reminder
+
+When running Rust checks: use `cargo check 2>&1 | tee /tmp/cargo-check.log` with a **5-6 minute timeout** for quick scans. Only extend to 10 minutes if the first pass shows nothing. Fix issues as soon as they appear — don't wait for a full check to complete.

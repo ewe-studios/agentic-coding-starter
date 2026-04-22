@@ -346,6 +346,121 @@ rustflags = ["-C", "link-arg=-fuse-ld=lld"]
 # rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld"]
 ```
 
+---
+
+## Linker Configuration: mold vs lld vs ld
+
+When configuring `.cargo/config.toml` on Linux, you have three main linker options. Each has different trade-offs:
+
+### Comparison Table
+
+| Linker | Speed | Compatibility | Notes |
+|--------|-------|---------------|-------|
+| `mold` | Fastest (10-20% faster than lld) | ⚠️ Some edge cases | Aggressive deduplication, can fail with certain C libraries |
+| `lld` | Very fast | ✅ Excellent | LLVM's linker, great balance of speed and compatibility |
+| `ld` (GNU) | Slow | ✅ Excellent | Default, reliable but significantly slower |
+
+### Recommended Configuration
+
+**Use `lld` as the default** - best balance of speed and compatibility:
+
+```toml
+[target.'cfg(target_os = "linux")']
+linker = "clang"
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+```
+
+### Known Issues
+
+**`mold` with `aws-lc-sys` (and similar crates):**
+
+The `mold` linker can fail with undefined symbol errors when linking crates that bundle large C libraries with versioned symbols (e.g., `aws_lc_0_38_0_*`). This is due to mold's aggressive symbol deduplication and stricter ELF handling.
+
+**Symptom:**
+```
+mold: error: undefined symbol: aws_lc_0_38_0_EVP_sha256
+mold: error: undefined symbol: aws_lc_0_38_0_AES_cbc_encrypt
+...
+```
+
+**Fixes (in order of preference):**
+
+1. **Switch to lld** (recommended):
+   ```toml
+   rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+   ```
+
+2. **Try mold with additional flags** (may not always work):
+   ```toml
+   rustflags = ["-C", "link-arg=-fuse-ld=mold", "-C", "link-arg=--no-undefined-version"]
+   ```
+
+3. **Clean and rebuild** the problematic crate:
+   ```bash
+   cargo clean -p aws-lc-sys
+   cargo build
+   ```
+
+### Platform-Specific Recommendations
+
+**Linux:**
+```toml
+[target.'cfg(target_os = "linux")']
+linker = "clang"
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+```
+
+**macOS:**
+```toml
+[target.'cfg(target_os = "macos")']
+# macOS default linker is usually fine, or use zld for speed
+# rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld"]
+```
+
+**Windows (MSVC):**
+```toml
+[target.'cfg(target_os = "windows")']
+# MSVC linker is the default and works well
+# No configuration needed
+```
+
+### Installation
+
+**For lld:**
+```bash
+# Arch Linux
+sudo pacman -S lld
+
+# Debian/Ubuntu
+sudo apt install lld
+
+# macOS (Homebrew)
+brew install llvm  # Includes lld
+```
+
+**For mold:**
+```bash
+# Arch Linux
+sudo pacman -S mold
+
+# Debian/Ubuntu
+sudo apt install mold
+
+# Or build from source
+git clone https://github.com/rui314/mold.git
+cd mold && make && sudo make install
+```
+
+### Verification
+
+Check which linker is being used:
+```bash
+# Verbose build to see linker invocation
+cargo build -vv 2>&1 | grep "fuse-ld"
+```
+
+---
+
 ### .gitignore
 
 ```gitignore

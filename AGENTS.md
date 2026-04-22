@@ -7,6 +7,12 @@ last_updated: 2026-03-02
 
 # Agent Configuration
 
+## ⚡ Fast Rust Check Workflow
+
+**CRITICAL:** When doing Rust checks and you're not sure about something, use quick `cargo check` with `tee` to collect warnings rapidly. **5-6 minutes should be enough** for the initial pass. If after 5-6 minutes you see nothing, increase to 10 minutes on the next run. If it finishes with no issues — great. If you see issues early, collect enough in 5 minutes then go fix them. This increases iteration speed and reduces wasted wait time.
+
+---
+
 ## Core Principle
 
 **Every agent reads their documentation file which specifies skills to load.**
@@ -87,3 +93,7 @@ _Version: 6.1.0 - Last Updated: 2026-03-02_
 
 _Simplified architecture: rule.md → agents → skills_
 _Added: Context Management guidelines for token optimization_
+
+## ⚡ Rust Check Reminder
+
+When running Rust checks: use `cargo check 2>&1 | tee /tmp/cargo-check.log` with a **5-6 minute timeout** for quick scans. Only extend to 10 minutes if the first pass shows nothing. Fix issues as soon as they appear — don't wait for a full check to complete.

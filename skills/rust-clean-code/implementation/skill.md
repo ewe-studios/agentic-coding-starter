@@ -73,7 +73,7 @@ tracing = { version = "0.1" }
 
 [dev-dependencies]
 tracing-test = { version = "0.2.5", features = ["no-env-filter"] }
-serial_test = "0.6.0"
+serial_test = "3.3.1"
 ```
 
 **Use tracing macros for ALL logging:**

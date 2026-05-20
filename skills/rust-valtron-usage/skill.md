@@ -1085,6 +1085,168 @@ The new pattern aligns with how `SimpleHttpClient` is actually used in the codeb
 - Yes → Use a rich `Pending` type (e.g., `MigrationProgress`, `FetchPending`).
 - No → Use `Pending = ()`.
 
+## Valtron Streams in Async Contexts
+
+When you need to use valtron streams inside `async` code (CF Workers, axum handlers, etc.), the **stream-to-future bridge** from feature 11 provides the conversion.
+
+### The Problem
+
+Valtron `StreamIterator` is a synchronous `Iterator` — it yields `Stream<D, P>` states via `.next()`. Rust async code expects `Future<Output = T>` or `impl futures_core::Stream`. You can't `.await` a `StreamIterator` directly.
+
+### The Solution: Stream-to-Future Bridge Types
+
+Four wrapper types in `foundation_core::valtron::stream_future` convert `StreamIterator` into standard async types:
+
+| Type | Returns | When to use |
+|------|---------|-------------|
+| `StreamCollectFuture<SI>` | `Future<Output = Vec<D>>` | Collect all `Next` values — replacement for `collect_result()` |
+| `StreamReadyFuture<SI>` | `Future<Output = Option<(D, SI)>>` | Get the first `Next` value + remaining iterator — replacement for `collect_one()` |
+| `StreamPendingFuture<SI>` | `Future<Output = Option<(P, SI)>>` | Get the first `Pending` context — for progress-driven logic |
+| `StreamAsFutureStream<SI>` | `impl futures_core::Stream<Item = Stream<D, P>>` | Pass-through as async stream — for streaming consumers |
+
+### Pattern 1: Replace `collect_result()` in async code
+
+```rust
+// SYNC — blocks the thread
+let results: Vec<User> = collect_result(user_stream);
+
+// ASYNC — returns a Future, use .await
+let results: Vec<User> = user_stream.into_collect_future().await;
+```
+
+### Pattern 2: Replace `collect_one()` in async code
+
+```rust
+// SYNC — blocks until first Next
+let user = collect_one(user_stream).ok_or_else(|| Error::NoResult)?;
+
+// ASYNC — resolves to first Next
+let result = user_stream.into_ready_future().await;
+let user = result
+    .map(|(value, _remaining)| value)
+    .ok_or_else(|| Error::NoResult)?;
+```
+
+### Pattern 3: Full async pipeline from `from_future`
+
+```rust
+pub async fn get_user_async(conn: Arc<DbConn>, id: &str) -> Result<Option<User>> {
+    let conn = Arc::clone(&conn);
+    let id = id.to_string();
+
+    // Step 1: Create future
+    let future = from_future(async move {
+        let mut stmt = conn.prepare("SELECT * FROM users WHERE id = ?").await?;
+        let row = stmt.query_row([&id]).await?;
+        let user: Option<User> = row.map(|r| from_row(&r)).transpose()?;
+        Ok::<_, DbError>(user)
+    });
+
+    // Step 2: Execute → StreamIterator
+    let stream = execute(future, None)
+        .map_err(|e| Error::Scheduling(e.to_string()))?;
+
+    // Step 3: Bridge to Future + await
+    stream.into_ready_future().await
+        .map(|(result, _)| result)
+        .ok_or_else(|| Error::NoResult)?
+}
+```
+
+### Pattern 4: Using `schedule_future` helper (when available)
+
+If `schedule_future` is available (e.g., in `foundation_db::async_utils`), it wraps the `from_future` + `execute` + `map` pipeline:
+
+```rust
+pub async fn get_async<V: DeserializeOwned>(&self, key: &str) -> StorageResult<Option<V>> {
+    let key = key.to_string();
+    let this = self.clone();
+
+    let future = async move {
+        let stream = this.get::<V>(&key)?;
+        stream.flat_map(|s| match s {
+            Stream::Next(r) => vec![r],
+            _ => vec![],
+        }).next().ok_or_else(|| StorageError::NotFound(key.clone()))?
+    };
+
+    schedule_future(future)?
+        .into_ready_future()
+        .await
+        .ok_or_else(|| StorageError::NotFound(key.to_string()))
+}
+```
+
+### Pattern 5: Streaming consumption via `StreamAsFutureStream`
+
+When you need to process items one at a time as an async stream:
+
+```rust
+use futures_core::Stream as FuturesStream;
+use futures_lite::stream::StreamExt; // for .next()
+
+let mut stream = data_stream.into_future_stream();
+while let Some(item) = stream.next().await {
+    match item {
+        Stream::Next(Ok(value)) => process(value),
+        Stream::Next(Err(e)) => handle_error(e),
+        Stream::Pending(ctx) => log_progress(ctx),
+        _ => {}
+    }
+}
+```
+
+### Critical: `wake_by_ref()` on `Poll::Pending`
+
+All bridge `Future` impls call `cx.waker().wake_by_ref()` before returning `Poll::Pending`. This is required because:
+
+1. The wrapped `StreamIterator` is synchronous — data is always ready
+2. Returning `Poll::Pending` contracts: "I'm not resolved, schedule me again"
+3. Without `wake_by_ref()`, the runtime never re-polls → hangs forever
+4. `wake_by_ref()` signals "re-poll me immediately" — the runtime coalesces the wake
+
+**This is correct Future semantics, not a workaround.** It simulates the waker firing that would happen in a real async context when I/O completes.
+
+### `Unpin` Requirements
+
+All bridge Future impls require `SI: Unpin` on the `StreamIterator`:
+
+```rust
+impl<SI> Future for StreamReadyFuture<SI>
+where
+    SI: StreamIterator + Unpin,  // Required for Pin::get_mut()
+{
+    // ...
+}
+```
+
+`StreamCollectFuture` additionally requires `SI::D: Unpin` because `Vec<T>` is only `Unpin` when `T: Unpin` (Rust stdlib quirk).
+
+All valtron iterators (regular structs, Vec iterators, combinator wrappers) are `Unpin` by default — none contain self-referential data.
+
+### When NOT to Use the Bridge
+
+- **You have native async APIs** (e.g., `D1WasmStorage` calling `JsFuture`) — call them directly, don't route through valtron.
+- **The operation is pure computation** — no need for valtron, just use a regular `async` block.
+- **You're already in a sync context** — use `collect_result()` / `collect_one()` directly.
+
+The bridge is specifically for: "I have a valtron `StreamIterator` and I need to `.await` it in async code."
+
+### Decision Flowchart for Async
+
+```
+Do you need to use valtron streams in async code?
+├─ No → Use sync collection (collect_result, collect_one)
+└─ Yes →
+    ├─ Do you have native async APIs (JsFuture, reqwest)?
+    │   ├─ Yes → Call them directly, don't bridge
+    │   └─ No → Use the stream-to-future bridge
+    │       ├─ Need all values? → .into_collect_future().await
+    │       ├─ Need first value? → .into_ready_future().await
+    │       ├─ Need pending context? → .into_pending_future().await
+    │       └─ Need async stream? → .into_future_stream()
+```
+
 ---
 
 _Created: 2026-03-28_

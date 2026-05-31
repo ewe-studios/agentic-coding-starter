@@ -1247,6 +1247,123 @@ Do you need to use valtron streams in async code?
     │       └─ Need async stream? → .into_future_stream()
 ```
 
+## Lessons from CF Workers wasm32 Deployment (2026-05-30)
+
+### TaskIterator::next_status() MUST Eventually Return `None`
+
+**The most critical lesson:** Every `TaskIterator` implementation **must** return `None` at some point. If it always returns `Some(...)`, the task stays in the executor forever, the `NotifyQueue` never closes, and any `while let Some(item) = stream.next().await` loop hangs indefinitely.
+
+```rust
+// BAD: Always returns Some — task never terminates
+fn next_status(&mut self) -> Option<TaskStatus<...>> {
+    if self.current >= self.max {
+        return Some(TaskStatus::Ready(self.current)); // current never increments → infinite loop!
+    }
+    // ...
+}
+
+// GOOD: Returns None after final Ready
+fn next_status(&mut self) -> Option<TaskStatus<...>> {
+    if self.current > self.max {
+        return None;  // Task completes, queue closes, stream terminates
+    }
+    if self.current == self.max {
+        self.current += 1; // Must advance past max so next call hits the None branch
+        return Some(TaskStatus::Ready(self.current));
+    }
+    // ...
+}
+```
+
+**Rule:** After returning `TaskStatus::Ready(final_value)`, the next `next_status()` call must return `None`. You must either increment the counter or track a `done` flag.
+
+### CondVar on wasm32 Requires `js-wasmbindgen` Feature Gate (When `std` Is Also On)
+
+`std::sync::Condvar` internally calls `thread::sleep` on wasm32-unknown-unknown, which **panics** with "time not implemented on this platform". When `std` is off, the no_std spin-waiting CondVar is used automatically.
+
+**The trap:** CF Workers builds often need `std` for `Duration`, `OnceLock`, `RefCell`, etc. — so you can't just disable `std`. In that case, the `js-wasmbindgen` feature gate overrides CondVar/Mutex routing to use the no_std spin-waiting implementation even with `std` enabled:
+
+```toml
+# cf-valtron-counter/Cargo.toml
+foundation_core = { default-features = false, features = ["js-wasmbindgen", "std"] }
+```
+
+The feature is threaded through: `foundation_nostd/Cargo.toml` adds `js-event-loop = []`, then `foundation_core/Cargo.toml`'s `js-wasmbindgen` feature includes `"foundation_nostd/js-event-loop"`. The cfg gates in `foundation_nostd` route to `nostd_impl` when `js-event-loop` is set, even if `std` is also set:
+
+```rust
+#[cfg(all(feature = "std", not(feature = "js-event-loop")))]
+mod std_impl;
+#[cfg(any(not(feature = "std"), feature = "js-event-loop"))]
+mod nostd_impl;
+```
+
+### setTimeout in CF Workers Requires Reflect Fallback
+
+CF Workers run in a custom global scope — neither `Window` nor `DedicatedWorkerGlobalScope`. After checking both, use `js_sys::Reflect::get` to get `setTimeout`:
+
+```rust
+} else {
+    let global = js_sys::global();
+    let set_timeout = js_sys::Reflect::get(&global, &JsValue::from_str("setTimeout"))
+        .expect("global has no setTimeout");
+    let set_timeout = set_timeout.dyn_ref::<js_sys::Function>()
+        .expect("setTimeout is not a function");
+    let _ = set_timeout.call2(&global, closure.as_ref().unchecked_ref(), &JsValue::from_f64(dur.as_millis() as f64));
+}
+```
+
+### tracing_subscriber::fmt() Panics on CF Workers — Use `.without_time()`
+
+The default `tracing_subscriber::fmt()` calls `SystemTime::now()` which is unavailable in CF Workers. Always use `.without_time()`:
+
+```rust
+tracing_subscriber::fmt()
+    .without_time()          // Required — SystemTime not available
+    .with_max_level(tracing::Level::TRACE)
+    .with_env_filter(filter)
+    .try_init();
+```
+
+### Pool Initialization Must Be Global, Not Per-Request
+
+`initialize_pool()` creates thread pool resources. It must be called **once globally** (e.g., `static POOL_GUARD: OnceLock<PoolGuard>` at the top of the entry point), not inside a per-request handler. Calling it per-request will fail or corrupt state.
+
+```rust
+static POOL_GUARD: OnceLock<PoolGuard> = OnceLock::new();
+
+#[wasm_bindgen]
+pub async fn fetch(req: web_sys::Request, _env: worker::Env) -> web_sys::Response {
+    POOL_GUARD.get_or_init(|| initialize_pool(42, None));
+    // ... handle request
+}
+```
+
+### CF Workers Build Requires `worker-build`, Not Raw wasm-bindgen
+
+Standard `wasm-bindgen --target web` or `--target bundler` produces output incompatible with CF Workers. Use `worker-build` (the worker-rs tool) which handles the correct JS shim generation:
+
+```bash
+worker-build --release   # Outputs to build/
+npx wrangler dev         # Uses build/index.js
+```
+
+### `execute()` vs `spawn()` — Use `execute()` for Stream Results
+
+`execute()` internally calls `spawn()` then `drive_stream()` on the resulting `NotifyQueueStreamIterator`. Don't manually call `spawn()` and then try to wrap it yourself — just use `execute()`:
+
+```rust
+// GOOD: One call does everything
+let driven_iter = execute(CounterTaskIterator::new(10), Some(Duration::from_millis(4)))?;
+
+// BAD: Don't replicate what execute() does internally
+let iter = single::spawn().with_task(task).schedule_iter(...)?;
+let driven_iter = drive_stream(iter);
+```
+
+### StreamAsFutureStream Must Call `wake_by_ref()` on `Poll::Pending`
+
+When wrapping valtron's sync iterators as `futures_core::Stream`, returning `Poll::Pending` without calling `cx.waker().wake_by_ref()` causes the future to never be re-polled. `Stream::Wait` from the executor must still trigger a re-poll.
+
 ---
 
 _Created: 2026-03-28_

@@ -1338,6 +1338,27 @@ pub async fn fetch(req: web_sys::Request, _env: worker::Env) -> web_sys::Respons
 }
 ```
 
+### SingleExecutorSingleton (wasm32/wasm64, optional convenience API)
+
+On wasm32/wasm64 targets (when `multi` feature is off), valtron provides `SingleExecutorSingleton` — a convenience wrapper that combines initialization + guard ownership into one call, similar to `CfHttpAppSingleton`:
+
+```rust
+use foundation_core::valtron::SingleExecutorSingleton;
+
+// One call initializes the executor and gives you a guard
+let _guard = SingleExecutorSingleton::get_or_init(42, |_| {
+    // optional setup closure — e.g., register services
+});
+
+// Later: get the guard without reinitializing
+let guard = SingleExecutorSingleton::guard();
+
+// Check if initialized
+if SingleExecutorSingleton::is_initialized() { ... }
+```
+
+The existing free functions (`initialize_pool`, `spawn`, `run_until_complete`) continue to work independently — `SingleExecutorSingleton` is optional. Use it when you want explicit guard ownership similar to the CF/Web HTTP app singletons.
+
 ### CF Workers Build Requires `worker-build`, Not Raw wasm-bindgen
 
 Standard `wasm-bindgen --target web` or `--target bundler` produces output incompatible with CF Workers. Use `worker-build` (the worker-rs tool) which handles the correct JS shim generation:

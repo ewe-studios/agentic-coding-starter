@@ -89,6 +89,8 @@ unsync context but if not we default to async versions and can provide wrappers 
 use valtron to call the async in a way that works for the users, meaning all things
 by default are async and just let the user know if its not possible and they can decide to call async code however they need in their different contexts.
 
+**IMPORTANT**: Yes, remember there are caveats, this is why we need to be detailed, maybe sync cant wrap async due to issues like &mut self, we need to clearly articulate the design in the feature to clearly know its possible to do that.
+
 **Prefer direct, minimal combinator chains.** Each combinator should have a clear purpose:
 
 ```rust

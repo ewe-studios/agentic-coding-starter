@@ -124,6 +124,13 @@ fn test_something() {
 
 📖 **Read for complete guide:** [`tracing-logging.md`](examples/tracing-logging.md)
 
+### 3.0 Things to note
+
+1. Implement Debug and Display for structs, so they can be printed in logs always.
+2. Use derive_more for custom errors and its supplied capabilities
+3. Preferrably unless specified not to, use foundation_errstack for ewe_platform projects.
+4. For ewe_platform always read the valtron skills.
+
 ### 3. Documentation: WHY/WHAT/HOW Pattern
 
 **Every public item needs documentation:**

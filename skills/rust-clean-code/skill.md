@@ -23,6 +23,12 @@ files:
 
 **CRITICAL:** When doing Rust checks and you're not sure about something, use quick `cargo check` with `tee` to collect warnings rapidly. **5-6 minutes should be enough** for the initial pass. If after 5-6 minutes you see nothing, increase to 10 minutes on the next run. If it finishes with no issues — great. If you see issues early, collect enough in 5 minutes then go fix them. This increases iteration speed and reduces wasted wait time.
 
+Also:
+
+1. Implement Debug and Display for structs, so they can be printed in logs always.
+2. Use derive_more for custom errors and its supplied capabilities
+3. Preferrably unless specified not to, use foundation_errstack for ewe_platform projects.
+
 ---
 ## Overview
 

@@ -79,7 +79,7 @@ pub fn list_models(&self) -> Result<impl StreamIterator<D = Result<ModelInfo>, P
 
 **Async first then sync via valtron calling async** 
 
-Where ever possible, implementation is always in the async functions and then sync call valtron to run async code and return result, unless due to technical issues or unnecessary complexity should we clone and duplicate code for sync but this ok but rare where the complexity of calling the async via valtron is not worth it and reimplementing the logic for sync when the api already support syncs makes the most sense.
+Where ever possible, implementation is always in the async functions and then sync call valtron to run async code and return result, unless due to technical issues or unnecessary complexity should we clone and duplicate code for sync but this ok but rare where the complexity of calling the async via valtron is not worth it and reimplementing the logic for sync when the api already support syncs makes the most sense. This will probably mean two traits one for async and one for sync with the async one having methods ending with `*_async` to avoid conflict with the sync ones. 
 
 **Prefer direct, minimal combinator chains.** Each combinator should have a clear purpose:
 

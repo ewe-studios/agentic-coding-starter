@@ -28,6 +28,7 @@ Also:
 1. Implement Debug and Display for structs, so they can be printed in logs always.
 2. Use derive_more for custom errors and its supplied capabilities
 3. Preferrably unless specified not to, use foundation_errstack for ewe_platform projects.
+4. Unless the user indicates, no clippy, cargo checks, build errors are pre-existing, fix it (some dead_code suppression is allowed, confirm with users) but everything else should be fixed and not suppresed.
 
 ---
 ## Overview

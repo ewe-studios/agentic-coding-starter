@@ -96,6 +96,19 @@ As sub-agent:
 6. Parse FILES section and read ONLY listed files
 7. Begin work with clean, minimal context
 
+### Specification clarity and detail (CRITICAL)
+
+When you write a specification, review it or are about to start it, always ask yourself:
+
+1. Does this spec have hidden details not clarified in the spec or feature
+2. Does this spec or feature make lots of assumptions on how some entity or behaviour functions without specifying the boundaries of its behaviour and execution or functionality
+3. Does this spec or feature leave alot out for assumption creating potential areas for mis-interpretation or wrong execution
+4. Can we make things more clear and more detailed to ensure the full scope, behaviours, boundaries, limitations is clearly articulated and written down.
+
+If any of this is true, you should indicate to the user, pause and ask more questions to get everything clarified, documented and updated.
+
+Update does not mean going to delete stuff unless its clear from the conversation that is what the user expects after clarification and discussion so be thoughtful, logical and surgical.
+
 ## Autonomous Decision-Making
 
 **Act Autonomously (NO approval needed):**

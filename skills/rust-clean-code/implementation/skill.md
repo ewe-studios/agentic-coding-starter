@@ -228,6 +228,34 @@ std = []
 
 📖 [`security-guide.md`](examples/security-guide.md)
 
+### Library-Owned CLI Pattern
+
+**When to read:** When adding CLI subcommands that depend on library logic
+
+**Pattern:** CLI command definitions (`clap::Command`) and handlers live in the library crate behind a `cli` feature flag. The platform binary is a thin wrapper that calls `command()` and `run()`. This allows the CLI to be used by standalone binaries or other consumers.
+
+```rust
+// In library crate (e.g., foundation_codegentools/src/cli/schema.rs):
+#[must_use]
+pub fn command() -> clap::Command { /* define args */ }
+pub fn run(args: &clap::ArgMatches) -> Result<(), BoxedError> { /* handle */ }
+
+// In library Cargo.toml:
+// [features]
+// cli = ["dep:clap"]
+
+// In platform binary (thin wrapper):
+pub fn register(command: clap::Command) -> clap::Command {
+    command.subcommand(foundation_codegentools::cli::schema::command())
+}
+pub fn run(args: &clap::ArgMatches) -> Result<(), BoxedError> {
+    foundation_codegentools::cli::schema::run(args)?;
+    Ok(())
+}
+```
+
+**Existing examples:** `foundation_testbed::cli`, `foundation_codegentools::cli`
+
 ### Iterator and Trait Patterns
 
 **When to read:** Implementing custom iterators or traits

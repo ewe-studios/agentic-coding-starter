@@ -1385,6 +1385,58 @@ let driven_iter = drive_stream(iter);
 
 When wrapping valtron's sync iterators as `futures_core::Stream`, returning `Poll::Pending` without calling `cx.waker().wake_by_ref()` causes the future to never be re-polled. `Stream::Wait` from the executor must still trigger a re-poll.
 
+## Error Handling: `foundation_errstacks` Required
+
+**All types used with `VfsResult<T>` MUST implement `Debug`.**
+
+- `VfsResult<T>` is `Result<T, ErrorTrace<VfsError>>` — never raw `Result<T, VfsError>`
+- All sync bridge wrappers (`SyncFile`, `SyncFs`, `SyncDirectory`, `SyncDynDirectory`, `LocalSeekableFile`, `SyncLibsqlDelta`, etc.) implement `Debug` using `finish_non_exhaustive()` for inner async types that may not be `Debug`
+- Tests use `err.current_context()` to access the typed `&VfsError` — **never** `downcast_ref`
+- Import `foundation_errstacks::ErrorTraceResultExt` when you need `change_context()` or `attach_printable()`
+
+```rust
+// CORRECT: current_context() returns &VfsError
+let err = sync.stat("/missing").unwrap_err();
+assert!(matches!(err.current_context(), VfsError::NotFound { .. }));
+
+// WRONG: downcast_ref bypasses foundation_errstacks API
+let err = sync.stat("/missing").unwrap_err();
+assert!(err.downcast_ref::<VfsError>().is_some()); // DON'T DO THIS
+```
+
+**Debug impl pattern for sync bridge wrappers:**
+
+```rust
+impl<A: AsyncVfsFile + 'static> fmt::Debug for SyncFile<A> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SyncFile").finish_non_exhaustive()
+    }
+}
+```
+
+## Test Annotations: Required for All Valtron Tests
+
+Every test that uses the valtron pool MUST have these annotations:
+
+```rust
+#[test]
+#[ntest::timeout(60_000)]           // 60s timeout — prevents hung tests
+#[serial_test::serial]              // Global serialization (pool is global state)
+#[tracing_test::traced_test]        // Log visibility in test output
+fn test_name() {
+    let _guard = init_pool();       // MUST be first line
+    // ...
+}
+```
+
+**Named serialization** — use when specific test groups conflict with each other but not with all other tests:
+
+```rust
+#[serial_test::serial(vfs_sqlite)]  // Only serializes with other vfs_sqlite tests
+```
+
+All valtron pool tests use unnamed `#[serial_test::serial]` because the pool is global state. Named groups (`#[serial_test::serial(name)]`) are useful when non-pool resources also conflict (e.g., shared temp files, shared databases) and you want finer-grained control.
+
 ---
 
 _Created: 2026-03-28_

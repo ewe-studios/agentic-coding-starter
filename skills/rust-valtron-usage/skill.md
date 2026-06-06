@@ -83,6 +83,12 @@ Where ever possible, implementation is always in the async functions and then sy
 
 *NOT A RULE BUT SOMETHING TO CONSIDER*: If it makes sense to reduce duplication and one trait can have async methods that others implement with sync methods with default implementation great, or if duplication is causing bloat, we can just define a trait with both async and sync methods but i doubt rust like this. So use your judgement here.
 
+**IMPORTANT**: In the desire to support sync and async versions, we may increase code size but i
+think its still worth it where sensible to ensure we can use these in sync and
+unsync context but if not we default to async versions and can provide wrappers that
+use valtron to call the async in a way that works for the users, meaning all things
+by default are async and just let the user know if its not possible and they can decide to call async code however they need in their different contexts.
+
 **Prefer direct, minimal combinator chains.** Each combinator should have a clear purpose:
 
 ```rust

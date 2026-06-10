@@ -95,15 +95,37 @@ fn test_empty_username_rejected() {
 **CRITICAL:** ALL tests go in `tests/` directory. **NO** `#[cfg(test)]` modules in source files.
 
 ```
-project_root/
+crate_root/
 ├── src/              # NO tests here
-├── tests/            # ALL tests here
+├── tests/            # ALL Rust tests here
 │   ├── units/        # Unit tests: {crate}_{module}_tests.rs
-│   └── integration/  # Integration tests: {crate}_{workflow}.rs
+│   └── integration/  # Rust integration tests: {crate}_{workflow}.rs
+├── integration/      # Cross-language / external-runtime harnesses for THIS crate
 └── benches/          # Benchmarks
 ```
 
 📖 **MUST READ:** [`test-organization.md`](examples/test-organization.md) - Complete structure and examples
+
+#### Crate-owned integration harnesses 🚨
+
+**RULE:** Integration tests and harnesses for a specific crate live **inside that crate**, never
+in a top-level project `/integrations` directory. This keeps everything for a crate discoverable
+in one place.
+
+- **Rust** integration tests → `{crate}/tests/integration/`.
+- **Cross-language / external-runtime** harnesses (e.g. a `node:test` suite driving a crate's
+  WASM/JS runtime, a Deno/browser runner, fixtures, mock host/DOM, and any helper build scripts)
+  → `{crate}/integration/` (a sibling of `src/` and `tests/`).
+- If a harness spans two crates, it lives with the crate that **owns the surface under test**
+  (e.g. `foundation_wasm`'s ABI runtime tests live in `foundation_wasm/integration/`; the DOM-layer
+  tests live in `foundation_wasm_ui/integration/` and reach the sibling crate via relative paths).
+- A nested helper crate used only by the harness (e.g. a wasm fixture module) is a **standalone
+  crate** (its own empty `[workspace]`) under `{crate}/integration/`, and added to the workspace
+  `exclude` so it doesn't pollute the main build / feature unification.
+- Keep these out of the published package (e.g. `include = ["/src", ...]` in `Cargo.toml`).
+
+**Why:** a crate's tests — at every level, in every language — should travel with the crate, not
+be scattered in a shared top-level folder that hides which crate they belong to.
 
 ---
 

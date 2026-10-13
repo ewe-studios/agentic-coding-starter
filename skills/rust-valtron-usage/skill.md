@@ -26,6 +26,14 @@ Valtron is a progress-driven execution engine. Operations produce `TaskIterator`
 
 Blocking should happen at **boundaries** — the outermost point where a concrete value is actually needed — not inside every individual operation.
 
+**Async all the way; valtron composes with it.** Write async logic as native Rust `async fn`s, all the way down. Valtron does not replace that — it hooks into it in both directions:
+- valtron can **drive async**: `execute(future)` schedules a future and returns a `StreamIterator`;
+- valtron work can **live inside async**: a `StreamIterator` becomes a future or future stream via `into_ready_future()`, `into_collect_future()`, `into_future_stream()` or `into_next_stream()` (`while let Some(chunk) = body.next().await`).
+
+Valtron's own rules on when a task may cross into async still apply — `Send + 'static` bounds, the `!Send` constraint (`run_future_iter`), and blocking only at boundaries (see the sections below). Native valtron `TaskIterator` state machines (e.g. protocol clients) stay valtron-native and are exposed to async callers through these adapters, not rewritten.
+
+**Streams, not buffers:** I/O bodies (HTTP, RPC, Docker, downloads) are returned as streams. Check the status first; never collect a whole body into memory except in tests or for a small body whose contents feed the next step. See `rust-clean-code/implementation` §6–7 (streaming bodies, generated types).
+
 ### When Blocking Internally IS Acceptable
 
 **Exception to the fundamental rule:** For single-value operations where the result is required immediately for subsequent operations, blocking internally is acceptable:

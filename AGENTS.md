@@ -50,6 +50,7 @@ Main Agent provides documentation path when spawning. If not provided, request i
 6. **Incomplete Implementation Check**: MANDATORY first check in verification
 7. **Sub-agents**: Never commit directly, never spawn verification agents
 8. **Context Optimization**: Load ONLY what you need
+9. **I/O & Async (Rust)**: Stream bodies, never buffer them (status first); use generated API types and fix the generator rather than working around it; async `fn`s all the way down, with valtron composing via futures/future streams under its existing Send/!Send/boundary rules — see `skills/rust-clean-code/implementation` §6–8
 
 **Enforcement**: Before any implementation, agents MUST demonstrate retrieval by:
 1. Searching for similar implementations

@@ -212,6 +212,42 @@ std = []
 
 📖 **Read when implementing:** [`no-std-support.md`](examples/no-std-support.md) - Complete patterns and testing
 
+### 6. Stream I/O Bodies — Never Buffer Them 🚨
+
+HTTP, RPC, Docker and any other I/O bodies are consumed as **streams** (`StreamIterator` / `FutureStream` / `Stream`), never read whole into memory.
+
+- **Check the status before touching the body.** On a non-success status, read only a bounded amount of the body to build the error message.
+- Large or unbounded payloads (image pulls/pushes/exports, progress streams, logs, file transfers, model downloads) are returned to the caller as a stream of typed items; the caller decides how to consume them.
+- A full read is acceptable **only** in tests, or when the body is small **and** its contents are needed for the next step (e.g. a small JSON response that is parsed and acted on).
+
+```rust
+// BAD: OOM risk, and the status is checked after the whole body is read
+let bytes = response.read_to_end()?;
+if !response.status().is_success() { return Err(...); }
+
+// GOOD: status first, bounded error body, stream the success body
+if !response.status().is_success() {
+    let msg = response.read_bounded(MAX_ERROR_BODY)?;
+    return Err(Error::Api { status, msg });
+}
+Ok(response.into_stream().map_done(parse_progress_line))
+```
+
+### 7. Use Generated Types — Fix the Generator, Don't Work Around It 🚨
+
+Crates with generated API clients (Docker, cloud providers, other platform crates) must use their **generated request/response types** — no hand-written duplicate structs or untyped `serde_json::Value` where a generated type exists.
+
+If a generated type is missing or wrong, or a generated function can't do what's needed (e.g. it drops a streaming body after the headers), **fix the generator and regenerate**. Hand-written wrappers that paper over generator gaps are not acceptable.
+
+### 8. Native Async Inside, Valtron at the Edges 🚨
+
+Write native Rust `async fn`s where async is needed. Valtron (executors, `TaskIterator`, `StreamIterator`, pools) is used either:
+
+- at the **edges** — entry points, adapters and sync/async boundaries; or
+- to **orchestrate native valtron tasks** (`TaskIterator` state machines).
+
+It is not threaded through otherwise-async core logic. See [`rust-valtron-usage`](../../rust-valtron-usage/skill.md).
+
 ---
 
 ## 📚 Implementation Patterns (Read When Needed)

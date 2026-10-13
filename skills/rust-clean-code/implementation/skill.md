@@ -239,14 +239,14 @@ Crates with generated API clients (Docker, cloud providers, other platform crate
 
 If a generated type is missing or wrong, or a generated function can't do what's needed (e.g. it drops a streaming body after the headers), **fix the generator and regenerate**. Hand-written wrappers that paper over generator gaps are not acceptable.
 
-### 8. Native Async Inside, Valtron at the Edges 🚨
+### 8. Async All the Way; Valtron Composes With It 🚨
 
-Write native Rust `async fn`s where async is needed. Valtron (executors, `TaskIterator`, `StreamIterator`, pools) is used either:
+Write async logic as native Rust `async fn`s, all the way down. Valtron hooks into async rather than replacing it:
 
-- at the **edges** — entry points, adapters and sync/async boundaries; or
-- to **orchestrate native valtron tasks** (`TaskIterator` state machines).
+- valtron can drive a future (`execute(future)` → `StreamIterator`);
+- valtron streams/tasks can be used inside async code by turning them into a future or future stream (`into_ready_future`, `into_collect_future`, `into_future_stream`, `into_next_stream`).
 
-It is not threaded through otherwise-async core logic. See [`rust-valtron-usage`](../../rust-valtron-usage/skill.md).
+Respect valtron's existing rules for when a task may cross into async (`Send + 'static`, the `!Send` constraint, blocking only at boundaries). Native valtron `TaskIterator` state machines stay valtron-native and are exposed to async callers through those adapters. See [`rust-valtron-usage`](../../rust-valtron-usage/skill.md).
 
 ---
 

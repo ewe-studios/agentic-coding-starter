@@ -83,6 +83,67 @@ pub fn list_models(&self) -> Result<impl StreamIterator<D = Result<ModelInfo>, P
 
 **Default:** Return streams. Block internally only when there's a clear justification.
 
+## State Tasks: the `#[task]` Functional Approach
+
+For an ordinary state machine, do **not** hand-write `impl TaskIterator` (see
+`rust-valtron-iterator` for when that is still the right call — combinators and
+multi-source adapters). Instead write a single **transition function** and mark
+it `#[task]`:
+
+```rust
+use foundation_core::valtron::{task, Ctx, TaskStatus};
+
+// The transition maps (Ctx, state) to the next state plus a TaskStatus,
+// or None to terminate. State can be any type — structs and enums are the norm.
+#[task]
+fn build_house(ctx: Ctx, stage: Stage) -> Option<(Stage, TaskStatus<House, ()>)> {
+    let _ = ctx;
+    match stage {
+        Stage::Foundation => Some((Stage::Walls, TaskStatus::Ignore)),
+        Stage::Walls      => Some((Stage::Roof,  TaskStatus::Ignore)),
+        Stage::Roof       => Some((Stage::Done,  TaskStatus::Ready(House { walls: 4 }))),
+        Stage::Done       => None,
+    }
+}
+```
+
+`#[task]` generates a **same-named struct** with `new(state)` that implements
+`TaskIterator`, and leaves the `fn` untouched so `build_house(ctx, state)` stays
+directly callable. It works on both `fn` and `async fn` (the async transition
+can `.await` inside the body and parks on the same wake-queue seam `FutureTask`
+uses).
+
+**Termination semantics (critical):**
+
+- **`None` is the only terminal signal.** Returning it ends the task, closes the
+  queue, and terminates any consuming stream — it yields *neither* a `next`
+  state *nor* a `TaskStatus`.
+- **`Ready` is *not* terminal.** The machine emits it, threads the returned
+  `next` state back, and keeps running — so a single machine may emit `Ready`
+  many times (e.g. one value per step), ending only when it returns `None`.
+- **Reach that terminal `None` with an explicit `Done` variant on the state enum:**
+  `SomeVariant(..)` = "still running", `Done` = done. The transition is a plain
+  `match state { Done => None, .. }`, so the terminal branch is spelled out, not
+  implicit; after the final `Ready` you advance the state to `Done` so the next
+  turn's `Done => None` ends the machine. An `Option<T>` state also works
+  (`let v = state?;` early-returns the terminal `None`), but the enum `Done`
+  variant is the clearer, more explicit form. Either way there is **no extra
+  `bool` flag** — the state shape itself carries completion.
+
+**Consumption** uses the same bridges as any other task (never `sync_one`/`sync_all`
+inside the system — those are boundary helpers only):
+
+```rust
+// Single value → await the ready-future (no collect-all):
+let (house, _rest) = execute(build_house::new(Stage::Foundation), None)?
+    .into_ready_future().await?;
+
+// Many values → stream them with .next().await (chunk-by-chunk, not buffered):
+use foundation_core::valtron::StreamExt; // re-exported futures_lite::StreamExt
+let mut stream = execute(download::new(state), None)?.into_next_stream();
+while let Some(chunk) = stream.next().await { /* consume one chunk */ }
+```
+
 ## Code Style: Clear, Simple, Succinct
 
 **Async first then sync via valtron calling async** 
@@ -1297,7 +1358,7 @@ fn next_status(&mut self) -> Option<TaskStatus<...>> {
 }
 ```
 
-**Rule:** After returning `TaskStatus::Ready(final_value)`, the next `next_status()` call must return `None`. You must either increment the counter or track a `done` flag.
+**Rule:** `None` is the *only* terminal signal — returning it ends the task, closes the queue, and terminates the stream. `TaskStatus::Ready(v)` is **not** terminal: a single machine may emit `Ready` many times (one value per step), and it keeps running until it returns `None`. To emit `N` values then stop, advance a counter (or state) on every `Ready` so that after the final value the next call hits the `None` branch. For `#[valtron::task]` state machines, use an enum state with a terminal `Done` variant (preferred — `Done => None` is explicit) or `Option<T>` state (`let v = state?;`) — no extra `bool` flag.
 
 ### CondVar on wasm32 Requires `js-wasmbindgen` Feature Gate (When `std` Is Also On)
 

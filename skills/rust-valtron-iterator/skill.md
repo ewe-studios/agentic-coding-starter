@@ -30,6 +30,12 @@ Use these patterns when:
 - Implementing custom `StreamIterator` combinators in `backends/foundation_core/src/valtron/stream_iterators.rs`
 - Debugging iterator implementations that block or skip progress reporting
 
+**Not** for ordinary state-machine tasks: those should be a single transition
+function behind `#[valtron::task]` (`StateTask` / `AsyncStateTask`) instead of a
+hand-written `impl TaskIterator`. See the `rust-valtron-usage` skill ("State
+Tasks: the `#[task]` Functional Approach"). Hand-writing an iterator is for
+*combinators* and *multi-source adapters*, not application state machines.
+
 ## Prerequisites
 
 - Understanding of Rust's `Iterator` trait

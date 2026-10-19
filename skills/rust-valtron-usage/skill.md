@@ -130,11 +130,19 @@ uses).
   variant is the clearer, more explicit form. Either way there is **no extra
   `bool` flag** — the state shape itself carries completion.
 
+**End-to-end:** `#[task]` lowers the transition into a `TaskIterator`; `execute(..)`
+schedules it on the engine and returns a `StreamIterator` of `Stream<D, P>`
+states; the `into_*` bridges reshape that stream into a future
+(`into_ready_future()` / `into_collect_future()`) or a `futures::Stream`
+(`into_next_stream()` / `into_future_stream()`).
+
 **Consumption** uses the same bridges as any other task (never `sync_one`/`sync_all`
 inside the system — those are boundary helpers only):
 
 ```rust
 // Single value → await the ready-future (no collect-all):
+//   into_ready_future().await → Option<(value, rest)>: the first `Ready` value
+//   plus the remaining iterator, so you can peel one value off and keep driving.
 let (house, _rest) = execute(build_house::new(Stage::Foundation), None)?
     .into_ready_future().await?;
 

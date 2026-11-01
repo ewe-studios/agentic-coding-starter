@@ -6,9 +6,9 @@ created: 2026-02-27
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "2.0"
-  last_updated: "2026-02-28"
-  tags: [orchestration, main-agent, verification, coordination, workflow]
+  version: "2.1"
+  last_updated: "2026-11-01"
+  tags: [orchestration, main-agent, verification, coordination, workflow, swarm, never-wait]
 tools: [Bash]
 files: []
 ---
@@ -187,8 +187,8 @@ DO NOT:
 ### Coordination Pattern
 
 ```
-Main Agent → Spawn Sub-Agent(s) → Wait for Reports →
-Analyze Files → Spawn Verification Agent(s) → Wait for Results →
+Main Agent → Spawn Sub-Agent(s) → Pick up next non-conflicting unit →
+As reports land: Analyze Files → Spawn Verification Agent(s) →
 All Pass? → Commit + Push : Create Fix Task → Resume Sub-Agent → Loop
 ```
 
@@ -214,8 +214,6 @@ Verified by JavaScript Verification Agent: All checks passed
 - Build: PASS
 - Security: PASS
 - Standards: PASS
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -288,9 +286,9 @@ When multiple tasks/issues exist:
 1. Read specification requirements and features
 2. Prepare context for each task (separate instructions)
 3. Spawn multiple implementation agents (up to 10)
-4. Wait for all completion reports
+4. Pick up the next non-conflicting unit; collect reports as they land
 5. Spawn verification agents per language
-6. Wait for all verification results
+6. Collect verification results as they land
 7. If ALL PASS: commit all + push
 8. If ANY FAIL: fix failed tasks, re-verify
 ```
@@ -325,6 +323,27 @@ When multiple tasks/issues exist:
 - Fix all failures before commit
 - Create new specs for new work on completed specs
 
+## Swarm Orchestration: Never Wait Idle
+
+Work in swarms. Do not sit idle while work is pending.
+
+**Rules:**
+
+1. **Never wait idle.** If a long task (a CI gate, a build) is in flight, run it
+   in the background or hand its finalization to an agent. Then pick up the next
+   non-conflicting unit of work. Collect the reports when they land.
+2. **Parallel features.** For features that clearly do not block each other: do
+   the reasoning yourself, write the brief into the feature doc, then spawn one
+   agent per feature in the same message. Review and validate each report as it
+   lands.
+3. **Research agents.** Spawn an agent of yourself (a fork) to research a problem
+   and report its findings and a resolution. You review the findings, validate
+   them against the code, update the plan, then spawn an executor.
+4. **Coordinate ownership.** Tell each agent what the others are working on. An
+   agent stops and announces to you before it touches a crate or code another
+   agent owns, so agents never clobber each other. Keep a short list of who owns
+   what.
+
 ## Summary
 
 **Main Agent Orchestration Checklist:**
@@ -348,4 +367,4 @@ When multiple tasks/issues exist:
 
 ---
 
-_Version: 2.0 - Last Updated: 2026-02-28_
+_Version: 2.1 - Last Updated: 2026-11-01_

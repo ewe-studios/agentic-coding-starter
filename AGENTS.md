@@ -1,8 +1,8 @@
 ---
 purpose: Central entry point for AI agent configuration
 description: Simplified agent system with skill-based architecture
-version: 6.1.0
-last_updated: 2026-03-02
+version: 6.2.0
+last_updated: 2026-11-01
 ---
 
 # Agent Configuration
@@ -101,6 +101,16 @@ Follow these rules when you spawn an agent:
 7. Use a background agent for long work, for example the Linux CI gate, so you
    stay free. Do not sit idle waiting; move to the next non-conflicting unit and
    pick the reports up when they land.
+8. For features that clearly do not block each other: do the reasoning yourself,
+   write the brief into the feature doc, then spawn one agent per feature in the
+   same message. Run several at once; review their reports as they land.
+9. Spawn an agent of yourself (a fork) to research a problem and report its
+   findings and a resolution. You review the findings, validate them against the
+   code, update the plan, then spawn an executor. Do not accept a finding until
+   you have checked it against the code.
+10. Tell each agent what the others are working on. An agent stops and announces
+    to you before it touches a crate or code another agent owns, so agents never
+    clobber each other. Keep a short list of who owns what.
 
 ## Core Principle
 
@@ -182,7 +192,7 @@ documentation/          # Read for modules you're changing
 
 ---
 
-_Version: 6.1.0 - Last Updated: 2026-03-02_
+_Version: 6.2.0 - Last Updated: 2026-11-01_
 
 _Simplified architecture: rule.md → agents → skills_
 _Added: Context Management guidelines for token optimization_

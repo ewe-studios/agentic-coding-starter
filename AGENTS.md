@@ -75,6 +75,33 @@ When you move to a new feature, or to a new crate, spawn a fresh agent to work
 on it. Put all the context the agent needs in its brief; it does not inherit
 yours.
 
+## Spawning Agents to Do Work
+
+You (the main agent) do the thinking. You delegate the execution. Spawn an agent
+when the work is independent, long, or needs a fresh context. Do the work
+yourself when it is a few tool calls, or a lookup whose target you already know.
+
+Follow these rules when you spawn an agent:
+
+1. Spawn one agent per unit of work: one feature, one crate, one review, or one
+   CI run. Do not give one agent unrelated tasks.
+2. Write the whole context into the brief. The agent does not inherit your
+   context. Put in the brief: the goal, what you already ruled out, the files to
+   read, the commands to run, the acceptance criteria, and the exact report
+   format you need back.
+3. State the limits. By default a subagent does not commit and does not spawn its
+   own verification agents. It reports. You verify, then you commit.
+4. Run independent agents in parallel: put all their spawns in one message.
+5. Wait for each result. Never guess an agent's result, and never write its
+   report before it comes back.
+6. Verify each report against the acceptance criteria before you act. A green
+   `cargo check` and `cargo clippy` is not a pass; the executor runs the tests
+   and pastes the output (reminder 10). A bare "done" with no test output is not
+   done.
+7. Use a background agent for long work, for example the Linux CI gate, so you
+   stay free. Do not sit idle waiting; move to the next non-conflicting unit and
+   pick the reports up when they land.
+
 ## Core Principle
 
 **Every agent reads their documentation file which specifies skills to load.**

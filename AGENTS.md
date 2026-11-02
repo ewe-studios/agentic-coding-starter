@@ -111,6 +111,18 @@ Follow these rules when you spawn an agent:
 10. Tell each agent what the others are working on. An agent stops and announces
     to you before it touches a crate or code another agent owns, so agents never
     clobber each other. Keep a short list of who owns what.
+11. Do not let an agent clobber your uncommitted work. If an agent must edit or
+    commit files you have not committed, first decide if its changes conflict
+    with your work. If they do not conflict, spawn the agent in the same tree:
+    it fixes, validates, and reports; you then do the final verification. If
+    they can conflict, commit your pending work first, then give the agent its
+    own worktree. The agent fixes and validates there, pushes to a new remote
+    branch (not your branch), and reports. You merge that branch into your work.
+    The agent deletes its worktree to free disk.
+    Each worktree builds into its own cargo target directory: `<repo>/target` by
+    default, or `$CARGO_TARGET_DIR/<checkout-name>` when that variable is set.
+    `scripts/ci/ci.py` sets this automatically, so parallel worktrees do not
+    clobber one shared target directory.
 
 ## Core Principle
 
@@ -153,6 +165,7 @@ Main Agent provides documentation path when spawning. If not provided, request i
 10. **Executors must run the tests**: a green `cargo check`/`cargo clippy` is not a pass. An executor runs `cargo test -p <crate> --profile uat` and reports the output before it calls the work done.
 11. **Linux compatibility check**: after you commit a crate, spawn one agent to run `scripts/ci/linux.sh <crate>` in the Linux CI Docker image, to compile and run its tests on Linux.
 12. **Version bump on new public API**: when a crate gains a new public API (a new module, function, type, or trait method), bump its version and move every workspace consumer's `version` requirement to match in the same change. Do not defer it to release time: a `path`+`version` dependency resolves to the published crate on `cargo package`, so a deferred bump lets a packaged consumer pick the stale registry version without the new API.
+13. **Agent work vs your uncommitted changes**: if an agent's edits will not break your uncommitted work, spawn it in the same tree and verify after it reports. If they can conflict, commit your work first, then give the agent a worktree; it pushes to a new branch, you merge back, and it deletes the worktree.
 
 **Enforcement**: Before any implementation, agents MUST demonstrate retrieval by:
 1. Searching for similar implementations

@@ -733,6 +733,29 @@ impl StreamIterator for MyStream {
 }
 ```
 
+## Waking a Parked Task: Register a Waker, Never Call the Executor
+
+A task that returns `TaskStatus::Depends(readiness)` parks. The executor then gives
+the readiness a **waker for that task** (`EventReadiness::register(&ReadinessWaker)`),
+the same pattern as `std::task::Waker`. The source keeps the waker and calls
+`waker.wake()` when it becomes ready or closes. The wake reaches only that task's
+executor thread. Nothing outside `foundation_core/src/valtron/` calls an executor
+function (`request_executor_resume`, `resume_idle`, `idle_wake` are private; a CI guard,
+`scripts/ci/check_executor_wake.py`, fails the build if they appear elsewhere).
+
+- Parking on a queue: use `EventQueue<T>` (`push`, `pop`, `close` wake the right side);
+  park on `queue.readiness()` (waits for an item) or `queue.vacancy()` (waits for room).
+  Do not build `QueueReadiness::new` over a plain `ConcurrentQueue`: it is deprecated and
+  is re-checked every millisecond.
+- Parking on a flag: `ResumeSignal` (its `set(true)` wakes). `BoolSignal` built from a raw
+  atomic is re-checked on a timer.
+- A new kind of source (a socket, a timer, a shutdown flag): hold a `ReadinessNotifier`,
+  return `notifier.register(waker)` from `register`, and call `notifier.notify()` where
+  the event happens. `register` returns `true` only if every change to ready wakes it;
+  the default `false` keeps the readiness on the timed re-check, which is always safe.
+- A readiness that combines others (`AnyReadiness`) registers the waker with each child
+  and returns `true` only if all of them do.
+
 ## Spawner Type: Prefer `BoxedSendExecutionAction` over `NoAction`
 
 When implementing `TaskIterator`, the `Spawner` associated type controls whether the task can spawn sub-tasks during execution. **`NoAction` should be rarely used** — it prevents the task from ever spawning work.

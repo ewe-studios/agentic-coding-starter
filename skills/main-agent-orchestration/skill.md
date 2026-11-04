@@ -6,8 +6,8 @@ created: 2026-02-27
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "2.1"
-  last_updated: "2026-11-01"
+  version: "2.2"
+  last_updated: "2026-11-04"
   tags: [orchestration, main-agent, verification, coordination, workflow, swarm, never-wait]
 tools: [Bash]
 files: []
@@ -183,6 +183,38 @@ DO NOT:
 - Spawn verification agents
 - Push to remote
 ```
+
+### Delegate for Cost: Research First, Then a Fresh Agent on the Right Model (owner rule 2026-11-04)
+
+The main agent does the expensive thinking once; cheaper agents do the building.
+
+1. **The main agent researches and designs every feature before it hands it off.** The
+   feature file names the files and lines, the measured cause, the fix, the tests that prove
+   it (including a test that fails on the old code) and the exact verify commands. A
+   sub-agent must not need to re-discover any of it.
+2. **Pick the model from the work, and write it in the feature frontmatter (`model:`).**
+   - **Haiku**: mechanical work: delete dead code, fix lint or warning debt, move inline
+     tests to `tests/`, small config or CI edits, bookkeeping.
+   - **Sonnet**: diagnosis or design: concurrency, async control flow, protocol behaviour,
+     security, generators, anything that needs measurement.
+   - The main agent keeps root-cause research that the plan depends on.
+3. **One fresh agent per feature, on the model the feature names.** Do not keep one
+   long-lived agent and resume it across features: its history is re-read on every step and
+   costs more than a fresh agent with a self-contained brief. Resume an agent only to finish
+   the feature it is on (for example after a usage limit or a restart).
+4. **The brief is self-contained**: the feature file, the spec's rules section, the branch,
+   the crates the agent may touch, and the report format. It does not depend on chat history.
+5. **Review every report against the feature's "Done when" before the next feature starts.**
+   Every new finding becomes a backlog entry and a scheduled feature in the same change.
+
+### Shared Machine Limits
+
+- **Disk.** When several agents build on one disk, check free space before each big build.
+  If the disk cannot hold every lane's `target` directory, run one lane's builds at a time
+  and pause the others. Free space by `cargo clean -p <finished crate>` in the lane's own
+  worktree, never by deleting another lane's files while it builds.
+- **Processes.** Stop a process you started by the PID you saved. Never use `pkill -f
+  <pattern>`: the pattern can match your own shell and kill it.
 
 ### Coordination Pattern
 

@@ -91,6 +91,26 @@ Blocking loops in `next()` defeat Valtron's progress-driven execution model:
 | **Prevents observability** | Debugging, logging, and metrics cannot see intermediate states |
 | **Starves other tasks** | Long-running loops hold the thread, delaying other ready tasks |
 
+### A Poll Must Not Block
+
+**Do not make a blocking call inside `next()` or `next_status()`.** A blocking
+call holds the valtron worker that polls the task. With a small pool, every
+worker can block and the pool starves. The failure looks like a flaky test,
+because a large pool hides it.
+
+| Do not call | Wait with |
+|-------------|-----------|
+| `std::thread::JoinHandle::join()` | a readiness signal, or a `WaitGroup` plus a task status |
+| `recv()` on a blocking socket | a non-blocking socket with a readiness registration |
+| a blocking file read or write | an async equivalent that parks on a readiness |
+| `std::thread::sleep()` | `TaskStatus::Delayed`, or a timer sleeper |
+
+`PoolConfig::slow_poll_warning` reports a task step that holds a worker longer
+than its threshold. `#[valtron]` and `#[valtron_test]` turn it on with 100 ms by
+default; `slow_poll = ms` overrides it. The warning names the task and the
+elapsed microseconds, at most once per task per second. A warning is a defect
+report, not back-pressure: find the blocking call and replace it.
+
 ## Acceptable Loop Pattern
 
 The **ONLY** acceptable loop is a **single bounded pass** through sources that returns immediately on any meaningful result:

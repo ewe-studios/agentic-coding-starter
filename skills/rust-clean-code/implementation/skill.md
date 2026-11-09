@@ -28,6 +28,7 @@ files:
   - examples/trait-patterns.md: "Trait implementation best practices"
   - examples/basic-template.md: "Basic implementation template"
   - examples/tracing-logging.md: "Mandatory tracing crate usage for all logging"
+  - examples/cross-target-layout.md: "Keep shared/ target-agnostic; move native-only code to native/"
 ---
 
 # Rust Clean Implementation
@@ -248,6 +249,34 @@ Write async logic as native Rust `async fn`s, all the way down. Valtron hooks in
 
 Respect valtron's existing rules for when a task may cross into async (`Send + 'static`, the `!Send` constraint, blocking only at boundaries). Native valtron `TaskIterator` state machines stay valtron-native and are exposed to async callers through those adapters. See [`rust-valtron-usage`](../../rust-valtron-usage/skill.md).
 
+### 9. `shared/` Is Target-Agnostic — Move Native Code, Don't Gate It 🚨
+
+A crate that builds for native and wasm splits its code into `shared/`
+(every target), `native/` (native only) and `wasm/` (wasm only). `shared/`
+compiles on every target from the same source.
+
+Never put a target marker on an item in `shared/` to make it compile. The
+marker records that the item is in the wrong module. Move the item to
+`native/`.
+
+```rust
+// ❌ BAD - shared/router/dispatch.rs
+/// One entry is added for each value.
+#[cfg(not(target_family = "wasm"))]
+pub(crate) fn extend_handler_headers(/* … */) { /* … */ }
+
+// ✅ GOOD - move the function and its callers to native/dispatch_h2.rs,
+// then delete the marker. shared/ stays free of target markers.
+```
+
+Two markers in `shared/` are correct: one that selects a different body for
+the same item on each target (the native hash crate against WebCrypto), and
+one that states a real capability difference (the wasm future drops `Send`).
+Both keep the item on every target. A marker that deletes the item on one
+target is a defect.
+
+📖 **Read for the decision table and examples:** [`cross-target-layout.md`](examples/cross-target-layout.md)
+
 ---
 
 ## 📚 Implementation Patterns (Read When Needed)
@@ -347,6 +376,7 @@ Every new module/function must have:
 - ❌ Adding external deps without checking project first
 - ❌ `unwrap()`/`expect()` in library code (use `?`)
 - ❌ Ignoring no_std support (if project supports it)
+- ❌ A `#[cfg(not(target_family = "wasm"))]` marker that deletes an item inside `shared/` (move it to `native/`)
 
 ---
 
@@ -366,6 +396,7 @@ Every new module/function must have:
 8. **Traits:** [`trait-patterns.md`](examples/trait-patterns.md) - Trait implementation patterns
 9. **Performance:** [`performance-tips.md`](examples/performance-tips.md) - After profiling
 10. **Template:** [`basic-template.md`](examples/basic-template.md) - Starting a new module
+11. **Cross-target layout:** [`cross-target-layout.md`](examples/cross-target-layout.md) - Before adding any target marker
 
 ---
 

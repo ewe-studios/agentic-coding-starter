@@ -215,6 +215,22 @@ pub mod prelude {
 }
 ```
 
+### Cross-Target Module Layout
+
+A crate that builds for native and WebAssembly uses `shared/` for code that
+builds on every target, `native/` for code that needs an operating system, and
+`wasm/` for code that needs the browser. `shared/` must not contain a
+`#[cfg(not(target_family = "wasm"))]` marker that deletes an item. Move the
+item to `native/`.
+
+❌ Bad: `#[cfg(not(target_family = "wasm"))] pub(crate) fn extend_handler_headers()`
+inside `shared/`.
+
+✅ Good: the function lives in `native/dispatch_h2.rs`, and `shared/` has no
+target marker.
+
+See [Cross-Target Crate Layout](../implementation/examples/cross-target-layout.md).
+
 ### Module Privacy
 
 ```rust

@@ -275,6 +275,25 @@ one that states a real capability difference (the wasm future drops `Send`).
 Both keep the item on every target. A marker that deletes the item on one
 target is a defect.
 
+The rule also works in the other direction. When the same code exists in
+`native/` and in `wasm/`, and the code does not touch a platform API, move it
+to `shared/` and keep one copy. Do not duplicate an identical function,
+trait or type for each target.
+
+```rust
+// ❌ BAD - two copies of the same platform-agnostic logic
+// native/router/headers.rs
+pub(crate) fn extend_handler_headers(headers: &mut Vec<(String, String)>) { /* … */ }
+// wasm/router/headers.rs
+pub(crate) fn extend_handler_headers(headers: &mut Vec<(String, String)>) { /* … */ }
+
+// ✅ GOOD - one copy in shared/router/headers.rs; native/ and wasm/ call it.
+```
+
+If one copy calls a platform API, the split is correct: keep the
+platform-specific part in `native/` or `wasm/`, and move the common part to
+`shared/`.
+
 📖 **Read for the decision table and examples:** [`cross-target-layout.md`](examples/cross-target-layout.md)
 
 ---
@@ -377,6 +396,7 @@ Every new module/function must have:
 - ❌ `unwrap()`/`expect()` in library code (use `?`)
 - ❌ Ignoring no_std support (if project supports it)
 - ❌ A `#[cfg(not(target_family = "wasm"))]` marker that deletes an item inside `shared/` (move it to `native/`)
+- ❌ The same platform-agnostic code copied into both `native/` and `wasm/` (move one copy to `shared/`)
 
 ---
 

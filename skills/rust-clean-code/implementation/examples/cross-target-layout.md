@@ -173,6 +173,13 @@ Keep it, and add one comment that states the capability difference.
 | Does the marker only pick a `Send` bound or a type alias?  | Keep it in `shared/`. |
 | Is the marker on a `mod` declaration or a `pub use` inside `shared/`? | Move the module and the re-export. |
 | Is the marker on an item whose only caller is already target-gated? | Move both to `native/`. |
+| Does the same platform-agnostic item exist in both `native/` and `wasm/`? | Move one copy to `shared/`. |
+
+The last row is the opposite of a deleting marker. Two copies of the same
+function, trait or type, one in `native/` and one in `wasm/`, are a
+duplication defect. If the code touches no platform API, move it to `shared/`
+and delete the copies. If one part touches a platform API, keep that part in
+`native/` or `wasm/` and move the common part to `shared/`.
 
 ---
 

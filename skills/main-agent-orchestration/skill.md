@@ -232,6 +232,7 @@ their results), never full logs.
   worktree, never by deleting another lane's files while it builds.
 - **Processes.** Stop a process you started by the PID you saved. Never use `pkill -f
   <pattern>`: the pattern can match your own shell and kill it.
+- **CI runners.** The accounts are on free plans. Batch fixes so one push starts one CI run. Do not push while a run you need is still in progress unless the fix is urgent. Read CI results through a Haiku sub-agent, and give fixes to a Sonnet sub-agent.
 
 ### Coordination Pattern
 

@@ -4,6 +4,20 @@ This file contains the version history for the `.agents/` directory.
 
 ---
 
+## 2026-11-11 - Story-Driven Specifications
+
+**Skills:** story-driven-specification (new), specifications-management (version 5.0)
+
+**WHAT:** Added the skill `story-driven-specification`. Each feature file became one
+self-contained story: stories and use cases, a bounded context with entities and verbs, a
+law worksheet with numbered invariants, must have / must do / must not lists, Given / When /
+Then acceptance scenarios, a technical breakdown with fault tables, and a table from each
+law and scenario to the test that proves it.
+
+**CHANGED:** `specifications-management` made this layout mandatory for every `feature.md`.
+`templates/FEATURE-template.md` got the new sections. The main agent and the specification
+update agent load the new skill.
+
 ## 2026-03-03 - Skills Optimization & TDD Consolidation (Version 6.1.0)
 
 ### Part 1: Rust Clean Code Skills Optimization

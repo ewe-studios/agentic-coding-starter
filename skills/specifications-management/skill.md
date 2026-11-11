@@ -6,8 +6,8 @@ created: 2026-02-27
 license: "MIT"
 metadata:
   author: "Main Agent"
-  version: "4.0"
-  last_updated: "2026-02-28"
+  version: "5.0"
+  last_updated: "2026-11-11"
   tags: [specifications, requirements, features, management, workflow]
 tools: []
 files: []
@@ -55,6 +55,43 @@ If any of this is true, you should indicate to the user, pause and ask more ques
 
 Update does not mean going to delete stuff unless its clear from the conversation that is what the user expects after clarification and discussion so be thoughtful, logical and surgical.
 
+### Story-Driven Features (CRITICAL, owner rule 2026-11-11)
+
+**MANDATORY:** Every `feature.md` is one self-contained story. Read the skill
+`.agents/skills/story-driven-specification/skill.md` before you write or update a feature.
+It has the method and the check list.
+
+A feature file has these sections, in this order:
+
+| # | Section | Content |
+|---|---|---|
+| 1 | Goal | What exists when the feature is done. |
+| 2 | Story | The story sentences (success and failure) and the use case table. |
+| 3 | Bounded context | What is inside and outside, the entities with one owner each, the verbs, the words. |
+| 4 | Rules | The law worksheet, the numbered invariants, must have, must do, must not. |
+| 5 | Acceptance scenarios | Given / When / Then. One behaviour for each scenario. The owner approves these. |
+| 6 | Technical breakdown | Types, state machines, sequences, limits, errors, fault tables, files. |
+| 7 | Tests | A table from each invariant and each scenario to the test that proves it, with its oracle. |
+| 8 | Verify | The exact commands. |
+| 9 | Done when | The check list for the reviewer. |
+
+**Rules:**
+
+- Start with sentences, not with types. The stories decide the entities and the verbs.
+- A law is a sentence that is true for every valid input and sequence. It does not copy the
+  code.
+- Each story verb (an operation that changes more than one entity) has a fault table: the
+  step that fails, what the system does, what the caller sees, what is left behind.
+- A fact about another system has a source (file and line, or a document). A feature that
+  says "measure later" for a fact that the design depends on is not ready for a hand-off.
+  Find the fact first, or change the design so that it does not depend on it.
+- An invariant with no test is not done. A test with no law is a question.
+- `requirements.md` of a feature-based spec has the spec-level stories and the context map
+  (which feature owns which entity). The detail stays in each `feature.md`.
+
+A feature with no story, no bounded context, no laws or no acceptance scenarios is
+incomplete. Do not hand it to an agent.
+
 ### Single-File Architecture (CRITICAL)
 
 **MANDATORY:** All specification and architecture details MUST be contained in:
@@ -71,7 +108,7 @@ Update does not mean going to delete stuff unless its clear from the conversatio
 
 **Architecture Content Requirements:**
 - `requirements.md` (spec-level): High-level architecture overview, layer descriptions, component relationships
-- `feature.md` (feature-level): Comprehensive, logically correct, cohesive deep architecture for the feature including:
+- `feature.md` (feature-level): The nine sections of "Story-Driven Features" above. Its technical breakdown is a comprehensive, logically correct, cohesive deep architecture for the feature including:
   - Technical approach and patterns
   - Component structure and interfaces
   - Data flow diagrams (text-based or mermaid)
@@ -424,9 +461,11 @@ Instead we should add a section in it for the implementation plans.
 **NEVER create multiple files, the feature.md is the comprehensive documentation of whats needs to be done**.
 
 **Contents:**
+- Story, bounded context, rules and acceptance scenarios (see "Story-Driven Features")
 - Technical approach and architecture
 - Key framework patterns
 - Step-by-step implementation tasks
+- The table from laws and scenarios to tests
 - Success criteria
 - Trade-offs considered
 
@@ -503,7 +542,8 @@ Instead we should add a section in it for the implementation plans.
 1. User requests complex feature
 2. Socratic conversation (10+ questions)
 3. Create specifications/NN-feature/requirements.md (overview only)
-4. Create features/00-foundation/feature.md (detailed)
+4. Create features/00-foundation/feature.md (detailed, story-driven: load the
+   `story-driven-specification` skill first)
 5. Create features/01-core/feature.md
 6. Set has_features: true
 7. Create spec-level start.md (Variant 1 - redirect to features)
@@ -548,6 +588,8 @@ Instead we should add a section in it for the implementation plans.
 - REPORT.md + VERIFICATION.md permanent
 
 **Key Principles:**
+0. Every feature is a story: stories, bounded context, laws, scenarios, breakdown, tests
+   (`story-driven-specification` skill)
 1. Requirements-first (no coding without specs)
 2. User approval required (explicit confirmation)
 3. Features by default (unless trivial)

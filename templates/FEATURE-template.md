@@ -49,14 +49,80 @@ Brief description of what this feature implements.
 
 ---
 
-## Requirements
+## Story
 
-1. **Requirement 1**
-   - Detail
-   - Detail
+**Read `.agents/skills/story-driven-specification/skill.md` first.** Start with sentences,
+not with types.
 
-2. **Requirement 2**
-   - Detail
+- **S1**: "[An actor] [does a thing] [to an object]."
+- **S2**: "[A failure story: what goes wrong during S1]."
+
+| # | Use case | Actor | Trigger | Result |
+|---|---|---|---|---|
+| U1 | | | | |
+
+## Bounded Context
+
+**Inside this feature:** [what this feature owns]
+
+**Outside:** [what it uses and does not own, with the owner of each thing]
+
+| Entity | Meaning | Owner (the one writer) |
+|---|---|---|
+| | | |
+
+| Verb | Kind (entity or story) | Trigger | Effect |
+|---|---|---|---|
+| | | | |
+
+**Words:** one word for one thing. List each term and its meaning.
+
+## Rules
+
+### Law worksheet (one for each entity; write "none", never leave a line empty)
+
+```
+Entity: ____________________
+Conserved value:         ____________________
+Bound:                   ____________________
+Inverse pairs:           ____________________
+Idempotent verbs:        ____________________
+Ordering pairs:          ____________________
+Monotone values:         ____________________
+Freeze points:           ____________________
+Links to other entities: ____________________
+```
+
+### Invariants (always true)
+
+| # | Invariant |
+|---|---|
+| I1 | |
+
+### Must have
+
+- [A thing that must exist when the feature is done]
+
+### Must do
+
+- [An action that the feature must take]
+
+### Must not
+
+- [An action that is forbidden]
+
+## Acceptance Scenarios
+
+```gherkin
+Feature: [Feature Name]
+
+  Scenario: [The behaviour, as a name]
+    Given [state]
+    When [one action]
+    Then [what an outside observer sees, including the outcome of the call]
+```
+
+One scenario for each story, each failure story and each row of a fault table.
 
 ## Architecture (COMPREHENSIVE)
 
@@ -177,19 +243,23 @@ Describe how errors are handled:
 - [ ] Task 2: Description
 - [ ] Task 3: Description
 
-## Testing
+## Fault Tables
 
-### Test Cases
+One table for each story verb.
 
-1. **Test Case 1**
-   - Given: Initial state
-   - When: Action
-   - Then: Expected result
+| Step that fails | What the system does | What the caller sees | What is left behind |
+|---|---|---|---|
+| | | | nothing |
 
-2. **Test Case 2**
-   - Given: Initial state
-   - When: Action
-   - Then: Expected result
+## Tests
+
+Each invariant and each scenario has a test. Each test names its oracle (example, property,
+expected outcome, stateful model, metamorphic, fault).
+
+| Law or scenario | Test | Oracle |
+|---|---|---|
+| I1 | `test_name` | property |
+| Scenario: [name] | `test_name` | example |
 
 ## Success Criteria
 
@@ -197,6 +267,8 @@ Describe how errors are handled:
 - [ ] All tests passing
 - [ ] Verification checks pass
 - [ ] No TODO/FIXME/stubs
+- [ ] Each invariant and each scenario has a passing test
+- [ ] The story-driven check list of the `story-driven-specification` skill passes
 
 ---
 

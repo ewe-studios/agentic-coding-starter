@@ -91,6 +91,7 @@ Main Agent is the orchestrator that coordinates all work, spawns specialized sub
 
 **Main Agent MUST:**
 - Act as orchestrator ONLY (never code directly)
+- Run on the most powerful model and plan: write the specifications, feature documents and detailed briefs, then hand the work to Sonnet or Haiku sub-agents (see `skills/main-agent-orchestration/skill.md`, "Delegate for Cost")
 - Spawn verification agents (only Main Agent has this authority)
 - Ensure start.md files exist for all specs and features
 - Coordinate all sub-agents

@@ -188,6 +188,22 @@ DO NOT:
 
 The main agent does the expensive thinking once; cheaper agents do the building.
 
+**The strongest model plans; smaller models do the work (owner rule 2026-11-11).** The main
+agent runs on the most powerful model (for example Opus). It plans, and it writes the technical
+specifications, the feature documents and the task briefs with full directions. Smaller models
+(Sonnet or Haiku) do the work from those briefs. The main agent picks the model that gives
+correct, verified work for the lowest token use:
+
+| Task | Model |
+|------|-------|
+| Planning, architecture, specifications, feature documents, root-cause research for an unclear failure, review of sub-agent reports | Main agent (Opus) |
+| Implementation from a detailed brief, multi-file fixes, test writing, concurrency and async work, reproduction of a CI failure | Sonnet |
+| Mechanical edits, search, log reading, version bumps, formatting, lint fixes, simple one-file fixes | Haiku |
+
+The main agent does a task itself only when the brief costs more tokens than the task (for
+example, a one-line edit). A sub-agent reports a short result (the diff, the commands it ran and
+their results), never full logs.
+
 1. **The main agent researches and designs every feature before it hands it off.** The
    feature file names the files and lines, the measured cause, the fix, the tests that prove
    it (including a test that fails on the old code) and the exact verify commands. A
@@ -197,7 +213,8 @@ The main agent does the expensive thinking once; cheaper agents do the building.
      tests to `tests/`, small config or CI edits, bookkeeping.
    - **Sonnet**: diagnosis or design: concurrency, async control flow, protocol behaviour,
      security, generators, anything that needs measurement.
-   - The main agent keeps root-cause research that the plan depends on.
+   - **Opus (the main agent)**: keeps planning, specifications and the root-cause research
+     that the plan depends on.
 3. **One fresh agent per feature, on the model the feature names.** Do not keep one
    long-lived agent and resume it across features: its history is re-read on every step and
    costs more than a fresh agent with a self-contained brief. Resume an agent only to finish

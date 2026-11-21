@@ -1,0 +1,4 @@
+interface:
+  display_name: "iOS Human Interface Design"
+  short_description: "Design native iPhone screens with Foundation UI"
+  default_prompt: "Use $ios-human-interface-design to review this Foundation UI screen for iPhone."

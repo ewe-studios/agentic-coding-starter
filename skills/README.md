@@ -11,6 +11,11 @@ Skills are detailed guides for:
 - Performing specific operations (e.g., database migrations, API integration)
 - Solving specific problems (e.g., performance optimization)
 
+## Native mobile design
+
+- [Android Material Design](android-material-design/SKILL.md) covers Compose controls, application themes and TalkBack checks.
+- [iOS Human Interface Design](ios-human-interface-design/SKILL.md) covers SwiftUI presentation, application themes and VoiceOver checks.
+
 ## Directory Structure
 
 Each skill lives in its own directory with optional subdirectories for assets:

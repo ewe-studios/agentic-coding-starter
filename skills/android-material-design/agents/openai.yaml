@@ -1,0 +1,4 @@
+interface:
+  display_name: "Android Material Design"
+  short_description: "Design and review native Android screens with Material 3"
+  default_prompt: "Use $android-material-design to design or review this Android screen and its theme."

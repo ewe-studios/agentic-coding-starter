@@ -26,6 +26,14 @@ Valtron is a progress-driven execution engine. Operations produce `TaskIterator`
 
 Blocking should happen at **boundaries** — the outermost point where a concrete value is actually needed — not inside every individual operation.
 
+**Async all the way; valtron composes with it.** Write async logic as native Rust `async fn`s, all the way down. Valtron does not replace that — it hooks into it in both directions:
+- valtron can **drive async**: `execute(future)` schedules a future and returns a `StreamIterator`;
+- valtron work can **live inside async**: a `StreamIterator` becomes a future or future stream via `into_ready_future()`, `into_collect_future()`, `into_future_stream()` or `into_next_stream()` (`while let Some(chunk) = body.next().await`).
+
+Valtron's own rules on when a task may cross into async still apply — `Send + 'static` bounds, the `!Send` constraint (`run_future_iter`), and blocking only at boundaries (see the sections below). Native valtron `TaskIterator` state machines (e.g. protocol clients) stay valtron-native and are exposed to async callers through these adapters, not rewritten.
+
+**Streams, not buffers:** I/O bodies (HTTP, RPC, Docker, downloads) are returned as streams. Check the status first; never collect a whole body into memory except in tests or for a small body whose contents feed the next step. See `rust-clean-code/implementation` §6–7 (streaming bodies, generated types).
+
 ### When Blocking Internally IS Acceptable
 
 **Exception to the fundamental rule:** For single-value operations where the result is required immediately for subsequent operations, blocking internally is acceptable:
@@ -74,6 +82,75 @@ pub fn list_models(&self) -> Result<impl StreamIterator<D = Result<ModelInfo>, P
 4. **Is this a one-shot initialization or CLI tool?** → Blocking is acceptable
 
 **Default:** Return streams. Block internally only when there's a clear justification.
+
+## State Tasks: the `#[task]` Functional Approach
+
+For an ordinary state machine, do **not** hand-write `impl TaskIterator` (see
+`rust-valtron-iterator` for when that is still the right call — combinators and
+multi-source adapters). Instead write a single **transition function** and mark
+it `#[task]`:
+
+```rust
+use foundation_core::valtron::{task, Ctx, TaskStatus};
+
+// The transition maps (Ctx, state) to the next state plus a TaskStatus,
+// or None to terminate. State can be any type — structs and enums are the norm.
+#[task]
+fn build_house(ctx: Ctx, stage: Stage) -> Option<(Stage, TaskStatus<House, ()>)> {
+    let _ = ctx;
+    match stage {
+        Stage::Foundation => Some((Stage::Walls, TaskStatus::Ignore)),
+        Stage::Walls      => Some((Stage::Roof,  TaskStatus::Ignore)),
+        Stage::Roof       => Some((Stage::Done,  TaskStatus::Ready(House { walls: 4 }))),
+        Stage::Done       => None,
+    }
+}
+```
+
+`#[task]` generates a **same-named struct** with `new(state)` that implements
+`TaskIterator`, and leaves the `fn` untouched so `build_house(ctx, state)` stays
+directly callable. It works on both `fn` and `async fn` (the async transition
+can `.await` inside the body and parks on the same wake-queue seam `FutureTask`
+uses).
+
+**Termination semantics (critical):**
+
+- **`None` is the only terminal signal.** Returning it ends the task, closes the
+  queue, and terminates any consuming stream — it yields *neither* a `next`
+  state *nor* a `TaskStatus`.
+- **`Ready` is *not* terminal.** The machine emits it, threads the returned
+  `next` state back, and keeps running — so a single machine may emit `Ready`
+  many times (e.g. one value per step), ending only when it returns `None`.
+- **Reach that terminal `None` with an explicit `Done` variant on the state enum:**
+  `SomeVariant(..)` = "still running", `Done` = done. The transition is a plain
+  `match state { Done => None, .. }`, so the terminal branch is spelled out, not
+  implicit; after the final `Ready` you advance the state to `Done` so the next
+  turn's `Done => None` ends the machine. An `Option<T>` state also works
+  (`let v = state?;` early-returns the terminal `None`), but the enum `Done`
+  variant is the clearer, more explicit form. Either way there is **no extra
+  `bool` flag** — the state shape itself carries completion.
+
+**End-to-end:** `#[task]` lowers the transition into a `TaskIterator`; `execute(..)`
+schedules it on the engine and returns a `StreamIterator` of `Stream<D, P>`
+states; the `into_*` bridges reshape that stream into a future
+(`into_ready_future()` / `into_collect_future()`) or a `futures::Stream`
+(`into_next_stream()` / `into_future_stream()`).
+
+**Consumption** uses the same bridges as any other task (never `sync_one`/`sync_all`
+inside the system — those are boundary helpers only):
+
+```rust
+// Single value → await the ready-future (no collect-all):
+//   into_ready_future().await → Option<(value, rest)>: the first `Ready` value
+//   plus the remaining iterator, so you can peel one value off and keep driving.
+let (house, _rest) = execute(build_house::new(Stage::Foundation), None)?
+    .into_ready_future().await?;
+
+// Many values → stream them with .next().await (chunk-by-chunk, not buffered):
+use foundation_core::valtron::StreamExt; // re-exported futures_lite::StreamExt
+let mut stream = execute(download::new(state), None)?.into_next_stream();
+while let Some(chunk) = stream.next().await { /* consume one chunk */ }
+```
 
 ## Code Style: Clear, Simple, Succinct
 
@@ -655,6 +732,29 @@ impl StreamIterator for MyStream {
     }
 }
 ```
+
+## Waking a Parked Task: Register a Waker, Never Call the Executor
+
+A task that returns `TaskStatus::Depends(readiness)` parks. The executor then gives
+the readiness a **waker for that task** (`EventReadiness::register(&ReadinessWaker)`),
+the same pattern as `std::task::Waker`. The source keeps the waker and calls
+`waker.wake()` when it becomes ready or closes. The wake reaches only that task's
+executor thread. Nothing outside `foundation_core/src/valtron/` calls an executor
+function (`request_executor_resume`, `resume_idle`, `idle_wake` are private; a CI guard,
+`scripts/ci/check_executor_wake.py`, fails the build if they appear elsewhere).
+
+- Parking on a queue: use `EventQueue<T>` (`push`, `pop`, `close` wake the right side);
+  park on `queue.readiness()` (waits for an item) or `queue.vacancy()` (waits for room).
+  Do not build `QueueReadiness::new` over a plain `ConcurrentQueue`: it is deprecated and
+  is re-checked every millisecond.
+- Parking on a flag: `ResumeSignal` (its `set(true)` wakes). `BoolSignal` built from a raw
+  atomic is re-checked on a timer.
+- A new kind of source (a socket, a timer, a shutdown flag): hold a `ReadinessNotifier`,
+  return `notifier.register(waker)` from `register`, and call `notifier.notify()` where
+  the event happens. `register` returns `true` only if every change to ready wakes it;
+  the default `false` keeps the readiness on the timed re-check, which is always safe.
+- A readiness that combines others (`AnyReadiness`) registers the waker with each child
+  and returns `true` only if all of them do.
 
 ## Spawner Type: Prefer `BoxedSendExecutionAction` over `NoAction`
 
@@ -1289,7 +1389,7 @@ fn next_status(&mut self) -> Option<TaskStatus<...>> {
 }
 ```
 
-**Rule:** After returning `TaskStatus::Ready(final_value)`, the next `next_status()` call must return `None`. You must either increment the counter or track a `done` flag.
+**Rule:** `None` is the *only* terminal signal — returning it ends the task, closes the queue, and terminates the stream. `TaskStatus::Ready(v)` is **not** terminal: a single machine may emit `Ready` many times (one value per step), and it keeps running until it returns `None`. To emit `N` values then stop, advance a counter (or state) on every `Ready` so that after the final value the next call hits the `None` branch. For `#[valtron::task]` state machines, use an enum state with a terminal `Done` variant (preferred — `Done => None` is explicit) or `Option<T>` state (`let v = state?;`) — no extra `bool` flag.
 
 ### CondVar on wasm32 Requires `js-wasmbindgen` Feature Gate (When `std` Is Also On)
 

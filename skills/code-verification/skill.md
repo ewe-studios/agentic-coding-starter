@@ -45,6 +45,27 @@ Task Complete → Report → Verify → Pass? → Commit → Push
 
 **CRITICAL**: Code commits ONLY after ALL checks pass.
 
+## Focused Local Checks, Full CI on GitHub (owner rule 2026-11-04)
+
+- **Locally, check only what the change can break**: the format, lint and tests of the
+  crates you changed, plus the tests of the workspace crates that depend on them and use the
+  changed API (`cargo tree -i <crate> --workspace --depth 1`, then keep the ones that call
+  what changed). Keep it fast. Do not run the whole-workspace CI script locally.
+- **The full run is GitHub CI on the pull request.** After a push, the main agent reads the
+  PR's CI result and sends each failure to the agent that owns the code. A run that was
+  cancelled by a newer push is not a failure; read the run for the newest commit.
+- **CI that does not run on a branch push** (only on pull requests) is started with
+  `workflow_dispatch` for the changed packages, or by opening the PR.
+
+## Test Against the Real Service, Not a Stub (owner rule 2026-11-03)
+
+When a local tool runs the real thing, tests use it, not a hand-written stub. For example
+`wrangler dev --local` runs the real D1, R2 and KV bindings and serves Cloudflare's REST API
+locally (`/cdn-cgi/local/explorer/api`); test the bindings inside workerd and the REST
+clients against that API. A stub adds behaviour of its own and hides real differences (it
+once made a REST API look like it accepted JSON numbers when the real API takes strings
+only). Use a stub only when no local form of the service exists, and say so in the test.
+
 ## Agent Hierarchy
 
 **Main Agent** (Only agent with verification authority):

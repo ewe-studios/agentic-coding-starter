@@ -12,7 +12,7 @@ metadata:
   complexity: "simple"
   tags: [utility, specification, tracking]
 tools_required: [Read, Write, Edit]
-skills_required: [specifications-management, context-work-ethic]
+skills_required: [specifications-management, story-driven-specification, context-work-ethic]
 spawned_by: [main-agent]
 spawns: []
 related_rules: [rule.md]
@@ -25,6 +25,7 @@ n5. **`.agents/skills/context-work-ethic/skill.md`** - Context management and co
 ## Skills to Read
 
 1. **`.agents/skills/specifications-management/skill.md`** - Complete specification lifecycle
+   - **`.agents/skills/story-driven-specification/skill.md`** - The content of each feature file
 
 n5. **`.agents/skills/context-work-ethic/skill.md`** - Context management and communication rules
 ## Workflow

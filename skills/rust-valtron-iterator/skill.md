@@ -30,6 +30,12 @@ Use these patterns when:
 - Implementing custom `StreamIterator` combinators in `backends/foundation_core/src/valtron/stream_iterators.rs`
 - Debugging iterator implementations that block or skip progress reporting
 
+**Not** for ordinary state-machine tasks: those should be a single transition
+function behind `#[valtron::task]` (`StateTask` / `AsyncStateTask`) instead of a
+hand-written `impl TaskIterator`. See the `rust-valtron-usage` skill ("State
+Tasks: the `#[task]` Functional Approach"). Hand-writing an iterator is for
+*combinators* and *multi-source adapters*, not application state machines.
+
 ## Prerequisites
 
 - Understanding of Rust's `Iterator` trait
@@ -84,6 +90,26 @@ Blocking loops in `next()` defeat Valtron's progress-driven execution model:
 | **Defeats incremental progress** | No `Pending`/`Delayed` states reported during the loop - all progress invisible |
 | **Prevents observability** | Debugging, logging, and metrics cannot see intermediate states |
 | **Starves other tasks** | Long-running loops hold the thread, delaying other ready tasks |
+
+### A Poll Must Not Block
+
+**Do not make a blocking call inside `next()` or `next_status()`.** A blocking
+call holds the valtron worker that polls the task. With a small pool, every
+worker can block and the pool starves. The failure looks like a flaky test,
+because a large pool hides it.
+
+| Do not call | Wait with |
+|-------------|-----------|
+| `std::thread::JoinHandle::join()` | a readiness signal, or a `WaitGroup` plus a task status |
+| `recv()` on a blocking socket | a non-blocking socket with a readiness registration |
+| a blocking file read or write | an async equivalent that parks on a readiness |
+| `std::thread::sleep()` | `TaskStatus::Delayed`, or a timer sleeper |
+
+`PoolConfig::slow_poll_warning` reports a task step that holds a worker longer
+than its threshold. `#[valtron]` and `#[valtron_test]` turn it on with 100 ms by
+default; `slow_poll = ms` overrides it. The warning names the task and the
+elapsed microseconds, at most once per task per second. A warning is a defect
+report, not back-pressure: find the blocking call and replace it.
 
 ## Acceptable Loop Pattern
 

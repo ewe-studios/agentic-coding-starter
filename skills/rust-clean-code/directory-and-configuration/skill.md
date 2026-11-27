@@ -18,6 +18,7 @@ files:
   - examples/rust-installation.md: "Complete Rust toolchain installation guide"
   - examples/rust-project-setup.md: "Step-by-step project setup and structure"
   - examples/cargo-config.md: "Cargo.toml and .cargo/config.toml examples"
+  - examples/build-storage.md: "Where Cargo writes outputs and its registry: one shared location, the worktree risks, and the sweep"
 ---
 
 # Rust Directory and Configuration
@@ -485,6 +486,50 @@ Cargo.lock  # Include for binaries, exclude for libraries
 **/*.rs.bk
 .DS_Store
 ```
+
+---
+
+## Build Output Location (mandatory)
+
+**Rule.** Before the first build in any environment, set where Cargo writes its outputs.
+Never accept the default `./target` for each checkout.
+
+- If the environment already names a location, use it.
+- If it does not, ask the user for a path on the largest local volume, and explain why:
+  a `target` tree grows to tens of gigabytes; one tree per worktree shares nothing; a full
+  volume stops every build with errors that look like code errors.
+- Never invent a path silently, and never leave the default when a worktree is involved.
+
+**Why one shared directory helps.** Cargo keys each artifact by package, features, profile,
+target, rust flags and compiler version. Two worktrees share an artifact only when every
+input matches; otherwise each gets its own fingerprint. A shared directory is therefore safe,
+and a build in one worktree reuses the common dependencies of another.
+
+**Risks, stated plainly.**
+
+- Cargo locks the directory for a whole build, so two agents that build at the same time
+  queue; they do not corrupt each other.
+- `cargo clean` in one worktree clears the shared directory for all of them.
+- The directory grows without a per-worktree clean. Run `cargo sweep --stamp --time 7`
+  regularly, and never during a build.
+- A script that assumes `./target` must read `CARGO_TARGET_DIR`.
+  `cargo metadata --format-version 1` prints the real path.
+
+**How to set it.** In this repository `.envrc` exports the values, and
+`.claude/settings.json` carries the same ones for agent shells:
+
+```sh
+export CARGO_TARGET_DIR=/Volumes/Outside/cargo-target
+export CARGO_HOME=/Volumes/Outside/cargo-home
+```
+
+**`CARGO_HOME` moves more than the registry.** It also holds `config.toml`, credentials and
+the `cargo install` binaries. Copy the old directory before the change, and keep
+`$CARGO_HOME/bin` on `PATH`. A missing value re-downloads the registry and hides installed
+tools.
+
+The full setup, with verification commands, editor and Kiro instructions, and the sweep
+routine, is in [examples/build-storage.md](examples/build-storage.md).
 
 ---
 

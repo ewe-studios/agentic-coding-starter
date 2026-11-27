@@ -29,6 +29,7 @@ Also:
 2. Use derive_more for custom errors and its supplied capabilities
 3. Preferrably unless specified not to, use foundation_errstack for ewe_platform projects.
 4. Unless the user indicates, no clippy, cargo checks, build errors are pre-existing, fix it (some dead_code suppression is allowed, confirm with users) but everything else should be fixed and not suppresed.
+5. Before the first build, set where Cargo writes its outputs (`CARGO_TARGET_DIR`, and `CARGO_HOME` for the registry). Ask the user for the location when it is not set. See `directory-and-configuration/skill.md`, section "Build Output Location (mandatory)".
 
 ---
 ## Overview

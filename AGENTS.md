@@ -7,6 +7,27 @@ last_updated: 2026-11-01
 
 # Agent Configuration
 
+## Mandatory Coordinator Workflow
+
+Claude Code and Codex follow this workflow for every project task. The model that starts the session is the coordinator.
+The coordinator discusses architecture with the owner and writes specifications, feature plans, and task briefs.
+Before handoff, the coordinator checks every requirement and acceptance criterion.
+Before implementation, update the feature plan, including screenshots and design assets, and obtain explicit owner approval.
+The owner may approve implementation in the request for the plan update.
+
+Delegate research, implementation, tests, fixes, and delivery to worker agents, including small tasks.
+Choose the least costly capable available model for each task, even if a specification names another model.
+Claude Haiku and Codex Luna suit searches and simple tasks. Claude Sonnet and Codex Sol suit harder tasks.
+These are examples, not fixed model requirements. If only one model is available, use it in a separate worker agent.
+
+Give each worker a short, complete brief with scope, files, checks, and acceptance criteria.
+Assign separate file ownership when workers run together. Ask for changes, checks, results, and remaining gaps.
+Review each result against the acceptance criteria. Return gaps to a worker and review the next result.
+After review, assign a delivery worker to commit and push each verified task to its assigned branch.
+Confirm the remote commit and tell the owner.
+
+This workflow takes precedence over conflicting workflow guidance in this file and its linked guides.
+
 ## ⚡ Fast Rust Check Workflow
 
 **CRITICAL:** When doing Rust checks and you're not sure about something, use quick `cargo check` with `tee` to collect warnings rapidly. **5-6 minutes should be enough** for the initial pass. If after 5-6 minutes you see nothing, increase to 10 minutes on the next run. If it finishes with no issues — great. If you see issues early, collect enough in 5 minutes then go fix them. This increases iteration speed and reduces wasted wait time.
@@ -51,10 +72,11 @@ do the hard thinking; agents do the execution. Two phases:
    a warning in code we touched and a warning in code we did not touch are the
    same defect, and both are ours to fix.
 7. You review and validate the reports against the plan, decide the "decide"
-   items, run the final verification (including the tests), then commit. Do not
+   items, assign final verification (including the tests), then review its report.
+   Assign a delivery worker to commit and push after review. Do not
    stand by waiting — move on to the next feature or crate and pick the reports
    up when they land.
-8. After you commit, spawn one agent to run the crate's full CI inside the
+8. After the delivery worker commits, spawn one agent to run the crate's full CI inside the
    Linux Docker image: `scripts/ci/linux.sh <crate>` (image
    `ewestudios/ewe-platform-ci:latest`, platform `linux/amd64`). A macOS pass
    is not proof of Linux compatibility.
@@ -78,8 +100,8 @@ yours.
 ## Spawning Agents to Do Work
 
 You (the main agent) do the thinking. You delegate the execution. Spawn an agent
-when the work is independent, long, or needs a fresh context. Do the work
-yourself when it is a few tool calls, or a lookup whose target you already know.
+for research, implementation, tests, fixes, and delivery, including small tasks.
+The coordinator writes the brief and reviews the result.
 
 Follow these rules when you spawn an agent:
 
@@ -89,8 +111,8 @@ Follow these rules when you spawn an agent:
    context. Put in the brief: the goal, what you already ruled out, the files to
    read, the commands to run, the acceptance criteria, and the exact report
    format you need back.
-3. State the limits. By default a subagent does not commit and does not spawn its
-   own verification agents. It reports. You verify, then you commit.
+3. State the limits. A worker does not spawn verification agents. It reports.
+   The coordinator reviews the result, then assigns a delivery worker to commit and push.
 4. Run independent agents in parallel: put all their spawns in one message.
 5. Wait for each result. Never guess an agent's result, and never write its
    report before it comes back.
@@ -111,14 +133,11 @@ Follow these rules when you spawn an agent:
 10. Tell each agent what the others are working on. An agent stops and announces
     to you before it touches a crate or code another agent owns, so agents never
     clobber each other. Keep a short list of who owns what.
-11. Do not let an agent clobber your uncommitted work. If an agent must edit or
-    commit files you have not committed, first decide if its changes conflict
-    with your work. If they do not conflict, spawn the agent in the same tree:
-    it fixes, validates, and reports; you then do the final verification. If
-    they can conflict, commit your pending work first, then give the agent its
-    own worktree. The agent fixes and validates there, pushes to a new remote
-    branch (not your branch), and reports. You merge that branch into your work.
-    The agent deletes its worktree to free disk.
+11. Protect uncommitted work. Check for file conflicts before assigning a worker.
+    Use the same tree when the files do not conflict. Assign verification after the worker reports.
+    If files conflict, first deliver pending work, then give the worker a separate worktree.
+    Review its report before assigning delivery to a new remote branch. Then merge the branch.
+    The worker deletes its worktree to free disk.
     Each worktree builds into its own cargo target directory: `<repo>/target` by
     default, or `$CARGO_TARGET_DIR/<checkout-name>` when that variable is set.
     `scripts/ci/ci.py` sets this automatically, so parallel worktrees do not
@@ -159,15 +178,15 @@ Main Agent provides documentation path when spawning. If not provided, request i
 4. **Main Agent**: Orchestrator only - delegates ALL work
 5. **Verification Required**: NO commits without verification passing
 6. **Incomplete Implementation Check**: MANDATORY first check in verification
-7. **Sub-agents**: Never commit directly, never spawn verification agents
+7. **Sub-agents**: Report changes and checks to the coordinator. Commit only when assigned delivery after review.
 8. **Context Optimization**: Load ONLY what you need
 9. **I/O & Async (Rust)**: Stream bodies, never buffer them (status first); use generated API types and fix the generator rather than working around it; async `fn`s all the way down, with valtron composing via futures/future streams under its existing Send/!Send/boundary rules — see `skills/rust-clean-code/implementation` §6–8
 10. **Executors must run the tests**: a green `cargo check`/`cargo clippy` is not a pass. An executor runs `cargo test -p <crate> --profile uat` and reports the output before it calls the work done.
-11. **Linux compatibility check**: after you commit a crate, spawn one agent to run `scripts/ci/linux.sh <crate>` in the Linux CI Docker image, to compile and run its tests on Linux.
+11. **Linux compatibility check**: after a crate commit, assign one agent to run `scripts/ci/linux.sh <crate>` in the Linux CI Docker image, to compile and run its tests on Linux.
 12. **Version bump on new public API**: when a crate gains a new public API (a new module, function, type, or trait method), bump its version and move every workspace consumer's `version` requirement to match in the same change. Do not defer it to release time: a `path`+`version` dependency resolves to the published crate on `cargo package`, so a deferred bump lets a packaged consumer pick the stale registry version without the new API.
-13. **Agent work vs your uncommitted changes**: if an agent's edits will not break your uncommitted work, spawn it in the same tree and verify after it reports. If they can conflict, commit your work first, then give the agent a worktree; it pushes to a new branch, you merge back, and it deletes the worktree.
+13. **Agent work vs your uncommitted changes**: if an agent's edits will not break your uncommitted work, spawn it in the same tree and assign verification after it reports. If they can conflict, first deliver your pending work, then give the agent a worktree. The worker reports, the coordinator reviews, and a delivery worker pushes to a new branch. Merge that branch and delete the worktree.
 14. **Time types come from `foundation_compact`**: use `foundation_compact::Instant` for a monotonic instant and `foundation_compact::SystemTime` for a wall-clock time. Never use `std::time::Instant` or `std::time::SystemTime` for a value that comes from `Clock`. On native targets the two names are the same type. On `wasm32-unknown-unknown` they are different types and the `std` clock reads panic, so a mixed pair fails the wasm gate and only the wasm gate. Name the type in full. Do not import it under a stand-in name such as `ReadinessInstant as Instant`. A crate without a direct `foundation_compact` dependency adds one (`default-features = false`).
-15. **The strongest model plans; smaller models do the work** (owner rule 2026-11-11): the main agent runs on the most powerful model (for example Opus). It plans and writes the specifications, feature documents and detailed task briefs. Sonnet or Haiku sub-agents do the work from those briefs: Sonnet for implementation, multi-file fixes, tests and CI reproduction; Haiku for mechanical edits, search, log reading and lint fixes. Pick the model that gives correct, verified work for the lowest token use. See `skills/main-agent-orchestration/skill.md`, "Delegate for Cost".
+15. **Choose models by task**: the session's first model coordinates and plans. Use the least costly capable available worker model for each task. A model named in a specification does not override this choice. See the mandatory workflow above.
 16. **Platform code is tested on its platform** (owner rule 2026-11-11): every crate runs its tests on Linux, macOS and Windows in CI. A `cargo check` or a cross-compile is not a test. A crate that cannot run its tests on one OS opts out in `ci/packages.toml` (`macos-tests = "none"` or `windows-tests = "none"`) with a reason that names the missing tool or service. A crate that fails on an OS because of a known bug may also opt out, with a reason that names the open GitHub issue; the fix of that issue removes the opt-out.
 17. **CI fits the free tier: jobs queue, they do not stampede** (owner rule 2026-11-11): matrix jobs set `max-parallel` from configuration; each workflow has a concurrency group that cancels superseded pull request runs and queues master runs; a pull request runs only the packages its change affects (the CI runner checks this too); a normal pull request runs Linux only; macOS and Windows run on master, on `platform/release` (pushes and pull requests into or from it), the nightly schedule and manual runs; CI uses the free GitHub-hosted runners (a public repository), not paid runners. Avoid pushes that only restart CI: batch fixes into one push.
 18. **Latest versions, one version per dependency** (owner rule 2026-11-11): use the latest stable version of every dependency. A dependency that more than one crate uses is declared once in the root `[workspace.dependencies]`, and each crate uses `{ workspace = true }`. `Cargo.lock` holds one version of it. A second version is allowed only when an upstream crate forces it, with the reason in a comment. A pre-release is not "latest stable".
